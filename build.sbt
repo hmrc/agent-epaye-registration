@@ -1,4 +1,5 @@
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
+import sbt.Tests.{Group, SubProcess}
+import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
 lazy val testSettings = Seq(
   "org.scalatest" %% "scalatest" % "2.2.6" % "test, it",
@@ -31,8 +32,17 @@ lazy val root = (project in file("."))
   )
   .configs(IntegrationTest)
   .settings(
+    Keys.fork in IntegrationTest := false,
     Defaults.itSettings,
-    unmanagedSourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest)(base => Seq(base / "it")),
-    libraryDependencies ++= testSettings
+    unmanagedSourceDirectories in IntegrationTest += baseDirectory(_ / "it").value,
+    libraryDependencies ++= testSettings,
+    parallelExecution in IntegrationTest := false,
+    testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value)
   )
   .enablePlugins(PlayScala, SbtGitVersioning, SbtDistributablesPlugin)
+
+def oneForkedJvmPerTest(tests: Seq[TestDefinition]) = {
+  tests.map { test =>
+    new Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq(s"-Dtest.name=${test.name}"))))
+  }
+}

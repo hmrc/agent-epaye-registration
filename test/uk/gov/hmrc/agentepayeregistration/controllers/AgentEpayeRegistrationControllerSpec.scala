@@ -8,18 +8,6 @@ import play.api.test.Helpers._
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 class AgentEpayeRegistrationControllerSpec extends PlaySpec with MockitoSugar with GuiceOneAppPerSuite {
-
-  val mockHelloWorldController = new AgentEpayeRegistrationController()
-
-  implicit val hc = new HeaderCarrier
-
-  "HelloWorldController" should {
-    "return Status: OK Body: empty" in {
-      val response = mockHelloWorldController.helloWorld()(FakeRequest("GET", "/hello-world"))
-
-      status(response) mustBe OK
-    }
-  }
 }
 
 
