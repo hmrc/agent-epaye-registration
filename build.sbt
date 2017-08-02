@@ -9,13 +9,16 @@ lazy val compileDeps = Seq(
   "uk.gov.hmrc" %% "play-graphite" % "3.2.0",
   "uk.gov.hmrc" %% "play-health" % "2.1.0",
   "uk.gov.hmrc" %% "logback-json-logger" % "3.1.0",
-  "de.threedimensions" %% "metrics-play" % "2.5.13"
+  "de.threedimensions" %% "metrics-play" % "2.5.13",
+  "uk.gov.hmrc" %% "play-reactivemongo" % "5.2.0",
+  "org.typelevel" %% "cats" % "0.9.0"
 )
 
 lazy val testDeps = Seq(
   "org.scalatest" %% "scalatest" % "2.2.6" % "test, it",
   "org.mockito" % "mockito-core" % "2.8.9" % "test, it",
-  "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" %  "test, it"
+  "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" %  "test, it",
+  "uk.gov.hmrc" %% "reactivemongo-test" % "2.0.0" % "test, it"
 )
 
 lazy val scoverageSettings = {
