@@ -1,3 +1,4 @@
+import play.core.PlayVersion
 import sbt.Tests.{Group, SubProcess}
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
@@ -18,6 +19,8 @@ lazy val testDeps = Seq(
   "org.scalatest" %% "scalatest" % "2.2.6" % "test, it",
   "org.mockito" % "mockito-core" % "2.8.9" % "test, it",
   "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" %  "test, it",
+  "uk.gov.hmrc" %% "hmrctest" % "2.3.0" % "test, it",
+  "com.github.tomakehurst" % "wiremock" % "2.3.1" % "test, it",
   "uk.gov.hmrc" %% "reactivemongo-test" % "2.0.0" % "test, it"
 )
 
