@@ -6,8 +6,9 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
 import uk.gov.hmrc.agentepayeregistration.support.{MongoApp, WireMockSupport}
 import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.test.UnitSpec
 
-abstract class BaseControllerISpec extends PlaySpec with OneAppPerSuite with MongoApp with WireMockSupport {
+abstract class BaseControllerISpec extends UnitSpec with OneAppPerSuite with MongoApp with WireMockSupport {
 
   override implicit lazy val app: Application = appBuilder.build()
 
