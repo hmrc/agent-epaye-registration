@@ -59,5 +59,3 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec {
     }
   }
 }
-
-
