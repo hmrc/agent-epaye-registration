@@ -1,6 +1,5 @@
 package uk.gov.hmrc.agentepayeregistration.model
 
-import org.scalatestplus.play.PlaySpec
 import uk.gov.hmrc.agentepayeregistration.models.AgentReference
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -23,19 +22,24 @@ class AgentReferenceSpec extends UnitSpec {
 
     "disallow references which do not start with 2 uppercase alpha characters" in {
       assertThrows[IllegalArgumentException] {
-        println(AgentReference("Hx2001"))
+        AgentReference("Hx2001")
       }
 
       assertThrows[IllegalArgumentException] {
-        println(AgentReference("1X2001"))
+        AgentReference("1X2001")
       }
     }
 
+    "disallow references whose last four characters are not numeric" in {
+      assertThrows[IllegalArgumentException] {
+        AgentReference("HX2OO1")
+      }
+    }
   }
 
   "generating the next code" should {
-    "increment the numeric portion if below 9999" in {
-      fail
+    "increment just the numeric portion if it has not reached 9999" in {
+      AgentReference("HX2345").newReference shouldBe AgentReference("HX2346")
     }
 
     "increment the alpha portion if the numeric portion has reached 9999" in {
