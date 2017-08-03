@@ -28,7 +28,7 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
       agentRef <- collection.find(Json.obj()).sort(Json.obj("$natural" -> -1)).one[RegistrationDetails].map(_.map(_.agentReference))
       nextAgentRef = agentRef match {
         case Some(x) => x.newReference
-        case None => AgentReference("HX0001")
+        case None => AgentReference("HX2000")
       }
       _ <- insert(RegistrationDetails(nextAgentRef, request))
     } yield nextAgentRef

@@ -1,7 +1,7 @@
 package uk.gov.hmrc.agentepayeregistration.repository
 
 import uk.gov.hmrc.agentepayeregistration.controllers.BaseControllerISpec
-import uk.gov.hmrc.agentepayeregistration.models.{Address, RegistrationRequest}
+import uk.gov.hmrc.agentepayeregistration.models.{Address, AgentReference, RegistrationRequest}
 
 import scala.collection.immutable.List
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,15 +35,11 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec {
 
       val result = await(repo.create(regDetails))
 
-      result should not be 0 //TODO: Fixme
+      result shouldBe AgentReference("HX2000")
 
       await(repo.find("agentName" -> agentName)).head should have(
-        'agentName (agentName),
-        'contactName (contactName),
-        'telephoneNumber (telephoneNumber),
-        'faxNumber (faxNumber),
-        'emailAddress (emailAddress),
-        'address (regAddress)
+        'agentReference (AgentReference("HX2000")),
+        'registration (regDetails)
       )
     }
 
@@ -55,7 +51,8 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec {
 
       results.size shouldBe 2
 
-      //results(0).agentPayeReferenceCode should be results(1).agentPayeReferenceCode
+      results.head.agentReference shouldBe AgentReference("HX2000")
+      results.last.agentReference shouldBe AgentReference("HX2001")
     }
   }
 }

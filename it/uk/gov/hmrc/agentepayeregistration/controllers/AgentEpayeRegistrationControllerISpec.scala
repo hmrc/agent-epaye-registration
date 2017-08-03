@@ -39,7 +39,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec {
       val result = await(controller.register(request))
 
       status(result) shouldBe 200
-      contentAsJson(result) shouldBe Json.obj("payeCode" -> "HX2000")
+      contentAsJson(result) shouldBe Json.obj("agentReference" -> "HX2000")
     }
   }
 
