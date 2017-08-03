@@ -8,7 +8,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.{FakeHeaders, FakeRequest}
 import play.api.test.Helpers.{await, status, _}
-import uk.gov.hmrc.agentepayeregistration.models.{Address, RegistrationDetails}
+import uk.gov.hmrc.agentepayeregistration.models.{Address, RegistrationRequest}
 import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
 import uk.gov.hmrc.play.http.HeaderCarrier
 

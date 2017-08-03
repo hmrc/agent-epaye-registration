@@ -1,7 +1,7 @@
 package uk.gov.hmrc.agentepayeregistration.repository
 
 import uk.gov.hmrc.agentepayeregistration.controllers.BaseControllerISpec
-import uk.gov.hmrc.agentepayeregistration.models.{Address, RegistrationDetails}
+import uk.gov.hmrc.agentepayeregistration.models.{Address, RegistrationRequest}
 
 import scala.collection.immutable.List
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -21,7 +21,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec {
   val telephoneNumber = Some("0123456789")
   val faxNumber = Some("0123456780")
   val emailAddress = Some("a@b.com")
-  val regDetails = RegistrationDetails(agentName, contactName, telephoneNumber, faxNumber, emailAddress, regAddress)
+  val regDetails = RegistrationRequest(agentName, contactName, telephoneNumber, faxNumber, emailAddress, regAddress)
 
   override def beforeEach() {
     super.beforeEach()

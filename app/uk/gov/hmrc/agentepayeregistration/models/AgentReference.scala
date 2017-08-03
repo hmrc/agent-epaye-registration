@@ -1,5 +1,8 @@
 package uk.gov.hmrc.agentepayeregistration.models
 
+import play.api.libs.functional.syntax._
+import play.api.libs.json._
+
 import scala.util.Try
 
 case class AgentReference(value: String) {
@@ -49,4 +52,9 @@ case class AgentReference(value: String) {
     else
       s"$c1${(c2.toUpper + 1).toChar}"
   }
+}
+
+object AgentReference {
+  implicit val agentReferenceWrites: Writes[AgentReference] =
+    (__ \ "agentReference").write[String].contramap(_.value)
 }
