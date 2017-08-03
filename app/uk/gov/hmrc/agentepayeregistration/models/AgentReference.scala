@@ -44,12 +44,9 @@ case class AgentReference(value: String) {
     val c1 = code.charAt(0).toUpper
     val c2 = code.charAt(1).toUpper
 
-    if (c2.equals("Z")) {
-      // Want to increment the first char and set second char to A
-      s"${c1 + 1}A"
-    } else {
-      // Want to just increment the second char
-      s"$c1${c2.toUpper + 1}"
-    }
+    if (c2 == 'Z')
+      s"${(c1 + 1).toChar}A"
+    else
+      s"$c1${(c2.toUpper + 1).toChar}"
   }
 }
