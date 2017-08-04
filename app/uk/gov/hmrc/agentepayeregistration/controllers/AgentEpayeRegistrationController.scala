@@ -16,7 +16,10 @@ class AgentEpayeRegistrationController @Inject()(service: AgentEpayeRegistration
 
   val register = Action.async(parse.json) { implicit request =>
     request.body.validate[RegistrationRequest].map { details =>
-      service.register(details).map(x => Ok(Json.toJson(x)))
+      service.register(details).map {
+        case Right(x) => Ok(Json.toJson(x))
+        case Left(failure) => BadRequest(Json.toJson(failure))
+      }
     }.recoverTotal(_ => Future.successful(BadRequest))
   }
 }
