@@ -31,19 +31,19 @@ class AgentEpayeRegistrationValidator @Inject()() {
       nonEmpty(field)(propertyName).andThen(_ => isValidCharacters(field)(propertyName))
 
     val validators = Seq(
-      mandatoryChars(request.agentName, "Agent name"),
-      mandatoryChars(request.contactName, "Contact name"),
-      mandatoryChars(request.address.addressLine1, "Address line1"),
-      mandatoryChars(request.address.addressLine2, "Address line2"),
-      mandatoryChars(request.address.postCode, "Postcode")
+      mandatoryChars(request.agentName, "agent name"),
+      mandatoryChars(request.contactName, "contact name"),
+      mandatoryChars(request.address.addressLine1, "address line 1"),
+      mandatoryChars(request.address.addressLine2, "address line 2"),
+      mandatoryChars(request.address.postCode, "postcode")
     )
 
     val optionalFieldValidators = Seq(
-      request.telephoneNumber.map(isInteger(_)("Telephone number")),
-      request.faxNumber.map(isInteger(_)(("Fax number"))),
-      request.emailAddress.map(isValidCharacters(_)("Email address")),
-      request.address.addressLine3.map(isValidCharacters(_)("Address line3")),
-      request.address.addressLine4.map(isValidCharacters(_)("Address line4"))
+      request.telephoneNumber.map(isInteger(_)("telephone number")),
+      request.faxNumber.map(isInteger(_)(("fax number"))),
+      request.emailAddress.map(isValidCharacters(_)("email address")),
+      request.address.addressLine3.map(isValidCharacters(_)("address line 3")),
+      request.address.addressLine4.map(isValidCharacters(_)("address line 4"))
     ).flatten
 
     Semigroup[Validated[Failure, Unit]]

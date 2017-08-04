@@ -2,10 +2,8 @@ package uk.gov.hmrc.agentepayeregistration.repository
 
 import javax.inject.{Inject, Singleton}
 
-import play.api.libs.json.Json
 import play.api.libs.json.Json.obj
 import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.commands.{CommandError, LastError}
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.core.errors.DatabaseException
