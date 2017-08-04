@@ -46,13 +46,15 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec {
     "create a unique Agent PAYE Reference code" in {
       await(repo.create(regDetails))
       await(repo.create(regDetails))
+      await(repo.create(regDetails))
 
       val results = await(repo.find("agentName" -> agentName))
 
-      results.size shouldBe 2
+      results.size shouldBe 3
 
       results.head.agentReference shouldBe AgentReference("HX2000")
-      results.last.agentReference shouldBe AgentReference("HX2001")
+      results.drop(1).head.agentReference shouldBe AgentReference("HX2001")
+      results.last.agentReference shouldBe AgentReference("HX2002")
     }
   }
 }
