@@ -19,8 +19,6 @@ case class AgentReference(value: String) {
   }
 
   private def validate(agentRef: String): Unit = {
-    require(agentRef.length == 6, "agent PAYE reference has an incorrect length")
-
     val (prefix, code) = value.splitAt(2)
 
     validateAlphaCode(prefix)
