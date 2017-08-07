@@ -54,5 +54,5 @@ case class AgentReference(value: String) {
 
 object AgentReference {
   implicit val agentReferenceWrites: Writes[AgentReference] =
-    (__ \ "agentReference").write[String].contramap(_.value)
+    (__ \ "payeAgentReference").write[String].contramap(_.value)
 }
