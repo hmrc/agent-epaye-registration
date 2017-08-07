@@ -1,9 +1,6 @@
 package uk.gov.hmrc.agentepayeregistration.validators
 
 import cats.data.Validated.{Invalid, Valid}
-import org.scalatestplus.play.PlaySpec
-import play.api.Application
-import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.agentepayeregistration.controllers.BaseControllerISpec
 import uk.gov.hmrc.agentepayeregistration.models.{Address, Failure, RegistrationRequest, ValidationError}
 
@@ -20,6 +17,7 @@ class AgentEpayeRegistrationValidatorSpec extends BaseControllerISpec {
 
   private def anError(errorCode: String, errorMsg: String) = Invalid(Failure(Set(ValidationError(errorCode, errorMsg))))
 
+  private def padField(chars: Int) = Seq.fill(chars)('1').mkString
 
   "validate should pass" when {
     "all values are valid" in {
@@ -115,6 +113,56 @@ class AgentEpayeRegistrationValidatorSpec extends BaseControllerISpec {
     "the email address contains invalid characters" in {
       validator.validate(regRequest.copy(emailAddress = Some("`"))) shouldBe
         anError("INVALID_FIELD", "The email address field contains invalid characters")
+    }
+
+    "if multiple fields are invalid, all the validation errors should be reported" in {
+      validator.validate(regRequest.copy(agentName = " ", contactName = " ")) shouldBe
+        Invalid(Failure(Set(
+          ValidationError("MISSING_FIELD", "The agent name field is mandatory"),
+          ValidationError("MISSING_FIELD", "The contact name field is mandatory")
+        )))
+    }
+
+    "the agent name is longer than 56 characters" in {
+      validator.validate(regRequest.copy(agentName = padField(57))) shouldBe
+        anError("INVALID_FIELD", "The agent name field exceeds 56 characters")
+    }
+    "the contact name is longer than 56 characters" in {
+      validator.validate(regRequest.copy(contactName = padField(57))) shouldBe
+        anError("INVALID_FIELD", "The contact name field exceeds 56 characters")
+    }
+    "the telephone number is longer than 35 characters" in {
+      validator.validate(regRequest.copy(telephoneNumber = Some(padField(36)))) shouldBe
+        anError("INVALID_FIELD", "The telephone number field exceeds 35 characters")
+    }
+    "the fax number is longer than 35 characters" in {
+      validator.validate(regRequest.copy(faxNumber = Some(padField(36)))) shouldBe
+        anError("INVALID_FIELD", "The fax number field exceeds 35 characters")
+
+    }
+    "the email address is longer than 129 characters" in {
+      validator.validate(regRequest.copy(emailAddress = Some(padField(132)))) shouldBe
+        anError("INVALID_FIELD", "The email address field exceeds 129 characters")
+    }
+    "the address line 1 is longer than 35 characters" in {
+      validator.validate(regRequest.copy(address = address.copy(addressLine1 = padField(36)))) shouldBe
+        anError("INVALID_FIELD", "The address line 1 field exceeds 35 characters")
+    }
+    "the address line 2 is longer than 35 characters" in {
+      validator.validate(regRequest.copy(address = address.copy(addressLine2 = padField(36)))) shouldBe
+        anError("INVALID_FIELD", "The address line 2 field exceeds 35 characters")
+    }
+    "the address line 3 is longer than 35 characters" in {
+      validator.validate(regRequest.copy(address = address.copy(addressLine3 = Some(padField(36))))) shouldBe
+        anError("INVALID_FIELD", "The address line 3 field exceeds 35 characters")
+    }
+    "the address line 4 is longer than 35 characters" in {
+      validator.validate(regRequest.copy(address = address.copy(addressLine4 = Some(padField(36))))) shouldBe
+        anError("INVALID_FIELD", "The address line 4 field exceeds 35 characters")
+    }
+    "the postcode is longer than 8 characters" in {
+      validator.validate(regRequest.copy(address = address.copy(postCode = padField(9)))) shouldBe
+        anError("INVALID_FIELD", "The postcode field exceeds 8 characters")
     }
   }
 }
