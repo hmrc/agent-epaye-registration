@@ -7,7 +7,7 @@ import uk.gov.hmrc.agentepayeregistration.models.{Address, Failure, Registration
 class AgentEpayeRegistrationValidatorSpec extends BaseControllerISpec {
   private lazy val validator = app.injector.instanceOf[AgentEpayeRegistrationValidator]
 
-  private val address = Address("29 Acacia Road", "Nuttytown", Some("Bannastate"), Some("Country"), "AB11 AA1")
+  private val address = Address("29 Acacia Road", "Nuttytown", Some("Bannastate"), Some("Country"), "AA11AA")
   private val regRequest = RegistrationRequest("Dave Agent",
     "John Contact",
     Some("0123456789"),
@@ -38,8 +38,8 @@ class AgentEpayeRegistrationValidatorSpec extends BaseControllerISpec {
     }
 
     "the email address is unusual but valid" in {
-     // validator.validate(regRequest.copy(emailAddress = Some("a+b@c.com"))) shouldBe Valid(())
-    //  validator.validate(regRequest.copy(emailAddress = Some("a_b@c.com"))) shouldBe Valid(())
+      validator.validate(regRequest.copy(emailAddress = Some("a+b@c.com"))) shouldBe Valid(())
+      validator.validate(regRequest.copy(emailAddress = Some("a_b@c.com"))) shouldBe Valid(())
       validator.validate(regRequest.copy(emailAddress = Some("a.b@c.com"))) shouldBe Valid(())
     }
   }
@@ -97,7 +97,7 @@ class AgentEpayeRegistrationValidatorSpec extends BaseControllerISpec {
     }
     "the postcode contains invalid characters" in {
       validator.validate(regRequest.copy(address = address.copy(postCode = "~"))) shouldBe
-        anError("INVALID_FIELD", "The postcode field contains invalid characters")
+        anError("INVALID_FIELD", "The postcode field is not a valid postcode")
     }
 
     "the telephone number is not numeric" in {
@@ -112,7 +112,7 @@ class AgentEpayeRegistrationValidatorSpec extends BaseControllerISpec {
 
     "the email address contains invalid characters" in {
       validator.validate(regRequest.copy(emailAddress = Some("`"))) shouldBe
-        anError("INVALID_FIELD", "The email address field contains invalid characters")
+        anError("INVALID_FIELD", "The email address field is not a valid email")
     }
 
     "if multiple fields are invalid, all the validation errors should be reported" in {
@@ -141,7 +141,7 @@ class AgentEpayeRegistrationValidatorSpec extends BaseControllerISpec {
 
     }
     "the email address is longer than 129 characters" in {
-      validator.validate(regRequest.copy(emailAddress = Some(padField(132)))) shouldBe
+      validator.validate(regRequest.copy(emailAddress = Some(s"${padField(132)}@example.org"))) shouldBe
         anError("INVALID_FIELD", "The email address field exceeds 129 characters")
     }
     "the address line 1 is longer than 35 characters" in {
@@ -159,10 +159,6 @@ class AgentEpayeRegistrationValidatorSpec extends BaseControllerISpec {
     "the address line 4 is longer than 35 characters" in {
       validator.validate(regRequest.copy(address = address.copy(addressLine4 = Some(padField(36))))) shouldBe
         anError("INVALID_FIELD", "The address line 4 field exceeds 35 characters")
-    }
-    "the postcode is longer than 8 characters" in {
-      validator.validate(regRequest.copy(address = address.copy(postCode = padField(9)))) shouldBe
-        anError("INVALID_FIELD", "The postcode field exceeds 8 characters")
     }
   }
 }

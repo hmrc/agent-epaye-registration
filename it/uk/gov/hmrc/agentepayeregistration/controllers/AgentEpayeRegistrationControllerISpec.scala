@@ -19,7 +19,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec {
           |   "address" : {
           |       "addressLine1" : "Line 1",
           |       "addressLine2" : "Line 2",
-          |       "postCode": "AB11 11A"
+          |       "postCode": "AB111AA"
           |   }
           |}
         """.stripMargin)
@@ -49,7 +49,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec {
             |   "address" : {
             |       "addressLine1" : "Line 1",
             |       "addressLine2" : "Line 2",
-            |       "postCode": "AB11 11A"
+            |       "postCode": "AB111AA"
             |   }
             |}
           """.stripMargin)
@@ -69,7 +69,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec {
             |   "address" : {
             |       "addressLine1" : "Line 1",
             |       "addressLine2" : "Line 2",
-            |       "postCode": "AB11 11A"
+            |       "postCode": "AB111AA"
             |   }
             |}
           """.stripMargin)

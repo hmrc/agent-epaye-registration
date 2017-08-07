@@ -6,7 +6,7 @@ import uk.gov.hmrc.agentepayeregistration.models.{Address, AgentReference, Regis
 import scala.collection.immutable.List
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec {
+class AgentEpayeRegistrationRepositoryISpec extends BaseControllerISpec {
   private lazy val repo = app.injector.instanceOf[AgentEpayeRegistrationRepository]
 
   val postcode = "AB11 AA11"
