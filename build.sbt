@@ -16,13 +16,13 @@ lazy val compileDeps = Seq(
   "org.typelevel" %% "cats" % "0.9.0"
 )
 
-lazy val testDeps = Seq(
-  "org.scalatest" %% "scalatest" % "2.2.6" % "test, it",
-  "org.mockito" % "mockito-core" % "2.8.9" % "test, it",
-  "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" %  "test, it",
-  "uk.gov.hmrc" %% "hmrctest" % "2.3.0" % "test, it",
-  "com.github.tomakehurst" % "wiremock" % "2.3.1" % "test, it",
-  "uk.gov.hmrc" %% "reactivemongo-test" % "2.0.0" % "test, it"
+def testDeps(scope: String) = Seq(
+  "org.scalatest" %% "scalatest" % "2.2.6" % scope,
+  "org.mockito" % "mockito-core" % "2.8.9" % scope,
+  "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" % scope,,
+  "uk.gov.hmrc" %% "hmrctest" % "2.3.0" % scope,,
+  "com.github.tomakehurst" % "wiremock" % "2.3.1" % scope,
+  "uk.gov.hmrc" %% "reactivemongo-test" % "2.0.0" % scope
 )
 
 lazy val scoverageSettings = {
@@ -48,7 +48,7 @@ lazy val root = (project in file("."))
       Resolver.typesafeRepo("releases"),
       Resolver.jcenterRepo
     ),
-    libraryDependencies ++= compileDeps ++ testDeps,
+    libraryDependencies ++= compileDeps ++ testDeps("test") ++ testDeps("it"),
     publishingSettings,
     scoverageSettings
   )
