@@ -1,13 +1,9 @@
 package uk.gov.hmrc.agentepayeregistration.validators
 
-import javax.inject.{Inject, Singleton}
-
 import cats.Semigroup
 import cats.data.Validated
 import cats.data.Validated.{Invalid, Valid}
-import uk.gov.hmrc.agentepayeregistration.models.{RegistrationRequest, Failure, ValidationError}
-
-import scala.util.Try
+import uk.gov.hmrc.agentepayeregistration.models.{Failure, RegistrationRequest}
 
 object ValidatedSemigroup {
   implicit def validatedSemigroup[A] = new Semigroup[Validated[Failure, Unit]] {
@@ -20,9 +16,7 @@ object ValidatedSemigroup {
   }
 }
 
-@Singleton
-class AgentEpayeRegistrationValidator @Inject()() {
-
+object AgentEpayeRegistrationValidator {
   import ValidatedSemigroup._
 
   def validate(request: RegistrationRequest): Validated[Failure, Unit] = {
