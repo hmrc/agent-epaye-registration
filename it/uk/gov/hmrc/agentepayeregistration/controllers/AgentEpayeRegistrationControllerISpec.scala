@@ -64,7 +64,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec {
         val postData = Json.parse(
           """
             |{
-            |   "agentName" : "InvalidName",
+            |   "agentName" : "Invalid#Name",
             |   "contactName" : "John Johnson",
             |   "address" : {
             |       "addressLine1" : "Line 1",
