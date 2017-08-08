@@ -37,9 +37,6 @@ object AgentEpayeRegistrationValidator {
       mandatoryPostcode(request.address.postCode, "postcode")
     )
 
-    def numberWithLimit(field: String, propertyName: String, limit: Int) =
-      isInteger(field)(propertyName).andThen(_ => maxLength(field, limit)(propertyName))
-
     def validCharsWithLimit(field: String, propertyName: String, limit: Int) =
       isValidCharacters(field)(propertyName).andThen(_ => maxLength(field, limit)(propertyName))
 
@@ -47,8 +44,8 @@ object AgentEpayeRegistrationValidator {
       isEmailAddress(field)(propertyName).andThen(_ => maxLength(field, limit)(propertyName))
 
     val optionalFieldValidators = Seq(
-      request.telephoneNumber.map(x => numberWithLimit(x, "telephone number", 35)),
-      request.faxNumber.map(x => numberWithLimit(x, "fax number", 35)),
+      request.telephoneNumber.map(x => isPhoneNumber(x)("telephone number")),
+      request.faxNumber.map(x => isPhoneNumber(x)("fax number")),
       request.emailAddress.map(x => emailValidatorWithLimit(x, "email address", 129)),
       request.address.addressLine3.map(x => validCharsWithLimit(x, "address line 3", 35)),
       request.address.addressLine4.map(x => validCharsWithLimit(x, "address line 4", 35))
@@ -59,40 +56,40 @@ object AgentEpayeRegistrationValidator {
       .getOrElse(Valid(()))
   }
 
-  private def nonEmpty(field: String)(propertyName: String) =
+  private[validators] def nonEmpty(field: String)(propertyName: String) =
     if (field.trim.nonEmpty)
       Valid(())
     else
       Invalid(Failure("MISSING_FIELD", s"The $propertyName field is mandatory"))
 
-  private def isValidCharacters(field: String)(propertyName: String) =
+  private[validators] def isValidCharacters(field: String)(propertyName: String) =
     if (field.matches("[a-zA-Z0-9,.()\\-\\!@\\s]+"))
       Valid(())
     else
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field contains invalid characters"))
 
-  private def maxLength(field: String, maxLength: Int)(propertyName: String) =
+  private[validators] def maxLength(field: String, maxLength: Int)(propertyName: String) =
     if (field.trim.length <= maxLength)
       Valid(())
     else
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field exceeds $maxLength characters"))
 
-  private def isInteger(field: String)(propertyName: String) =
-    if (field.matches("[0-9]+"))
-      Valid(())
-    else
-      Invalid(Failure("INVALID_FIELD", s"The $propertyName field is not an integer"))
-
-  private def isEmailAddress(field: String)(propertyName: String) =
+  private[validators] def isEmailAddress(field: String)(propertyName: String) =
     if (field.matches("""(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"""))
       Valid(())
     else
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field is not a valid email"))
 
-  private def isPostcode(field: String)(propertyName: String) =
+  private[validators] def isPostcode(field: String)(propertyName: String) =
     if (field.matches("^[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}$|BFPO\\s?[0-9]{1,5}$"))
       Valid(())
     else
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field is not a valid postcode"))
+
+  private[validators] def isPhoneNumber(field: String)(propertyName: String) =
+    if (field.matches("^[0-9- +()#x ]{0,35}$"))
+      Valid(())
+    else
+      Invalid(Failure("INVALID_FIELD", s"The $propertyName field is not a valid phone number"))
 }
 

@@ -16,9 +16,6 @@ class AgentEpayeRegistrationService @Inject()(repository: AgentEpayeRegistration
     validate(request) match {
       case Valid(_) => repository.create(request).map(Right(_))
       case Invalid(failure) => Future.successful(Left(failure))
-
     }
-
   }
-
 }

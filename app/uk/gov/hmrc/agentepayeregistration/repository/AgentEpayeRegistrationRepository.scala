@@ -36,7 +36,7 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
         case None => AgentReference(initialAgentReference)
       }
       _ <- insert(RegistrationDetails(nextAgentRef, request)) recover {
-        case error: DatabaseException if error.code == Some(mongoCodeDuplicateKey) => create(request)
+        case error: DatabaseException if error.code.contains(mongoCodeDuplicateKey) => create(request)
       }
     } yield nextAgentRef
   }

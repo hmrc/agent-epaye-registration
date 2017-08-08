@@ -19,7 +19,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec {
     )
   )
 
-  "submitting valid details to /register" should {
+  "submitting valid details to /registrations" should {
     "respond with HTTP 200 with a the new unique PAYE code in the response body" in {
       val request = FakeRequest(POST, "/registrations", FakeHeaders(), validPostData)
       val result = await(controller.register(request))
@@ -29,7 +29,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec {
     }
   }
 
-  "submitting invalid details to /register" should {
+  "submitting invalid details to /registrations" should {
     "respond with HTTP 400 Bad Request" when {
       "no details are given" in {
         val request = FakeRequest(POST, "/registrations", FakeHeaders(), Json.obj())
