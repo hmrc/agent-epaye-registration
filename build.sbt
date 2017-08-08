@@ -60,7 +60,7 @@ lazy val root = (project in file("."))
     parallelExecution in IntegrationTest := false,
     testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value)
   )
-  .enablePlugins(PlayScala, SbtGitVersioning, SbtDistributablesPlugin)
+  .enablePlugins(Seq(PlayScala,SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin) : _*)
 
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]) = {
   tests.map { test =>
