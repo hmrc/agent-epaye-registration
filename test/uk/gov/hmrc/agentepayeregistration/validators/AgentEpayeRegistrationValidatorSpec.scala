@@ -151,14 +151,6 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
       AgentEpayeRegistrationValidator.isPhoneNumber("44-1234-ACME12")("x") shouldBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid phone number"))
     }
-    "fail with empty space" in {
-      AgentEpayeRegistrationValidator.isPhoneNumber("44-1234-ACME12")("x") shouldBe
-        Invalid(Failure("INVALID_FIELD", "The x field is not a valid phone number"))
-    }
-    "fail with more than 35 characters" in {
-      AgentEpayeRegistrationValidator.isPhoneNumber(padField(36))("x") shouldBe
-        Invalid(Failure("INVALID_FIELD", "The x field is not a valid phone number"))
-    }
   }
 
   "validate should check all mandatory fields are present" when {
@@ -274,12 +266,11 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
     }
     "the telephone number is longer than 35 characters" in {
       validate(regRequest.copy(telephoneNumber = Some(padField(36)))) shouldBe
-        anError("INVALID_FIELD", "The telephone number field is not a valid phone number")
+        anError("INVALID_FIELD", "The telephone number field exceeds 35 characters")
     }
     "the fax number is longer than 35 characters" in {
       validate(regRequest.copy(faxNumber = Some(padField(36)))) shouldBe
-        anError("INVALID_FIELD", "The fax number field is not a valid phone number")
-
+        anError("INVALID_FIELD", "The fax number field exceeds 35 characters")
     }
     "the email address is longer than 129 characters" in {
       validate(regRequest.copy(emailAddress = Some(s"${padField(130)}@example.org"))) shouldBe
