@@ -16,13 +16,17 @@
 
 package uk.gov.hmrc.agentepayeregistration.models
 
+import org.joda.time.{DateTime, DateTimeZone}
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{Format, JsPath}
+import play.api.libs.json.{Format, JsPath, Reads, Writes}
 
 case class RegistrationDetails(agentReference: AgentReference,
-                               registration: RegistrationRequest)
+                               registration: RegistrationRequest,
+                               createdDateTime: Option[DateTime] = Some(DateTime.now(DateTimeZone.UTC)))
 
 object RegistrationDetails {
+
+  private val dateTimeFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
 
   implicit val registrationDetailsFormat: Format[RegistrationDetails] = (
     (JsPath \ "agentReference").format[String] and
@@ -31,10 +35,13 @@ object RegistrationDetails {
       (JsPath \ "telephoneNumber").formatNullable[String] and
       (JsPath \ "faxNumber").formatNullable[String] and
       (JsPath \ "emailAddress").formatNullable[String] and
-      (JsPath \ "address").format[Address]
-    ) ((agentRef, agentName, contactName, telNo, faxNo, emailAddr, address) =>
+      (JsPath \ "address").format[Address] and
+      (JsPath \ "createdDateTime").formatNullable[DateTime](Format(Reads.jodaDateReads(dateTimeFormat),
+        Writes.jodaDateWrites(dateTimeFormat)))
+    ) ((agentRef, agentName, contactName, telNo, faxNo, emailAddr, address, createdDateTime) =>
     RegistrationDetails(AgentReference(agentRef),
-      RegistrationRequest(agentName, contactName, telNo, faxNo, emailAddr, address)
+      RegistrationRequest(agentName, contactName, telNo, faxNo, emailAddr, address),
+      createdDateTime
     ), (details => (
       details.agentReference.value,
       details.registration.agentName,
@@ -42,7 +49,8 @@ object RegistrationDetails {
       details.registration.telephoneNumber,
       details.registration.faxNumber,
       details.registration.emailAddress,
-      details.registration.address
+      details.registration.address,
+      details.createdDateTime
     )))
 
 }

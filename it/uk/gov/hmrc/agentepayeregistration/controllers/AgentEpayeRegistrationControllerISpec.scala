@@ -48,7 +48,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec {
       }
 
       "some field was invalid" in {
-        val postDataInvalidField = validPostData + ("agentName", JsString("Invalid#Name"))
+        val postDataInvalidField = validPostData + ("agentName" -> JsString("Invalid#Name"))
 
         val request = FakeRequest(POST, "/registrations", FakeHeaders(), postDataInvalidField)
         val result = await(controller.register(request))

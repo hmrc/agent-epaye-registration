@@ -37,10 +37,14 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseControllerISpec {
 
       result shouldBe AgentReference("HX2000")
 
-      await(repo.find("agentName" -> agentName)).head should have(
+      val details = await(repo.find("agentName" -> agentName)).head
+
+      details should have(
         'agentReference (AgentReference("HX2000")),
         'registration (regDetails)
       )
+
+      details.createdDateTime should not be empty
     }
 
     "create a unique Agent PAYE Reference code" in {
