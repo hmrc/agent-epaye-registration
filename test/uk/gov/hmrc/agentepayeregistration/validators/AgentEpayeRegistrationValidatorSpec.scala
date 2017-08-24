@@ -57,6 +57,10 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
       AgentEpayeRegistrationValidator.isValidCharacters("~")("sample") shouldBe expectedInvalid
       AgentEpayeRegistrationValidator.isValidCharacters("[")("sample") shouldBe expectedInvalid
       AgentEpayeRegistrationValidator.isValidCharacters("#")("sample") shouldBe expectedInvalid
+      AgentEpayeRegistrationValidator.isValidCharacters("(")("sample") shouldBe expectedInvalid
+      AgentEpayeRegistrationValidator.isValidCharacters(")")("sample") shouldBe expectedInvalid
+      AgentEpayeRegistrationValidator.isValidCharacters("@")("sample") shouldBe expectedInvalid
+      AgentEpayeRegistrationValidator.isValidCharacters("!")("sample") shouldBe expectedInvalid
     }
 
     "allow a-z" in {
@@ -68,8 +72,8 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
     "allow 0-9" in {
       AgentEpayeRegistrationValidator.nonEmpty("01234567890")("sample") shouldBe Valid(())
     }
-    "allow commas, periods, (round brackets), -, !, @, and space" in {
-      AgentEpayeRegistrationValidator.nonEmpty(",.() -!@")("sample") shouldBe Valid(())
+    "allow commas, periods, -, \\, /, ', &, and space" in {
+      AgentEpayeRegistrationValidator.nonEmpty(",.-\\/'& ")("sample") shouldBe Valid(())
     }
   }
 
@@ -91,11 +95,12 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
       AgentEpayeRegistrationValidator.isEmailAddress("a@b.com")("x") shouldBe Valid(())
     }
 
-    "allow email addresses with a hyphen, plus, period, underscore, or numbers" in {
+    "allow email addresses with a hyphen, plus, period, underscore, exclamations, or numbers" in {
       AgentEpayeRegistrationValidator.isEmailAddress("a-b@b.com")("x") shouldBe Valid(())
       AgentEpayeRegistrationValidator.isEmailAddress("a+b@b.com")("x") shouldBe Valid(())
       AgentEpayeRegistrationValidator.isEmailAddress("a.b@b.com")("x") shouldBe Valid(())
       AgentEpayeRegistrationValidator.isEmailAddress("a_b@b.com")("x") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a!b@b.com")("x") shouldBe Valid(())
       AgentEpayeRegistrationValidator.isEmailAddress("1@b.com")("x") shouldBe Valid(())
     }
 
@@ -130,6 +135,11 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
       AgentEpayeRegistrationValidator.isPostcode("AA999AA")("x") shouldBe Valid(())
     }
 
+    "pass BFPO codes" in {
+      AgentEpayeRegistrationValidator.isPostcode("BFPO 1")("x") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.isPostcode("BFPO1234")("x") shouldBe Valid(())
+    }
+
     "fail a valid postcode with lowercase characters" in {
       AgentEpayeRegistrationValidator.isPostcode("aa999aa")("x") shouldBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid postcode"))
@@ -150,8 +160,14 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
     "pass just numbers" in {
       AgentEpayeRegistrationValidator.isPhoneNumber("01234567890")("x") shouldBe Valid(())
     }
-    "pass pass numbers separated by a space" in {
+    "pass numbers separated by a space" in {
       AgentEpayeRegistrationValidator.isPhoneNumber("01234 567890")("x") shouldBe Valid(())
+    }
+    "pass numbers with hash" in {
+      AgentEpayeRegistrationValidator.isPhoneNumber("#01234 567890")("x") shouldBe Valid(())
+    }
+    "pass numbers with an x" in {
+      AgentEpayeRegistrationValidator.isPhoneNumber("01234 567890x2")("x") shouldBe Valid(())
     }
     "pass with a country code prefix" in {
       AgentEpayeRegistrationValidator.isPhoneNumber("+441234 567890")("x") shouldBe Valid(())
@@ -216,11 +232,11 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
 
   "validate checks alphanumeric fields contain acceptable characters" when {
     "an invalid agent name is given" in {
-      validate(regRequest.copy(agentName = "Jonny 'John' Jones")) shouldBe
+      validate(regRequest.copy(agentName = """Jonny "John" Jones""")) shouldBe
         Invalid(Failure("INVALID_FIELD", "The agent name field contains invalid characters"))
     }
     "an invalid contact name is given" in {
-      validate(regRequest.copy(contactName = "Jonny 'John' Jones")) shouldBe
+      validate(regRequest.copy(contactName = """Jonny "John" Jones""")) shouldBe
         Invalid(Failure("INVALID_FIELD", "The contact name field contains invalid characters"))
     }
     "an invalid first address is given" in {
@@ -280,13 +296,13 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
       validate(regRequest.copy(contactName = padField(57))) shouldBe
         anError("INVALID_FIELD", "The contact name field exceeds 56 characters")
     }
-    "the telephone number is longer than 35 characters" in {
-      validate(regRequest.copy(telephoneNumber = Some(padField(36)))) shouldBe
-        anError("INVALID_FIELD", "The telephone number field exceeds 35 characters")
+    "the telephone number is longer than 24 characters" in {
+      validate(regRequest.copy(telephoneNumber = Some(padField(25)))) shouldBe
+        anError("INVALID_FIELD", "The telephone number field exceeds 24 characters")
     }
-    "the fax number is longer than 35 characters" in {
-      validate(regRequest.copy(faxNumber = Some(padField(36)))) shouldBe
-        anError("INVALID_FIELD", "The fax number field exceeds 35 characters")
+    "the fax number is longer than 24 characters" in {
+      validate(regRequest.copy(faxNumber = Some(padField(25)))) shouldBe
+        anError("INVALID_FIELD", "The fax number field exceeds 24 characters")
     }
     "the email address is longer than 129 characters" in {
       validate(regRequest.copy(emailAddress = Some(s"${padField(130)}@example.org"))) shouldBe

@@ -43,7 +43,9 @@ object AgentEpayeRegistrationValidator {
         .andThen(_ => maxLength(field, limit)(propertyName))
 
     def mandatoryPostcode(field: String, propertyName: String) =
-      nonEmpty(field)("postcode").andThen(_ => isPostcode(field)("postcode"))
+      nonEmpty(field)(propertyName)
+        .andThen(_ => isPostcode(field)(propertyName))
+        .andThen(_ => maxLength(field, 8)(propertyName))
 
     val validators = Seq(
       mandatoryChars(request.agentName, "agent name", 56),
@@ -64,8 +66,8 @@ object AgentEpayeRegistrationValidator {
 
 
     val optionalFieldValidators = Seq(
-      request.telephoneNumber.map(x => phoneValidatorWithLimit(x, "telephone number", 35)),
-      request.faxNumber.map(x => phoneValidatorWithLimit(x, "fax number", 35)),
+      request.telephoneNumber.map(x => phoneValidatorWithLimit(x, "telephone number", 24)),
+      request.faxNumber.map(x => phoneValidatorWithLimit(x, "fax number", 24)),
       request.emailAddress.map(x => emailValidatorWithLimit(x, "email address", 129)),
       request.address.addressLine3.map(x => validCharsWithLimit(x, "address line 3", 35)),
       request.address.addressLine4.map(x => validCharsWithLimit(x, "address line 4", 35))
@@ -83,7 +85,7 @@ object AgentEpayeRegistrationValidator {
       Invalid(Failure("MISSING_FIELD", s"The $propertyName field is mandatory"))
 
   private[validators] def isValidCharacters(field: String)(propertyName: String) =
-    if (field.matches("[a-zA-Z0-9,.()\\-\\!@\\s]+"))
+    if (field.matches("[A-Za-z0-9\\-,.&'\\\\/ ]+"))
       Valid(())
     else
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field contains invalid characters"))
@@ -95,7 +97,7 @@ object AgentEpayeRegistrationValidator {
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field exceeds $maxLength characters"))
 
   private[validators] def isEmailAddress(field: String)(propertyName: String) =
-    if (field.matches("""(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)"""))
+    if (field.matches("""^[a-zA-Z0-9\.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"""))
       Valid(())
     else
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field is not a valid email"))
