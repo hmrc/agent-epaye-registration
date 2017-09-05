@@ -1,14 +1,16 @@
 package uk.gov.hmrc.agentepayeregistration.controllers
 
-import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
+import org.scalatest.concurrent.Eventually
+import org.scalatest.time.{Seconds, Span}
+import org.scalatest.{Matchers, WordSpecLike}
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.test.FakeRequest
 import uk.gov.hmrc.agentepayeregistration.support.{MongoApp, WireMockSupport}
-import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.test.UnitSpec
 
-abstract class BaseControllerISpec extends UnitSpec with OneAppPerSuite with MongoApp with WireMockSupport {
+abstract class BaseControllerISpec extends WordSpecLike with Matchers with Eventually with GuiceOneServerPerSuite with MongoApp with WireMockSupport {
+
+  implicit override val patienceConfig: PatienceConfig = PatienceConfig(timeout = Span(1, Seconds), interval = Span(1, Seconds))
 
   override implicit lazy val app: Application = appBuilder.build()
 
@@ -16,11 +18,6 @@ abstract class BaseControllerISpec extends UnitSpec with OneAppPerSuite with Mon
     new GuiceApplicationBuilder()
       .configure(mongoConfiguration)
   }
-
-  protected implicit val materializer = app.materializer
-
-  implicit def hc(implicit request: FakeRequest[_]): HeaderCarrier = HeaderCarrier.fromHeadersAndSession(request.headers, Some(request.session))
-
 }
 
 
