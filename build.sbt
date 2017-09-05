@@ -5,7 +5,7 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 lazy val compileDeps = Seq(
   "uk.gov.hmrc" %% "http-verbs" % "6.4.0",
   "uk.gov.hmrc" %% "play-auditing" % "2.10.0",
-  "uk.gov.hmrc" %% "play-auth" % "1.1.0",
+  "uk.gov.hmrc" %% "play-auth" % "2.2.1",
   "uk.gov.hmrc" %% "play-config" % "4.3.0",
   "uk.gov.hmrc" %% "play-graphite" % "3.2.0",
   "uk.gov.hmrc" %% "play-health" % "2.1.0",
