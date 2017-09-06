@@ -10,13 +10,19 @@ import uk.gov.hmrc.agentepayeregistration.support.{MongoApp, WireMockSupport}
 
 abstract class BaseControllerISpec extends WordSpecLike with Matchers with Eventually with GuiceOneServerPerSuite with MongoApp with WireMockSupport {
 
-  implicit override val patienceConfig: PatienceConfig = PatienceConfig(timeout = Span(1, Seconds), interval = Span(1, Seconds))
+  def additionalTestConfiguration: Seq[(String, String)] = Seq.empty
+
+  implicit override val patienceConfig: PatienceConfig = PatienceConfig(timeout = Span(4, Seconds), interval = Span(1, Seconds))
 
   override implicit lazy val app: Application = appBuilder.build()
 
   protected def appBuilder: GuiceApplicationBuilder = {
     new GuiceApplicationBuilder()
       .configure(mongoConfiguration)
+      .configure(
+        "microservice.services.auth.port" -> wireMockPort
+      )
+      .configure(additionalTestConfiguration:_*)
   }
 }
 

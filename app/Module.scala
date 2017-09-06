@@ -14,20 +14,23 @@
  * limitations under the License.
  */
 
-import java.net.InetSocketAddress
+import java.net.{InetSocketAddress, URL}
 import java.util.concurrent.TimeUnit.{MILLISECONDS, SECONDS}
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Provider, Singleton}
 
 import com.codahale.metrics.graphite.{Graphite, GraphiteReporter}
 import com.codahale.metrics.{MetricFilter, SharedMetricRegistries}
 import com.google.inject.AbstractModule
+import com.google.inject.name.Names
 import org.slf4j.MDC
 import play.api.inject.ApplicationLifecycle
-import play.api.{Configuration, Environment, Logger}
+import play.api.{Configuration, Environment, Logger, Mode}
+import uk.gov.hmrc.play.http.{HttpGet, HttpPost}
+import wiring.WSVerbs
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class Module(environment: Environment, configuration: Configuration) extends AbstractModule {
+class Module(val environment: Environment, val configuration: Configuration) extends AbstractModule with ServicesConfig {
 
   def configure(): Unit = {
     lazy val appName = configuration.getString("appName").get
@@ -37,7 +40,26 @@ class Module(environment: Environment, configuration: Configuration) extends Abs
     MDC.put("appName", appName)
     loggerDateFormat.foreach(str => MDC.put("logger.json.dateformat", str))
 
+    bind(classOf[HttpGet]).toInstance(new WSVerbs)
+    bind(classOf[HttpPost]).toInstance(new WSVerbs)
+    bindBaseUrl("auth")
+    bindProperty("extract.auth.stride.enrolment")
     bind(classOf[GraphiteStartUp]).asEagerSingleton()
+  }
+
+  private def bindBaseUrl(serviceName: String) =
+    bind(classOf[URL]).annotatedWith(Names.named(s"$serviceName-baseUrl")).toProvider(new BaseUrlProvider(serviceName))
+
+  private class BaseUrlProvider(serviceName: String) extends Provider[URL] {
+    override lazy val get = new URL(baseUrl(serviceName))
+  }
+
+  private def bindProperty(propertyName: String) =
+    bind(classOf[String]).annotatedWith(Names.named(propertyName)).toProvider(new PropertyProvider(propertyName))
+
+  private class PropertyProvider(confKey: String) extends Provider[String] {
+    override lazy val get = configuration.getString(confKey)
+      .getOrElse(throw new IllegalStateException(s"No value found for configuration property $confKey"))
   }
 }
 
@@ -78,4 +100,42 @@ class GraphiteStartUp @Inject()(configuration: Configuration,
   lifecycle.addStopHook { () =>
     Future successful reporter.stop()
   }
+}
+
+trait ServicesConfig {
+
+  def environment: Environment
+  def configuration: Configuration
+
+  lazy val env = if (environment.mode.equals(Mode.Test)) "Test" else configuration.getString("run.mode").getOrElse("Dev")
+  private lazy val rootServices = "microservice.services"
+  private lazy val services = s"$env.microservice.services"
+  private lazy val playServices = s"govuk-tax.$env.services"
+
+  private lazy val defaultProtocol: String =
+    configuration.getString(s"$rootServices.protocol")
+      .getOrElse(configuration.getString(s"$services.protocol")
+        .getOrElse("http"))
+
+  def baseUrl(serviceName: String) = {
+    val protocol = getConfString(s"$serviceName.protocol",defaultProtocol)
+    val host = getConfString(s"$serviceName.host", throw new RuntimeException(s"Could not find config $serviceName.host"))
+    val port = getConfInt(s"$serviceName.port", throw new RuntimeException(s"Could not find config $serviceName.port"))
+    s"$protocol://$host:$port"
+  }
+
+  private def getConfString(confKey: String, defString: => String) = {
+    configuration.getString(s"$rootServices.$confKey").
+      getOrElse(configuration.getString(s"$services.$confKey").
+        getOrElse(configuration.getString(s"$playServices.$confKey").
+          getOrElse(defString)))
+  }
+
+  private def getConfInt(confKey: String, defInt: => Int) = {
+    configuration.getInt(s"$rootServices.$confKey").
+      getOrElse(configuration.getInt(s"$services.$confKey").
+        getOrElse(configuration.getInt(s"$playServices.$confKey").
+          getOrElse(defInt)))
+  }
+
 }

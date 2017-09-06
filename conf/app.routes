@@ -1,3 +1,4 @@
 # microservice specific routes
 
 POST        /registrations             @uk.gov.hmrc.agentepayeregistration.controllers.AgentEpayeRegistrationController.register()
+GET         /registrations             @uk.gov.hmrc.agentepayeregistration.controllers.AgentEpayeRegistrationController.extract()

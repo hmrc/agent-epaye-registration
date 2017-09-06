@@ -5,7 +5,7 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 lazy val compileDeps = Seq(
   "uk.gov.hmrc" %% "http-verbs" % "6.4.0",
   "uk.gov.hmrc" %% "play-auditing" % "2.10.0",
-  "uk.gov.hmrc" %% "play-auth" % "1.1.0",
+  "uk.gov.hmrc" %% "play-auth" % "2.2.1",
   "uk.gov.hmrc" %% "play-config" % "4.3.0",
   "uk.gov.hmrc" %% "play-graphite" % "3.2.0",
   "uk.gov.hmrc" %% "play-health" % "2.1.0",
@@ -21,7 +21,7 @@ def testDeps(scope: String) = Seq(
   "org.mockito" % "mockito-core" % "2.8.9" % scope,
   "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" % scope,
   "uk.gov.hmrc" %% "hmrctest" % "2.3.0" % scope,
-  "com.github.tomakehurst" % "wiremock" % "2.3.1" % scope,
+  "com.github.tomakehurst" % "wiremock" % "2.8.0" % scope,
   "uk.gov.hmrc" %% "reactivemongo-test" % "2.0.0" % scope
 )
 
