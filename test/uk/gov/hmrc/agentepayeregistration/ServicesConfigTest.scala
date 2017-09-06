@@ -27,12 +27,14 @@ class ServicesConfigTest extends UnitSpec {
       val servicesConfig = TestServicesConfig(
         """
           |microservice {
-          |   services {
-          |      auth {
-          |         host = foo
-          |         port = 9999
-          |         protocol = bar
-          |}}}
+          |  services {
+          |    auth {
+          |      host = foo
+          |      port = 9999
+          |      protocol = bar
+          |    }
+          |  }
+          |}
         """.stripMargin, Mode.Test)
       servicesConfig.baseUrl("auth").toString shouldBe "bar://foo:9999"
     }
@@ -41,10 +43,12 @@ class ServicesConfigTest extends UnitSpec {
       val servicesConfig = TestServicesConfig(
         """
           |microservice {
-          |   services {
-          |      auth {
-          |         host = foo
-          |}}}
+          |  services {
+          |    auth {
+          |      host = foo
+          |    }
+          |  }
+          |}
         """.stripMargin, Mode.Test)
 
       val exception = intercept[RuntimeException] {
@@ -58,10 +62,12 @@ class ServicesConfigTest extends UnitSpec {
       val servicesConfig = TestServicesConfig(
         """
           |microservice {
-          |   services {
-          |      auth {
-          |         port = 9999
-          |}}}
+          |  services {
+          |    auth {
+          |      port = 9999
+          |    }
+          |  }
+          |}
         """.stripMargin, Mode.Test)
 
       val exception = intercept[RuntimeException] {
