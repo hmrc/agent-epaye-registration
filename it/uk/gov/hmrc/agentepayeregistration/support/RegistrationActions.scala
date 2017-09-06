@@ -5,6 +5,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.ServerProvider
 import play.api.libs.json.JsValue
 import play.api.libs.ws.{WSClient, WSResponse}
+import uk.gov.hmrc.play.http.HeaderNames
 
 trait RegistrationActions extends ScalaFutures {
 
@@ -21,6 +22,7 @@ trait RegistrationActions extends ScalaFutures {
 
   def getRegistrations: WSResponse =
     wsClient.url(s"$url/registrations")
+      .withHeaders(HeaderNames.authorisation -> "Bearer XYZ")
       .get()
       .futureValue
 }

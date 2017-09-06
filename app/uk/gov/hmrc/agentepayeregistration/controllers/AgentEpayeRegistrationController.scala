@@ -20,15 +20,20 @@ import javax.inject._
 
 import play.api.libs.json.Json
 import play.api.mvc.Action
+import uk.gov.hmrc.agentepayeregistration.connectors.AuthConnector
 import uk.gov.hmrc.agentepayeregistration.models.RegistrationRequest
 import uk.gov.hmrc.agentepayeregistration.services.AgentEpayeRegistrationService
+import uk.gov.hmrc.auth.core.authorise.Enrolment
+import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions, InsufficientEnrolments, NoActiveSession}
+import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import uk.gov.hmrc.play.microservice.controller.BaseController
+import uk.gov.hmrc.auth.core.retrieve.AuthProvider.PrivilegedApplication
 
 import scala.concurrent.Future
 
 @Singleton
-class AgentEpayeRegistrationController @Inject()(service: AgentEpayeRegistrationService) extends BaseController {
+class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enrolment") strideEnrolment: String, service: AgentEpayeRegistrationService, val authConnector: AuthConnector) extends BaseController with AuthorisedFunctions {
 
   val register = Action.async(parse.json) { implicit request =>
     request.body.validate[RegistrationRequest].map { details =>
@@ -37,5 +42,18 @@ class AgentEpayeRegistrationController @Inject()(service: AgentEpayeRegistration
         case Left(failure) => BadRequest(Json.toJson(failure))
       }
     }.recoverTotal(_ => Future.successful(BadRequest))
+  }
+
+  //TODO APB-1125
+  def extract = Action.async { implicit request =>
+    authorised(Enrolment(strideEnrolment) and AuthProviders(PrivilegedApplication)) {
+        Future.successful(Ok(Json.arr()))
+      }.recoverWith {
+        case ex: NoActiveSession =>
+          Future.successful(Unauthorized(ex.getMessage))
+        case ex: AuthorisationException =>
+          Future.successful(Forbidden(ex.getMessage))
+      }
+
   }
 }

@@ -6,28 +6,46 @@ import uk.gov.hmrc.agentepayeregistration.support.WireMockSupport
 trait AuthStub {
   me: WireMockSupport =>
 
-  def requestIsNotAuthenticated(): AuthStub = {
-    stubFor(post(urlEqualTo("/auth/authorise")).willReturn(aResponse().withStatus(401)))
+  def givenRequestIsNotAuthorised(mdtpDetail: String): AuthStub = {
+    stubFor(post(urlEqualTo("/auth/authorise"))
+      .willReturn(aResponse()
+        .withStatus(401)
+        .withHeader("WWW-Authenticate", s"""MDTP detail="${mdtpDetail}"""")
+      )
+    )
     this
   }
 
-  def givenAuthorisedWithStride: AuthStub = {
-    stubFor(post(urlEqualTo("/auth/authorise"))
-      .willReturn(aResponse()
-        .withStatus(200)
-        .withBody(
+  def givenAuthorisedFor(enrolment: String, authProvider: String): AuthStub = {
+    stubFor(post(urlEqualTo("/auth/authorise")).atPriority(1)
+      .withRequestBody(
+        equalToJson(
           s"""
              |{
              |  "authorise": [
              |    {
-             |      "enrolment": "T2 Technical"
+             |      "enrolment": "$enrolment"
              |    },
              |    {
-             |      "authProviders": ["PrivilegedApplication"]
+             |      "authProviders": [
+             |        "$authProvider"
+             |      ]
              |    }
              |  ]
              |}
-       """.stripMargin)))
+           """.stripMargin, true, true))
+      .willReturn(aResponse()
+        .withStatus(200)
+        .withHeader("Content-Type","application/json")
+        .withBody("{}"))
+    )
+
+    stubFor(post(urlEqualTo("/auth/authorise")).atPriority(2)
+      .willReturn(aResponse()
+        .withStatus(401)
+        .withHeader("WWW-Authenticate", "MDTP detail=\"InsufficientEnrolments\"")
+      )
+    )
     this
   }
 }
