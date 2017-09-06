@@ -107,7 +107,7 @@ trait ServicesConfig {
   def environment: Environment
   def configuration: Configuration
 
-  private lazy val env = if (environment.mode.equals(Mode.Test)) "Test" else configuration.getString("run.mode").getOrElse("Dev")
+  lazy val env = if (environment.mode.equals(Mode.Test)) "Test" else configuration.getString("run.mode").getOrElse("Dev")
   private lazy val rootServices = "microservice.services"
   private lazy val services = s"$env.microservice.services"
   private lazy val playServices = s"govuk-tax.$env.services"

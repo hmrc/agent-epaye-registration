@@ -24,7 +24,7 @@ import uk.gov.hmrc.agentepayeregistration.connectors.AuthConnector
 import uk.gov.hmrc.agentepayeregistration.models.RegistrationRequest
 import uk.gov.hmrc.agentepayeregistration.services.AgentEpayeRegistrationService
 import uk.gov.hmrc.auth.core.authorise.Enrolment
-import uk.gov.hmrc.auth.core.{AuthorisedFunctions, InsufficientEnrolments, NoActiveSession}
+import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions, InsufficientEnrolments, NoActiveSession}
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -47,12 +47,12 @@ class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enr
   //TODO APB-1125
   def extract = Action.async { implicit request =>
     authorised(Enrolment(strideEnrolment) and AuthProviders(PrivilegedApplication)) {
-        Future.successful(Ok)
+        Future.successful(Ok(Json.arr()))
       }.recoverWith {
-        case _: NoActiveSession =>
-          Future.successful(BadRequest)
-        case _: InsufficientEnrolments =>
-          Future.successful(Forbidden)
+        case ex: NoActiveSession =>
+          Future.successful(Unauthorized(ex.getMessage))
+        case ex: AuthorisationException =>
+          Future.successful(Forbidden(ex.getMessage))
       }
 
   }
