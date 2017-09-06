@@ -18,6 +18,7 @@ package uk.gov.hmrc.agentepayeregistration.repository
 
 import javax.inject.{Inject, Singleton}
 
+import org.joda.time.{DateTime, DateTimeZone}
 import play.api.libs.json.Json.obj
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.{Index, IndexType}
@@ -37,13 +38,16 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
     RegistrationDetails.registrationDetailsFormat,
     ReactiveMongoFormats.objectIdFormats) {
 
+
   override def indexes: Seq[Index] =
-    Seq(Index(key = Seq("agentReference" -> IndexType.Ascending), name = Some("agentRefIndex"), unique = true))
+    Seq(Index(key = Seq("agentReference" -> IndexType.Ascending), name = Some("agentRefIndex"), unique = true),
+      Index(key = Seq("createdDateTime" -> IndexType.Ascending), name = Some("createdDateTime"), unique = false))
 
-  val initialAgentReference = "HX2000"
+  val initialAgentReference: String = "HX2000"
 
-  def create(request: RegistrationRequest)(implicit ec: ExecutionContext): Future[AgentReference] = {
-    val mongoCodeDuplicateKey = 11000
+  def create(request: RegistrationRequest, createdDate: DateTime = DateTime.now(DateTimeZone.UTC))
+            (implicit ec: ExecutionContext): Future[AgentReference] = {
+    val mongoCodeDuplicateKey: Int = 11000
 
     for {
       maybeRegDetails <- collection.find(obj()).sort(obj("agentReference" -> -1)).one[RegistrationDetails]
@@ -51,9 +55,25 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
         case Some(regDetails) => regDetails.agentReference.newReference
         case None => AgentReference(initialAgentReference)
       }
-      _ <- insert(RegistrationDetails(nextAgentRef, request)) recover {
+      _ <- insert(RegistrationDetails(nextAgentRef, request, createdDate)) recover {
         case error: DatabaseException if error.code.contains(mongoCodeDuplicateKey) => create(request)
       }
     } yield nextAgentRef
+  }
+
+  def findRegistrations(dateTimeFrom: DateTime, dateTimeTo: DateTime)
+                       (implicit ec: ExecutionContext): Future[List[RegistrationDetails]] = {
+    if(dateTimeTo.isBefore(dateTimeFrom)) throw new IllegalArgumentException("to date is before from date")
+
+    val queryFilter: play.api.libs.json.JsObject = obj(
+      "createdDateTime" -> obj(
+        "$gte" -> obj("$date" -> dateTimeFrom.getMillis),
+        "$lte" -> obj("$date" -> dateTimeTo.getMillis)
+      )
+    )
+    collection.find(queryFilter)
+      .sort(obj("createdDateTime" -> 1))
+      .cursor[RegistrationDetails]()
+      .collect[List](Integer.MAX_VALUE)
   }
 }

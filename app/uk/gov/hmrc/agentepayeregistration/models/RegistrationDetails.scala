@@ -16,17 +16,16 @@
 
 package uk.gov.hmrc.agentepayeregistration.models
 
-import org.joda.time.{DateTime, DateTimeZone}
+import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{Format, JsPath, Reads, Writes}
+import play.api.libs.json.{Format, JsPath}
+import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
 case class RegistrationDetails(agentReference: AgentReference,
                                registration: RegistrationRequest,
-                               createdDateTime: Option[DateTime] = Some(DateTime.now(DateTimeZone.UTC)))
+                               createdDateTime: DateTime)
 
 object RegistrationDetails {
-
-  private val dateTimeFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
 
   implicit val registrationDetailsFormat: Format[RegistrationDetails] = (
     (JsPath \ "agentReference").format[String] and
@@ -36,8 +35,7 @@ object RegistrationDetails {
       (JsPath \ "faxNumber").formatNullable[String] and
       (JsPath \ "emailAddress").formatNullable[String] and
       (JsPath \ "address").format[Address] and
-      (JsPath \ "createdDateTime").formatNullable[DateTime](Format(Reads.jodaDateReads(dateTimeFormat),
-        Writes.jodaDateWrites(dateTimeFormat)))
+      (JsPath \ "createdDateTime").format[DateTime](ReactiveMongoFormats.dateTimeFormats)
     ) ((agentRef, agentName, contactName, telNo, faxNo, emailAddr, address, createdDateTime) =>
     RegistrationDetails(AgentReference(agentRef),
       RegistrationRequest(agentName, contactName, telNo, faxNo, emailAddr, address),
