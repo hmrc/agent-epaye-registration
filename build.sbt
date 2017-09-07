@@ -42,6 +42,7 @@ lazy val root = (project in file("."))
     name := "agent-epaye-registration",
     organization := "uk.gov.hmrc",
     scalaVersion := "2.11.11",
+    PlayKeys.playDefaultPort := 9445,
     resolvers := Seq(
       Resolver.bintrayRepo("hmrc", "releases"),
       Resolver.bintrayRepo("hmrc", "release-candidates"),

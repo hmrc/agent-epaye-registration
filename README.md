@@ -2,7 +2,14 @@
 
 [![Build Status](https://travis-ci.org/hmrc/agent-epaye-registration.svg)](https://travis-ci.org/hmrc/agent-epaye-registration) [ ![Download](https://api.bintray.com/packages/hmrc/releases/agent-epaye-registration/images/download.svg) ](https://bintray.com/hmrc/releases/agent-epaye-registration/_latestVersion)
 
-This is a backend microservice for Agent EPAYE Registration .
+This is a backend microservice for Agent EPAYE Registration, part of interim replacement of OPRA (On-Line Pre-Registration of Agents).
+
+The OPRA system provides a way for PAYE agents (not otherwise known to PAYE systems and therefore without known facts) to obtain a reference number that can be used as a known fact to enable them to register and enrol as a PAYE agent.
+ 
+ ## Features
+ 
+ - Agent who needs an Agent PAYE reference code is able to enter its details and can be issued a code
+ - Team capturing OPRA data has a way for stored data to be extracted so that it is available to other services
 
 ## Running the tests
 
@@ -10,11 +17,11 @@ This is a backend microservice for Agent EPAYE Registration .
 
 ## Running the app locally
 
-    sm --start AGENT_MTD -f
+    sm --start AGENT_EPAYE_REG -f
     sm --stop AGENT_EPAYE_REGISTRATION
     ./run-local
 
-## Proposed API
+## API
 
 We're still building this service so some/all of the API described here might not be implemented yet!
 
