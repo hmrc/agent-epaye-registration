@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/hmrc/agent-epaye-registration.svg)](https://travis-ci.org/hmrc/agent-epaye-registration) [ ![Download](https://api.bintray.com/packages/hmrc/releases/agent-epaye-registration/images/download.svg) ](https://bintray.com/hmrc/releases/agent-epaye-registration/_latestVersion)
 
-This is a frontend microservice for Agent EPAYE Registration, and is interim replacement of OPRA (On-Line Pre-Registration of Agents).
+This is a backend microservice for Agent EPAYE Registration, part of interim replacement of OPRA (On-Line Pre-Registration of Agents).
 
 The OPRA system provides a way for PAYE agents (not otherwise known to PAYE systems and therefore without known facts) to obtain a reference number that can be used as a known fact to enable them to register and enrol as a PAYE agent.
  
