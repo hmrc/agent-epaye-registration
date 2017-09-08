@@ -53,12 +53,12 @@ class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enr
       service.extract(dateFrom, dateTo).map {
         case Right(registrations) => Ok(Json.obj("registrations" -> Json.toJson(registrations)))
         case Left(failure) => BadRequest(Json.toJson(failure))
-      }.recoverWith {
-        case ex: NoActiveSession =>
-          Future.successful(Unauthorized(ex.getMessage))
-        case ex: AuthorisationException =>
-          Future.successful(Forbidden(ex.getMessage))
       }
+    }.recoverWith {
+      case ex: NoActiveSession =>
+        Future.successful(Unauthorized(ex.getMessage))
+      case ex: AuthorisationException =>
+        Future.successful(Forbidden(ex.getMessage))
     }
   }
 }
