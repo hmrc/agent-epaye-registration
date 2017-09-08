@@ -17,6 +17,8 @@
 package uk.gov.hmrc.agentepayeregistration.validators
 
 import cats.data.Validated.{Invalid, Valid}
+import org.joda.time.format.ISODateTimeFormat
+import org.joda.time.{DateTimeZone, Days, LocalDate}
 import uk.gov.hmrc.agentepayeregistration.models.{Address, Failure, RegistrationRequest, ValidationError}
 import uk.gov.hmrc.play.test.UnitSpec
 import uk.gov.hmrc.agentepayeregistration.validators.AgentEpayeRegistrationValidator._
@@ -185,102 +187,144 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
     }
   }
 
+  "isValidDateRange validator" should {
+    val datePresent = LocalDate.now(DateTimeZone.UTC)
+    val dateYesterday = datePresent.minusDays(1)
+    val dateTomorrow = datePresent.plusDays(1)
+
+    "pass if the date range covers a single day in the past" in {
+      AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday.toString, dateYesterday.toString) shouldBe Valid(())
+    }
+    "pass if the date range covers several days in the past" in {
+      AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday.minusDays(1).toString, dateYesterday.toString) shouldBe Valid(())
+    }
+
+    "fail if the from is not in the past" in {
+      AgentEpayeRegistrationValidator.isValidDateRange(datePresent.toString, datePresent.toString) shouldBe
+        anError("INVALID_DATE_RANGE", "'From' date must be in the past")
+      AgentEpayeRegistrationValidator.isValidDateRange(dateTomorrow.toString, dateTomorrow.toString) shouldBe
+        anError("INVALID_DATE_RANGE", "'From' date must be in the past")
+    }
+
+    "fail if the to date is not in the past" in {
+      AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday.toString, datePresent.toString) shouldBe
+        anError("INVALID_DATE_RANGE", "'To' date must be in the past")
+      AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday.toString, dateTomorrow.toString) shouldBe
+        anError("INVALID_DATE_RANGE", "'To' date must be in the past")
+    }
+
+    "fail if the from date occurs after the to date" in {
+      AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday.toString, dateYesterday.minusDays(1).toString) shouldBe
+        anError("INVALID_DATE_RANGE", "'To' date must be after 'From' date")
+    }
+
+    "fail if the date range spans more than a year" in {
+      AgentEpayeRegistrationValidator.isValidDateRange("2001-01-01", "2002-01-01") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.isValidDateRange("2001-01-01", "2002-01-02") shouldBe
+        anError("INVALID_DATE_RANGE", "Date range must be 1 year or less")
+    }
+
+    "pass if the date range spans exactly a leap year" in {
+      AgentEpayeRegistrationValidator.isValidDateRange("2015-03-01", "2016-03-01") shouldBe Valid(())
+    }
+  }
+
   "validate should check all mandatory fields are present" when {
     "an agent name is not given" in {
-      validate(regRequest.copy(agentName = " ")) shouldBe
+      validateRegistrationRequest(regRequest.copy(agentName = " ")) shouldBe
         anError("MISSING_FIELD", "The agent name field is mandatory")
     }
     "a contact name is not given" in {
-      validate(regRequest.copy(contactName = " ")) shouldBe
+      validateRegistrationRequest(regRequest.copy(contactName = " ")) shouldBe
         anError("MISSING_FIELD", "The contact name field is mandatory")
     }
     "the first address line is not given" in {
-      validate(regRequest.copy(address = address.copy(addressLine1 = " "))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine1 = " "))) shouldBe
         anError("MISSING_FIELD", "The address line 1 field is mandatory")
     }
     "the second address line is not given" in {
-      validate(regRequest.copy(address = address.copy(addressLine2 = " "))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine2 = " "))) shouldBe
         anError("MISSING_FIELD", "The address line 2 field is mandatory")
     }
     "the postcode is not given" in {
-      validate(regRequest.copy(address = address.copy(postCode = " "))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(postCode = " "))) shouldBe
         anError("MISSING_FIELD", "The postcode field is mandatory")
     }
   }
 
   "validate should pass if an optional field is missing" when {
     "the optional telephone number is not given" in {
-      validate(regRequest.copy(telephoneNumber = None)) shouldBe Valid(())
+      validateRegistrationRequest(regRequest.copy(telephoneNumber = None)) shouldBe Valid(())
     }
     "the optional fax number is not given" in {
-      validate(regRequest.copy(faxNumber = None)) shouldBe Valid(())
+      validateRegistrationRequest(regRequest.copy(faxNumber = None)) shouldBe Valid(())
     }
     "the optional third address line is not given" in {
-      validate(regRequest.copy(address = address.copy(addressLine3 = None))) shouldBe Valid(())
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine3 = None))) shouldBe Valid(())
     }
     "the optional fourth address line is not given" in {
-      validate(regRequest.copy(address = address.copy(addressLine4 = None))) shouldBe Valid(())
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine4 = None))) shouldBe Valid(())
     }
   }
 
   "validate checks the email address field really is an email address" when {
     "an invalid email address is given" in {
-      validate(regRequest.copy(emailAddress = Some("a.c.com"))) shouldBe
+      validateRegistrationRequest(regRequest.copy(emailAddress = Some("a.c.com"))) shouldBe
         Invalid(Failure("INVALID_FIELD", "The email address field is not a valid email"))
     }
   }
 
   "validate checks alphanumeric fields contain acceptable characters" when {
     "an invalid agent name is given" in {
-      validate(regRequest.copy(agentName = """Jonny "John" Jones""")) shouldBe
+      validateRegistrationRequest(regRequest.copy(agentName = """Jonny "John" Jones""")) shouldBe
         Invalid(Failure("INVALID_FIELD", "The agent name field contains invalid characters"))
     }
     "an invalid contact name is given" in {
-      validate(regRequest.copy(contactName = """Jonny "John" Jones""")) shouldBe
+      validateRegistrationRequest(regRequest.copy(contactName = """Jonny "John" Jones""")) shouldBe
         Invalid(Failure("INVALID_FIELD", "The contact name field contains invalid characters"))
     }
     "an invalid first address is given" in {
-      validate(regRequest.copy(address = address.copy(addressLine1 = "~"))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine1 = "~"))) shouldBe
         anError("INVALID_FIELD", "The address line 1 field contains invalid characters")
     }
     "an invalid second address is given" in {
-      validate(regRequest.copy(address = address.copy(addressLine2 = "~"))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine2 = "~"))) shouldBe
         anError("INVALID_FIELD", "The address line 2 field contains invalid characters")
     }
     "an invalid third address is given" in {
-      validate(regRequest.copy(address = address.copy(addressLine3 = Some("~")))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine3 = Some("~")))) shouldBe
         anError("INVALID_FIELD", "The address line 3 field contains invalid characters")
     }
     "an invalid fourth address is given" in {
-      validate(regRequest.copy(address = address.copy(addressLine4 = Some("~")))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine4 = Some("~")))) shouldBe
         anError("INVALID_FIELD", "The address line 4 field contains invalid characters")
     }
   }
 
   "validate checks the phone numbers are in an acceptable format" when {
     "an invalid telephone number is given" in {
-      validate(regRequest.copy(telephoneNumber = Some("~"))) shouldBe
+      validateRegistrationRequest(regRequest.copy(telephoneNumber = Some("~"))) shouldBe
         anError("INVALID_FIELD", "The telephone number field is not a valid phone number")
     }
     "an invalid fax number is given" in {
-      validate(regRequest.copy(faxNumber = Some("~"))) shouldBe
+      validateRegistrationRequest(regRequest.copy(faxNumber = Some("~"))) shouldBe
         anError("INVALID_FIELD", "The fax number field is not a valid phone number")
     }
   }
 
   "validate checks the postcode really is a postcode" when {
     "an invalid postcode is given" in {
-      validate(regRequest.copy(address = address.copy(postCode = "~"))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(postCode = "~"))) shouldBe
         anError("INVALID_FIELD", "The postcode field is not a valid postcode")
     }
   }
 
   "validate should pass when all values are valid" in {
-    validate(regRequest) shouldBe Valid(())
+    validateRegistrationRequest(regRequest) shouldBe Valid(())
   }
 
   "validate reports all errors if multiple fields are invalid" in {
-    validate(regRequest.copy(agentName = " ", contactName = " ")) shouldBe
+    validateRegistrationRequest(regRequest.copy(agentName = " ", contactName = " ")) shouldBe
       Invalid(Failure(Set(
         ValidationError("MISSING_FIELD", "The agent name field is mandatory"),
         ValidationError("MISSING_FIELD", "The contact name field is mandatory")
@@ -289,39 +333,39 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
 
   "validate fails if a field's maximum length is exceeded" when {
     "the agent name is longer than 56 characters" in {
-      validate(regRequest.copy(agentName = padField(57))) shouldBe
+      validateRegistrationRequest(regRequest.copy(agentName = padField(57))) shouldBe
         anError("INVALID_FIELD", "The agent name field exceeds 56 characters")
     }
     "the contact name is longer than 56 characters" in {
-      validate(regRequest.copy(contactName = padField(57))) shouldBe
+      validateRegistrationRequest(regRequest.copy(contactName = padField(57))) shouldBe
         anError("INVALID_FIELD", "The contact name field exceeds 56 characters")
     }
     "the telephone number is longer than 24 characters" in {
-      validate(regRequest.copy(telephoneNumber = Some(padField(25)))) shouldBe
+      validateRegistrationRequest(regRequest.copy(telephoneNumber = Some(padField(25)))) shouldBe
         anError("INVALID_FIELD", "The telephone number field exceeds 24 characters")
     }
     "the fax number is longer than 24 characters" in {
-      validate(regRequest.copy(faxNumber = Some(padField(25)))) shouldBe
+      validateRegistrationRequest(regRequest.copy(faxNumber = Some(padField(25)))) shouldBe
         anError("INVALID_FIELD", "The fax number field exceeds 24 characters")
     }
     "the email address is longer than 129 characters" in {
-      validate(regRequest.copy(emailAddress = Some(s"${padField(130)}@example.org"))) shouldBe
+      validateRegistrationRequest(regRequest.copy(emailAddress = Some(s"${padField(130)}@example.org"))) shouldBe
         anError("INVALID_FIELD", "The email address field exceeds 129 characters")
     }
     "the address line 1 is longer than 35 characters" in {
-      validate(regRequest.copy(address = address.copy(addressLine1 = padField(36)))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine1 = padField(36)))) shouldBe
         anError("INVALID_FIELD", "The address line 1 field exceeds 35 characters")
     }
     "the address line 2 is longer than 35 characters" in {
-      validate(regRequest.copy(address = address.copy(addressLine2 = padField(36)))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine2 = padField(36)))) shouldBe
         anError("INVALID_FIELD", "The address line 2 field exceeds 35 characters")
     }
     "the address line 3 is longer than 35 characters" in {
-      validate(regRequest.copy(address = address.copy(addressLine3 = Some(padField(36))))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine3 = Some(padField(36))))) shouldBe
         anError("INVALID_FIELD", "The address line 3 field exceeds 35 characters")
     }
     "the address line 4 is longer than 35 characters" in {
-      validate(regRequest.copy(address = address.copy(addressLine4 = Some(padField(36))))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine4 = Some(padField(36))))) shouldBe
         anError("INVALID_FIELD", "The address line 4 field exceeds 35 characters")
     }
   }

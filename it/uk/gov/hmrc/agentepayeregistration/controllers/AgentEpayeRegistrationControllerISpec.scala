@@ -1,6 +1,9 @@
 package uk.gov.hmrc.agentepayeregistration.controllers
 
-import play.api.libs.json.{JsObject, JsString, Json}
+import org.joda.time._
+import play.api.libs.json.{JsArray, JsObject, JsString, Json}
+import uk.gov.hmrc.agentepayeregistration.models.{Address, RegistrationRequest}
+import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
 import uk.gov.hmrc.agentepayeregistration.stubs.AuthStub
 import uk.gov.hmrc.agentepayeregistration.support.RegistrationActions
 
@@ -62,15 +65,36 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
       "respond 200 OK" when {
         "request is authorised by expected stride enrolment" in {
           givenAuthorisedFor("ValidStrideEnrolment", "PrivilegedApplication")
-          val result = getRegistrations
+          val result = getRegistrations("2001-01-01", "2001-01-01")
           result.status shouldBe 200
+          result.header("Content-Type") shouldBe Some("application/json")
+          Json.parse(result.body) shouldBe Json.parse("""{ "registrations" : [] }""")
         }
       }
+
+      "respond 200 OK with registrations in JSON" when {
+        "request contains valid parameters and registrations are present in repository" in {
+          val creationTime = DateTime.now(DateTimeZone.UTC).minusDays(1)
+          val repo = app.injector.instanceOf[AgentEpayeRegistrationRepository]
+
+          val regReq = RegistrationRequest("", "", None, None, None, Address("", "", None, None, ""))
+          import scala.concurrent.ExecutionContext.Implicits.global
+          await(repo.create(regReq, creationTime))
+
+          givenAuthorisedFor("ValidStrideEnrolment", "PrivilegedApplication")
+          val dateParam = creationTime.toLocalDate.toString
+          val result = getRegistrations(dateParam, dateParam)
+          result.status shouldBe 200
+
+          val responseJson = Json.parse(result.body).toString()
+          responseJson should include("HX2000")
+          responseJson should include(creationTime.toString)
+        }}
 
       "respond 403 Forbidden" when {
         "request is authenticated but not with expected stride enrolment" in {
           givenAuthorisedFor("OtherStrideEnrolment", "PrivilegedApplication")
-          val result = getRegistrations
+          val result = getRegistrations("2001-01-01", "2001-01-01")
           result.status shouldBe 403
         }
       }
@@ -78,11 +102,44 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
       "respond 401 Unauthorised" when {
         "request is not authorised for a MDTP detail - NoActiveSession" in {
           givenRequestIsNotAuthorised("MissingBearerToken")
-          val result = getRegistrations
+          val result = getRegistrations("2001-01-01", "2001-01-01")
           result.status shouldBe 401
         }
       }
 
+      "respond 400 Bad Request" when {
+        "date range parameters are not in ISO date format" in {
+          givenAuthorisedFor("ValidStrideEnrolment", "PrivilegedApplication")
+          val result = getRegistrations("01-01-2001", "01-01-2001")
+          result.status shouldBe 400
+          result.header("Content-Type") shouldBe Some("application/json")
+          Json.parse(result.body) shouldBe Json.parse(
+            """{
+              |  "errors" : [
+              |    {
+              |      "code" : "INVALID_DATE_FORMAT",
+              |      "message" : "'To' and 'From' dates must be in ISO format (yyyy-MM-dd)"
+              |    }
+              |  ]
+              |}""".stripMargin)
+        }
+
+        "date validation fails" in {
+          givenAuthorisedFor("ValidStrideEnrolment", "PrivilegedApplication")
+          val result = getRegistrations("2001-01-02", "2001-01-01")
+          result.status shouldBe 400
+          result.header("Content-Type") shouldBe Some("application/json")
+          Json.parse(result.body) shouldBe Json.parse(
+            """{
+                "errors" : [
+                  {
+                    "code" : "INVALID_DATE_RANGE",
+                    "message" : "'To' date must be after 'From' date"
+                  }
+                ]
+              }""")
+        }
+      }
     }
   }
 }

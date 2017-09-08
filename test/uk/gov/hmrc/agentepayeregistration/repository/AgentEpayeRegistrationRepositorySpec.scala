@@ -64,8 +64,8 @@ class AgentEpayeRegistrationRepositorySpec extends BaseRepositorySpec with Mongo
         'registration (regDetails)
       )
 
-      details.createdDateTime.getMillis should be > (beforeCreation.getMillis)
-      details.createdDateTime.getMillis should be < (afterCreation.getMillis)
+      details.createdDateTime.getMillis should be >= (beforeCreation.getMillis)
+      details.createdDateTime.getMillis should be <= (afterCreation.getMillis)
     }
 
     "create new records and generate a new unique Agent PAYE Reference code" in {

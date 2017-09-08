@@ -71,6 +71,7 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
         "$lte" -> obj("$date" -> dateTimeTo.getMillis)
       )
     )
+
     collection.find(queryFilter)
       .sort(obj("createdDateTime" -> 1))
       .cursor[RegistrationDetails]()

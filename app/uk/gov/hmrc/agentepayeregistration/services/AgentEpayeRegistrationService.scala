@@ -19,7 +19,9 @@ package uk.gov.hmrc.agentepayeregistration.services
 import javax.inject.{Inject, Singleton}
 
 import cats.data.Validated.{Invalid, Valid}
-import uk.gov.hmrc.agentepayeregistration.models.{AgentReference, Failure, RegistrationRequest}
+import org.joda.time.format.ISODateTimeFormat
+import org.joda.time.{DateTimeZone, LocalDate}
+import uk.gov.hmrc.agentepayeregistration.models._
 import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
 import uk.gov.hmrc.agentepayeregistration.validators.AgentEpayeRegistrationValidator._
 
@@ -29,9 +31,23 @@ import scala.concurrent.{ExecutionContext, Future}
 class AgentEpayeRegistrationService @Inject()(repository: AgentEpayeRegistrationRepository) {
 
   def register(request: RegistrationRequest)(implicit ec: ExecutionContext): Future[Either[Failure, AgentReference]] = {
-    validate(request) match {
+    validateRegistrationRequest(request) match {
       case Valid(_) => repository.create(request).map(Right(_))
       case Invalid(failure) => Future.successful(Left(failure))
+    }
+  }
+
+  def extract(dateFrom: String, dateTo: String)
+             (implicit ec: ExecutionContext): Future[Either[Failure, List[RegistrationExtraction]]] = {
+    validateDateRange(dateFrom, dateTo) match {
+      case Valid(_) =>
+        val startOfFromDay = LocalDate.parse(dateFrom, ISODateTimeFormat.date()).toDateTimeAtStartOfDay
+        val endOfToDay = LocalDate.parse(dateFrom, ISODateTimeFormat.date()).toDateTimeAtStartOfDay.plusDays(1).minusMillis(1)
+        repository.findRegistrations(startOfFromDay, endOfToDay).map { registrations =>
+          Right(registrations.map(RegistrationExtraction.apply))
+        }
+      case Invalid(failure) =>
+        Future.successful(Left(failure))
     }
   }
 }

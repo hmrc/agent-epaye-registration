@@ -20,9 +20,10 @@ trait RegistrationActions extends ScalaFutures {
       .post(registrationRequest)
       .futureValue
 
-  def getRegistrations: WSResponse =
-    wsClient.url(s"$url/registrations")
+  def getRegistrations(urlEncodedDateFrom: String, urlEncodedDateTo: String): WSResponse = {
+    wsClient.url(s"$url/registrations?dateFrom=$urlEncodedDateFrom&dateTo=$urlEncodedDateTo")
       .withHeaders(HeaderNames.authorisation -> "Bearer XYZ")
       .get()
       .futureValue
+  }
 }
