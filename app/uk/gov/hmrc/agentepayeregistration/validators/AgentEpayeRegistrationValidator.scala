@@ -19,9 +19,7 @@ package uk.gov.hmrc.agentepayeregistration.validators
 import cats.Semigroup
 import cats.data.Validated
 import cats.data.Validated.{Invalid, Valid}
-import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.{DateTimeZone, Days, LocalDate}
-import uk.gov.hmrc.agentepayeregistration.binders.DateRange
 import uk.gov.hmrc.agentepayeregistration.models.{Failure, RegistrationRequest}
 
 import scala.util.{Success, Try}
@@ -81,11 +79,11 @@ object AgentEpayeRegistrationValidator {
     validate(validators ++ optionalFieldValidators)
   }
 
-  def validateDateRange(dateRange: DateRange): Validated[Failure, Unit] = {
+  def validateDateRange(dateFrom: LocalDate, dateTo: LocalDate): Validated[Failure, Unit] = {
     validate(Seq(
-      isInPast(dateRange.from)("From")
-        .andThen(_ => isInPast(dateRange.to)("To"))
-        .andThen(_ => isValidDateRange(dateRange))
+      isInPast(dateFrom)("From")
+        .andThen(_ => isInPast(dateTo)("To"))
+        .andThen(_ => isValidDateRange(dateFrom, dateTo))
     ))
   }
 
@@ -139,9 +137,7 @@ object AgentEpayeRegistrationValidator {
       Invalid(Failure("INVALID_DATE_RANGE", s"'$paramName' date must be in the past"))
   }
 
-  private[validators] def isValidDateRange(dateRange: DateRange) = {
-    val from = dateRange.from
-    val to = dateRange.to
+  private[validators] def isValidDateRange(from: LocalDate, to: LocalDate) = {
     Try(from.isAfter(to)) match {
       case Success(true) =>
         Invalid(Failure("INVALID_DATE_RANGE", "'To' date must be after 'From' date"))

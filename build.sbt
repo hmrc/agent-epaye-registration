@@ -48,10 +48,7 @@ lazy val root = (project in file("."))
       Resolver.jcenterRepo
     ),
     libraryDependencies ++= compileDeps ++ testDeps("test") ++ testDeps("it"),
-    routesImport ++= Seq(
-      "uk.gov.hmrc.agentepayeregistration.binders.DateRange",
-      "uk.gov.hmrc.agentepayeregistration.binders.DateRange._"
-    ),
+    routesImport += "uk.gov.hmrc.agentepayeregistration.binders.Binders._",
     publishingSettings,
     scoverageSettings
   )

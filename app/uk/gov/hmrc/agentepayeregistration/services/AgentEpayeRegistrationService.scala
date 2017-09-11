@@ -19,7 +19,7 @@ package uk.gov.hmrc.agentepayeregistration.services
 import javax.inject.{Inject, Singleton}
 
 import cats.data.Validated.{Invalid, Valid}
-import uk.gov.hmrc.agentepayeregistration.binders.DateRange
+import org.joda.time.LocalDate
 import uk.gov.hmrc.agentepayeregistration.models._
 import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
 import uk.gov.hmrc.agentepayeregistration.validators.AgentEpayeRegistrationValidator._
@@ -36,12 +36,12 @@ class AgentEpayeRegistrationService @Inject()(repository: AgentEpayeRegistration
     }
   }
 
-  def extract(dateRange: DateRange)
+  def extract(dateFrom: LocalDate, dateTo: LocalDate)
              (implicit ec: ExecutionContext): Future[Either[Failure, List[RegistrationExtraction]]] = {
-    validateDateRange(dateRange) match {
+    validateDateRange(dateFrom, dateTo) match {
       case Valid(_) =>
-        val startOfDayFrom = dateRange.from.toDateTimeAtStartOfDay
-        val endOfDayTo = dateRange.to.toDateTimeAtStartOfDay.plusDays(1).minusMillis(1)
+        val startOfDayFrom = dateFrom.toDateTimeAtStartOfDay
+        val endOfDayTo = dateTo.toDateTimeAtStartOfDay.plusDays(1).minusMillis(1)
         repository.findRegistrations(startOfDayFrom, endOfDayTo).map { registrations =>
           Right(registrations.map(RegistrationExtraction.apply))
         }

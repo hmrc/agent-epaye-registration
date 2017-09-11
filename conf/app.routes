@@ -1,4 +1,4 @@
 # microservice specific routes
 
 POST        /registrations             @uk.gov.hmrc.agentepayeregistration.controllers.AgentEpayeRegistrationController.register()
-GET         /registrations             @uk.gov.hmrc.agentepayeregistration.controllers.AgentEpayeRegistrationController.extract(dateRange: DateRange)
+GET         /registrations             @uk.gov.hmrc.agentepayeregistration.controllers.AgentEpayeRegistrationController.extract(dateFrom: org.joda.time.LocalDate, dateTo: org.joda.time.LocalDate)
