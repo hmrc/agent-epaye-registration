@@ -19,8 +19,10 @@ package uk.gov.hmrc.agentepayeregistration.validators
 import cats.Semigroup
 import cats.data.Validated
 import cats.data.Validated.{Invalid, Valid}
-import org.joda.time.{DateTimeZone, Days, LocalDate, Years, Months}
+import org.joda.time.format.ISODateTimeFormat
+import org.joda.time.{DateTimeZone, Days, LocalDate}
 import uk.gov.hmrc.agentepayeregistration.models.{Failure, RegistrationRequest}
+
 import scala.util.{Success, Try}
 
 object ValidatedSemigroup {
@@ -80,7 +82,14 @@ object AgentEpayeRegistrationValidator {
   }
 
   def validateDateRange(dateFrom: String, dateTo: String): Validated[Failure, Unit] = {
-    validate(Seq(isValidDateRange(dateFrom, dateTo)))
+    def dateInPast(param: String, paramName: String) =
+      isISODate(param)(paramName).andThen(_ => isInPast(parseISODate(param))(paramName))
+
+    validate(Seq(
+      dateInPast(dateFrom, "From")
+        .andThen(_ => dateInPast(dateTo, "To"))
+        .andThen(_ => isValidDateRange(parseISODate(dateFrom), parseISODate(dateTo))))
+    )
   }
 
   private def validate(validators: Seq[Validated[Failure, Unit]]): Validated[Failure, Unit] = {
@@ -125,24 +134,30 @@ object AgentEpayeRegistrationValidator {
     else
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field is not a valid phone number"))
 
-  private[validators] def isValidDateRange(dateFromParam: String, dateToParam: String) = {
-    val today = LocalDate.now(DateTimeZone.UTC)
+  private def parseISODate(dateTxt: String) = LocalDate.parse(dateTxt, ISODateTimeFormat.date())
+  private[validators] def isISODate(param: String)(paramName: String) =
+    Try(parseISODate(param)) match {
+    case Success(_) =>
+      Valid(())
+    case _ =>
+      Invalid(Failure("INVALID_DATE_FORMAT", s"'$paramName' date must be in ISO format (yyyy-MM-dd)"))
+  }
 
-    (Try(LocalDate.parse(dateFromParam)), Try(LocalDate.parse(dateToParam))) match {
-      case (Success(dateFrom: LocalDate), Success(dateTo: LocalDate)) => {
-        if (!today.isAfter(dateFrom))
-          Invalid(Failure("INVALID_DATE_RANGE", "'From' date must be in the past"))
-        else if (!today.isAfter(dateTo))
-          Invalid(Failure("INVALID_DATE_RANGE", "'To' date must be in the past"))
-        else if (dateFrom.isAfter(dateTo))
-          Invalid(Failure("INVALID_DATE_RANGE", "'To' date must be after 'From' date"))
-        else if (!dateTo.equals(dateFrom.plusYears(1)) && Days.daysBetween(dateFrom, dateTo).getDays > 365)
-          Invalid(Failure("INVALID_DATE_RANGE", "Date range must be 1 year or less"))
-        else
-          Valid(())
-      }
-      case _ => Invalid(Failure("INVALID_DATE_FORMAT", "'To' and 'From' dates must be in ISO format (yyyy-MM-dd)"))
-    }
+  private[validators] def isInPast(date: LocalDate)(paramName: String) = {
+    val today = LocalDate.now(DateTimeZone.UTC)
+    if (today.isAfter(date))
+      Valid(())
+    else
+      Invalid(Failure("INVALID_DATE_RANGE", s"'$paramName' date must be in the past"))
+  }
+
+  private[validators] def isValidDateRange(dateFrom: LocalDate, dateTo: LocalDate) = {
+    if (dateFrom.isAfter(dateTo))
+      Invalid(Failure("INVALID_DATE_RANGE", "'To' date must be after 'From' date"))
+    else if (!dateTo.equals(dateFrom.plusYears(1)) && Days.daysBetween(dateFrom, dateTo).getDays > 365)
+      Invalid(Failure("INVALID_DATE_RANGE", "Date range must be 1 year or less"))
+    else
+      Valid(())
   }
 }
 
