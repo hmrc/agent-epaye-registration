@@ -1,4 +1,3 @@
-import play.core.PlayVersion
 import sbt.Tests.{Group, SubProcess}
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
@@ -49,6 +48,7 @@ lazy val root = (project in file("."))
       Resolver.jcenterRepo
     ),
     libraryDependencies ++= compileDeps ++ testDeps("test") ++ testDeps("it"),
+    routesImport += "uk.gov.hmrc.agentepayeregistration.binders.Binders._",
     publishingSettings,
     scoverageSettings
   )

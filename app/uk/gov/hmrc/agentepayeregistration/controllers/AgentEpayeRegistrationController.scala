@@ -18,6 +18,7 @@ package uk.gov.hmrc.agentepayeregistration.controllers
 
 import javax.inject._
 
+import org.joda.time.LocalDate
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Action
@@ -46,7 +47,7 @@ class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enr
     }.recoverTotal(_ => Future.successful(BadRequest))
   }
 
-  def extract(dateFrom: String, dateTo: String) = Action.async { implicit request =>
+  def extract(dateFrom: LocalDate, dateTo: LocalDate) = Action.async { implicit request =>
     authorised(Enrolment(strideEnrolment) and AuthProviders(PrivilegedApplication)) {
       service.extract(dateFrom, dateTo).map {
         case Right(registrations) => Ok(Json.obj("registrations" -> Json.toJson(registrations)))

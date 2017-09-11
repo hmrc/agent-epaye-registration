@@ -187,25 +187,6 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
     }
   }
 
-  "isISODate validator" should {
-    "pass a string date in the ISO format yyyy-MM-dd" in {
-      AgentEpayeRegistrationValidator.isISODate("2016-02-29")("x") shouldBe Valid(())
-    }
-    "fail a string not in the format yyyy-MM-dd" in {
-      val expectedFailure = Invalid(Failure("INVALID_DATE_FORMAT", "'x' date must be in ISO format (yyyy-MM-dd)"))
-      AgentEpayeRegistrationValidator.isISODate("yyyy-MM-dd")("x") shouldBe expectedFailure
-      AgentEpayeRegistrationValidator.isISODate("01-01-2017")("x") shouldBe expectedFailure
-      AgentEpayeRegistrationValidator.isISODate("2017 01 01")("x") shouldBe expectedFailure
-      AgentEpayeRegistrationValidator.isISODate("2017-01-01 19:16:39+01:00")("x") shouldBe expectedFailure
-      AgentEpayeRegistrationValidator.isISODate("")("x") shouldBe expectedFailure
-    }
-    "fail a string in the format yyyy-MM-dd but not a valid date" in {
-      val feb29NotInLeapYear = "2017-02-29"
-      AgentEpayeRegistrationValidator.isISODate(feb29NotInLeapYear)("x") shouldBe
-        Invalid(Failure("INVALID_DATE_FORMAT", "'x' date must be in ISO format (yyyy-MM-dd)"))
-    }
-  }
-
   "isInPast" should {
     "pass a date in the past" in {
       val dateYesterday = LocalDate.now(DateTimeZone.UTC).minusDays(1)
@@ -256,21 +237,17 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
   }
 
   "validateDateRange captures all classes of date range validation errors" when {
-    "param is not in ISO date format" in {
-      validateDateRange("01-01-2001", "2001-01-01") shouldBe anError("INVALID_DATE_FORMAT", "'From' date must be in ISO format (yyyy-MM-dd)")
-      validateDateRange("2001-01-01", "01-01-2001") shouldBe anError("INVALID_DATE_FORMAT", "'To' date must be in ISO format (yyyy-MM-dd)")
-    }
+    val present = LocalDate.now(DateTimeZone.UTC)
+    val past = present.minusDays(1)
     "param is not in the past" in {
-      val present = LocalDate.now(DateTimeZone.UTC)
-      val past = present.minusDays(1)
-      validateDateRange(present.toString, past.toString) shouldBe anError("INVALID_DATE_RANGE", "'From' date must be in the past")
-      validateDateRange(past.toString, present.toString) shouldBe anError("INVALID_DATE_RANGE", "'To' date must be in the past")
+      validateDateRange(present, past) shouldBe anError("INVALID_DATE_RANGE", "'From' date must be in the past")
+      validateDateRange(past, present) shouldBe anError("INVALID_DATE_RANGE", "'To' date must be in the past")
     }
     "from param is not after to param" in {
-      validateDateRange("2001-01-02", "2001-01-01") shouldBe anError("INVALID_DATE_RANGE", "'To' date must be after 'From' date")
+      validateDateRange(past, past.minusDays(1)) shouldBe anError("INVALID_DATE_RANGE", "'To' date must be after 'From' date")
     }
     "date range is less than or equal to a year" in {
-      validateDateRange("2001-01-01", "2002-01-02") shouldBe anError("INVALID_DATE_RANGE", "Date range must be 1 year or less")
+      validateDateRange(past.minusYears(1).minusDays(1), past) shouldBe anError("INVALID_DATE_RANGE", "Date range must be 1 year or less")
     }
   }
 
