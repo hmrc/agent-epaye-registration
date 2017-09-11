@@ -18,26 +18,24 @@ package uk.gov.hmrc.agentepayeregistration.controllers
 
 import javax.inject._
 
-import org.joda.time.LocalDate
-import org.joda.time.format.ISODateTimeFormat
+import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import uk.gov.hmrc.agentepayeregistration.connectors.AuthConnector
-import uk.gov.hmrc.agentepayeregistration.models.{AgentReference, RegistrationExtraction, RegistrationRequest}
+import uk.gov.hmrc.agentepayeregistration.models.RegistrationRequest
 import uk.gov.hmrc.agentepayeregistration.services.AgentEpayeRegistrationService
 import uk.gov.hmrc.auth.core.authorise.Enrolment
 import uk.gov.hmrc.auth.core.retrieve.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions, NoActiveSession}
-import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.Future
-import scala.util.{Failure, Success, Try}
 
 @Singleton
 class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enrolment") strideEnrolment: String, service: AgentEpayeRegistrationService, val authConnector: AuthConnector) extends BaseController with AuthorisedFunctions {
+  lazy val logger = Logger("registrationController")
 
   val register = Action.async(parse.json) { implicit request =>
     request.body.validate[RegistrationRequest].map { details =>
@@ -56,9 +54,11 @@ class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enr
       }
     }.recoverWith {
       case ex: NoActiveSession =>
-        Future.successful(Unauthorized(ex.getMessage))
+        logger.warn("No active session whilst trying to extract registrations", ex)
+        Future.successful(Unauthorized)
       case ex: AuthorisationException =>
-        Future.successful(Forbidden(ex.getMessage))
+        logger.warn("Authorisation exception whilst trying to extract registrations", ex)
+        Future.successful(Forbidden)
     }
   }
 }

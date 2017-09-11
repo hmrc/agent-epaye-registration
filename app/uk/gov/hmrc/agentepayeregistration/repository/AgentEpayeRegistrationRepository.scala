@@ -40,7 +40,7 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
 
   override def indexes: Seq[Index] =
     Seq(Index(key = Seq("agentReference" -> IndexType.Ascending), name = Some("agentRefIndex"), unique = true),
-      Index(key = Seq("createdDateTime" -> IndexType.Ascending), name = Some("createdDateTime"), unique = false))
+      Index(key = Seq("createdDateTime" -> IndexType.Ascending), name = Some("createdDateTimeIndex"), unique = false))
 
   val initialAgentReference: String = "HX2000"
 
@@ -62,7 +62,7 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
 
   def findRegistrations(dateTimeFrom: DateTime, dateTimeTo: DateTime)
                        (implicit ec: ExecutionContext): Future[List[RegistrationDetails]] = {
-    if(dateTimeTo.isBefore(dateTimeFrom)) throw new IllegalArgumentException("to date is before from date")
+    require(!dateTimeTo.isBefore(dateTimeFrom), "to date is before from date")
 
     val queryFilter: (String, JsValueWrapper) = "createdDateTime" -> obj(
         "$gte" -> obj("$date" -> dateTimeFrom.getMillis),

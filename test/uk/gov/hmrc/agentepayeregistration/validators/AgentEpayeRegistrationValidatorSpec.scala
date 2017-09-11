@@ -187,49 +187,94 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
     }
   }
 
-  "isValidDateRange validator" should {
-    val datePresent = LocalDate.now(DateTimeZone.UTC)
-    val dateYesterday = datePresent.minusDays(1)
-    val dateTomorrow = datePresent.plusDays(1)
-
-    "pass if the date range covers a single day in the past" in {
-      AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday.toString, dateYesterday.toString) shouldBe Valid(())
+  "isISODate validator" should {
+    "pass a string date in the ISO format yyyy-MM-dd" in {
+      AgentEpayeRegistrationValidator.isISODate("2016-02-29")("x") shouldBe Valid(())
     }
-    "pass if the date range covers several days in the past" in {
-      AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday.minusDays(1).toString, dateYesterday.toString) shouldBe Valid(())
+    "fail a string not in the format yyyy-MM-dd" in {
+      val expectedFailure = Invalid(Failure("INVALID_DATE_FORMAT", "'x' date must be in ISO format (yyyy-MM-dd)"))
+      AgentEpayeRegistrationValidator.isISODate("yyyy-MM-dd")("x") shouldBe expectedFailure
+      AgentEpayeRegistrationValidator.isISODate("01-01-2017")("x") shouldBe expectedFailure
+      AgentEpayeRegistrationValidator.isISODate("2017 01 01")("x") shouldBe expectedFailure
+      AgentEpayeRegistrationValidator.isISODate("2017-01-01 19:16:39+01:00")("x") shouldBe expectedFailure
+      AgentEpayeRegistrationValidator.isISODate("")("x") shouldBe expectedFailure
     }
-
-    "fail if the from is not in the past" in {
-      AgentEpayeRegistrationValidator.isValidDateRange(datePresent.toString, datePresent.toString) shouldBe
-        anError("INVALID_DATE_RANGE", "'From' date must be in the past")
-      AgentEpayeRegistrationValidator.isValidDateRange(dateTomorrow.toString, dateTomorrow.toString) shouldBe
-        anError("INVALID_DATE_RANGE", "'From' date must be in the past")
-    }
-
-    "fail if the to date is not in the past" in {
-      AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday.toString, datePresent.toString) shouldBe
-        anError("INVALID_DATE_RANGE", "'To' date must be in the past")
-      AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday.toString, dateTomorrow.toString) shouldBe
-        anError("INVALID_DATE_RANGE", "'To' date must be in the past")
-    }
-
-    "fail if the from date occurs after the to date" in {
-      AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday.toString, dateYesterday.minusDays(1).toString) shouldBe
-        anError("INVALID_DATE_RANGE", "'To' date must be after 'From' date")
-    }
-
-    "fail if the date range spans more than a year" in {
-      AgentEpayeRegistrationValidator.isValidDateRange("2001-01-01", "2002-01-01") shouldBe Valid(())
-      AgentEpayeRegistrationValidator.isValidDateRange("2001-01-01", "2002-01-02") shouldBe
-        anError("INVALID_DATE_RANGE", "Date range must be 1 year or less")
-    }
-
-    "pass if the date range spans exactly a leap year" in {
-      AgentEpayeRegistrationValidator.isValidDateRange("2015-03-01", "2016-03-01") shouldBe Valid(())
+    "fail a string in the format yyyy-MM-dd but not a valid date" in {
+      val feb29NotInLeapYear = "2017-02-29"
+      AgentEpayeRegistrationValidator.isISODate(feb29NotInLeapYear)("x") shouldBe
+        Invalid(Failure("INVALID_DATE_FORMAT", "'x' date must be in ISO format (yyyy-MM-dd)"))
     }
   }
 
-  "validate should check all mandatory fields are present" when {
+  "isInPast" should {
+    "pass a date in the past" in {
+      val dateYesterday = LocalDate.now(DateTimeZone.UTC).minusDays(1)
+      AgentEpayeRegistrationValidator.isInPast(dateYesterday)("x") shouldBe Valid(())
+    }
+    "fail a date in the present" in {
+      val dateToday = LocalDate.now(DateTimeZone.UTC)
+      AgentEpayeRegistrationValidator.isInPast(dateToday)("x") shouldBe
+        Invalid(Failure("INVALID_DATE_RANGE", "'x' date must be in the past"))
+    }
+    "fail a date in the future" in {
+      val dateTomorrow = LocalDate.now(DateTimeZone.UTC).plusDays(1)
+      AgentEpayeRegistrationValidator.isInPast(dateTomorrow)("x") shouldBe
+        Invalid(Failure("INVALID_DATE_RANGE", "'x' date must be in the past"))
+    }
+  }
+
+  "isValidDateRange" should {
+    "pass a valid date range" in {
+      val dateYesterday = LocalDate.now(DateTimeZone.UTC).minusDays(1)
+      AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday, dateYesterday) shouldBe Valid(())
+      AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday.minusDays(1), dateYesterday) shouldBe Valid(())
+    }
+    "fail if the from date occurs after the to date" in {
+      val dateYesterday = LocalDate.now(DateTimeZone.UTC).minusDays(1)
+      AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday, dateYesterday.minusDays(1)) shouldBe
+        anError("INVALID_DATE_RANGE", "'To' date must be after 'From' date")
+    }
+    "fail if the date range spans more than a year" in {
+      val someYear = LocalDate.parse("2015-03-01", ISODateTimeFormat.date())
+      AgentEpayeRegistrationValidator.isValidDateRange(someYear, someYear.plusYears(1).plusDays(1)) shouldBe
+        anError("INVALID_DATE_RANGE", "Date range must be 1 year or less")
+    }
+    "pass if the date range spans exactly 366 days of a leap year" in {
+      val yearBeforeFeb29 = LocalDate.parse("2015-03-01", ISODateTimeFormat.date())
+      val yearAfterFeb29 = LocalDate.parse("2016-03-01", ISODateTimeFormat.date())
+      Days.daysBetween(yearBeforeFeb29, yearAfterFeb29).getDays shouldBe 366
+      AgentEpayeRegistrationValidator.isValidDateRange(yearBeforeFeb29, yearAfterFeb29) shouldBe Valid(())
+    }
+    "fail if given a null parameter" in {
+      val somedate = LocalDate.parse("2001-01-01", ISODateTimeFormat.date())
+      val expectedCode = "INVALID_DATE_RANGE"
+      val expectedMsg = "Both 'To' and 'From' dates are required"
+      AgentEpayeRegistrationValidator.isValidDateRange(null, somedate) shouldBe anError(expectedCode, expectedMsg)
+      AgentEpayeRegistrationValidator.isValidDateRange(somedate, null) shouldBe anError(expectedCode, expectedMsg)
+      AgentEpayeRegistrationValidator.isValidDateRange(null, null) shouldBe anError(expectedCode, expectedMsg)
+    }
+  }
+
+  "validateDateRange captures all classes of date range validation errors" when {
+    "param is not in ISO date format" in {
+      validateDateRange("01-01-2001", "2001-01-01") shouldBe anError("INVALID_DATE_FORMAT", "'From' date must be in ISO format (yyyy-MM-dd)")
+      validateDateRange("2001-01-01", "01-01-2001") shouldBe anError("INVALID_DATE_FORMAT", "'To' date must be in ISO format (yyyy-MM-dd)")
+    }
+    "param is not in the past" in {
+      val present = LocalDate.now(DateTimeZone.UTC)
+      val past = present.minusDays(1)
+      validateDateRange(present.toString, past.toString) shouldBe anError("INVALID_DATE_RANGE", "'From' date must be in the past")
+      validateDateRange(past.toString, present.toString) shouldBe anError("INVALID_DATE_RANGE", "'To' date must be in the past")
+    }
+    "from param is not after to param" in {
+      validateDateRange("2001-01-02", "2001-01-01") shouldBe anError("INVALID_DATE_RANGE", "'To' date must be after 'From' date")
+    }
+    "date range is less than or equal to a year" in {
+      validateDateRange("2001-01-01", "2002-01-02") shouldBe anError("INVALID_DATE_RANGE", "Date range must be 1 year or less")
+    }
+  }
+
+  "validateRegistrationRequest should check all mandatory fields are present" when {
     "an agent name is not given" in {
       validateRegistrationRequest(regRequest.copy(agentName = " ")) shouldBe
         anError("MISSING_FIELD", "The agent name field is mandatory")
@@ -252,7 +297,7 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
     }
   }
 
-  "validate should pass if an optional field is missing" when {
+  "validateRegistrationRequest should pass if an optional field is missing" when {
     "the optional telephone number is not given" in {
       validateRegistrationRequest(regRequest.copy(telephoneNumber = None)) shouldBe Valid(())
     }
@@ -267,14 +312,14 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
     }
   }
 
-  "validate checks the email address field really is an email address" when {
+  "validateRegistrationRequest checks the email address field really is an email address" when {
     "an invalid email address is given" in {
       validateRegistrationRequest(regRequest.copy(emailAddress = Some("a.c.com"))) shouldBe
         Invalid(Failure("INVALID_FIELD", "The email address field is not a valid email"))
     }
   }
 
-  "validate checks alphanumeric fields contain acceptable characters" when {
+  "validateRegistrationRequest checks alphanumeric fields contain acceptable characters" when {
     "an invalid agent name is given" in {
       validateRegistrationRequest(regRequest.copy(agentName = """Jonny "John" Jones""")) shouldBe
         Invalid(Failure("INVALID_FIELD", "The agent name field contains invalid characters"))
@@ -301,7 +346,7 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
     }
   }
 
-  "validate checks the phone numbers are in an acceptable format" when {
+  "validateRegistrationRequest checks the phone numbers are in an acceptable format" when {
     "an invalid telephone number is given" in {
       validateRegistrationRequest(regRequest.copy(telephoneNumber = Some("~"))) shouldBe
         anError("INVALID_FIELD", "The telephone number field is not a valid phone number")
@@ -312,18 +357,18 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
     }
   }
 
-  "validate checks the postcode really is a postcode" when {
+  "validateRegistrationRequest checks the postcode really is a postcode" when {
     "an invalid postcode is given" in {
       validateRegistrationRequest(regRequest.copy(address = address.copy(postCode = "~"))) shouldBe
         anError("INVALID_FIELD", "The postcode field is not a valid postcode")
     }
   }
 
-  "validate should pass when all values are valid" in {
+  "validateRegistrationRequest should pass when all values are valid" in {
     validateRegistrationRequest(regRequest) shouldBe Valid(())
   }
 
-  "validate reports all errors if multiple fields are invalid" in {
+  "validateRegistrationRequest reports all errors if multiple fields are invalid" in {
     validateRegistrationRequest(regRequest.copy(agentName = " ", contactName = " ")) shouldBe
       Invalid(Failure(Set(
         ValidationError("MISSING_FIELD", "The agent name field is mandatory"),
@@ -331,7 +376,7 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
       )))
   }
 
-  "validate fails if a field's maximum length is exceeded" when {
+  "validateRegistrationRequest fails if a field's maximum length is exceeded" when {
     "the agent name is longer than 56 characters" in {
       validateRegistrationRequest(regRequest.copy(agentName = padField(57))) shouldBe
         anError("INVALID_FIELD", "The agent name field exceeds 56 characters")

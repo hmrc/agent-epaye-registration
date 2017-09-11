@@ -1,7 +1,7 @@
 package uk.gov.hmrc.agentepayeregistration.controllers
 
 import org.joda.time._
-import play.api.libs.json.{JsArray, JsObject, JsString, Json}
+import play.api.libs.json.{JsObject, JsString, Json}
 import uk.gov.hmrc.agentepayeregistration.models.{Address, RegistrationRequest}
 import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
 import uk.gov.hmrc.agentepayeregistration.stubs.AuthStub
@@ -118,7 +118,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
               |  "errors" : [
               |    {
               |      "code" : "INVALID_DATE_FORMAT",
-              |      "message" : "'To' and 'From' dates must be in ISO format (yyyy-MM-dd)"
+              |      "message" : "'From' date must be in ISO format (yyyy-MM-dd)"
               |    }
               |  ]
               |}""".stripMargin)

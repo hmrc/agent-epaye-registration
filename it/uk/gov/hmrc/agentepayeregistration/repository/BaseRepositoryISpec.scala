@@ -22,7 +22,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.agentepayeregistration.support.{MongoApp, WireMockSupport}
 import uk.gov.hmrc.play.test.UnitSpec
 
-abstract class BaseRepositorySpec extends UnitSpec with OneAppPerSuite with MongoApp with WireMockSupport {
+abstract class BaseRepositoryISpec extends UnitSpec with OneAppPerSuite with MongoApp with WireMockSupport {
 
   override implicit lazy val app: Application = appBuilder.build()
 
