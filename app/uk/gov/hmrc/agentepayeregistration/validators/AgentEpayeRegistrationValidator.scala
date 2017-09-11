@@ -152,12 +152,16 @@ object AgentEpayeRegistrationValidator {
   }
 
   private[validators] def isValidDateRange(dateFrom: LocalDate, dateTo: LocalDate) = {
-    if (dateFrom.isAfter(dateTo))
-      Invalid(Failure("INVALID_DATE_RANGE", "'To' date must be after 'From' date"))
-    else if (!dateTo.equals(dateFrom.plusYears(1)) && Days.daysBetween(dateFrom, dateTo).getDays > 365)
-      Invalid(Failure("INVALID_DATE_RANGE", "Date range must be 1 year or less"))
-    else
-      Valid(())
+    Try(dateFrom.isAfter(dateTo)) match {
+      case Success(true) =>
+        Invalid(Failure("INVALID_DATE_RANGE", "'To' date must be after 'From' date"))
+      case Success(false) =>
+        if (!dateTo.equals(dateFrom.plusYears(1)) && Days.daysBetween(dateFrom, dateTo).getDays > 365)
+          Invalid(Failure("INVALID_DATE_RANGE", "Date range must be 1 year or less"))
+        else
+          Valid(())
+      case _ => Invalid(Failure("INVALID_DATE_RANGE", "Both 'To' and 'From' dates are required"))
+    }
   }
 }
 

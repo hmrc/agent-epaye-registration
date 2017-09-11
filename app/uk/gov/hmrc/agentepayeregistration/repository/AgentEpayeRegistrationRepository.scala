@@ -63,7 +63,7 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
 
   def findRegistrations(dateTimeFrom: DateTime, dateTimeTo: DateTime)
                        (implicit ec: ExecutionContext): Future[List[RegistrationDetails]] = {
-    if(dateTimeTo.isBefore(dateTimeFrom)) throw new IllegalArgumentException("to date is before from date")
+    require(!dateTimeTo.isBefore(dateTimeFrom), "to date is before from date")
 
     val queryFilter: play.api.libs.json.JsObject = obj(
       "createdDateTime" -> obj(

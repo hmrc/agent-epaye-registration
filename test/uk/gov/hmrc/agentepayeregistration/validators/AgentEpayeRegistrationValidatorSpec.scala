@@ -245,6 +245,14 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
       Days.daysBetween(yearBeforeFeb29, yearAfterFeb29).getDays shouldBe 366
       AgentEpayeRegistrationValidator.isValidDateRange(yearBeforeFeb29, yearAfterFeb29) shouldBe Valid(())
     }
+    "fail if given a null parameter" in {
+      val somedate = LocalDate.parse("2001-01-01", ISODateTimeFormat.date())
+      val expectedCode = "INVALID_DATE_RANGE"
+      val expectedMsg = "Both 'To' and 'From' dates are required"
+      AgentEpayeRegistrationValidator.isValidDateRange(null, somedate) shouldBe anError(expectedCode, expectedMsg)
+      AgentEpayeRegistrationValidator.isValidDateRange(somedate, null) shouldBe anError(expectedCode, expectedMsg)
+      AgentEpayeRegistrationValidator.isValidDateRange(null, null) shouldBe anError(expectedCode, expectedMsg)
+    }
   }
 
   "validateDateRange captures all classes of date range validation errors" when {
