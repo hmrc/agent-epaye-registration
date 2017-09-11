@@ -17,9 +17,8 @@
 package uk.gov.hmrc.agentepayeregistration.repository
 
 import javax.inject.{Inject, Singleton}
-
 import org.joda.time.{DateTime, DateTimeZone}
-import play.api.libs.json.Json.obj
+import play.api.libs.json.Json.{JsValueWrapper, obj}
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.BSONObjectID
@@ -65,16 +64,10 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
                        (implicit ec: ExecutionContext): Future[List[RegistrationDetails]] = {
     if(dateTimeTo.isBefore(dateTimeFrom)) throw new IllegalArgumentException("to date is before from date")
 
-    val queryFilter: play.api.libs.json.JsObject = obj(
-      "createdDateTime" -> obj(
+    val queryFilter: (String, JsValueWrapper) = "createdDateTime" -> obj(
         "$gte" -> obj("$date" -> dateTimeFrom.getMillis),
-        "$lte" -> obj("$date" -> dateTimeTo.getMillis)
-      )
-    )
+        "$lte" -> obj("$date" -> dateTimeTo.getMillis))
 
-    collection.find(queryFilter)
-      .sort(obj("createdDateTime" -> 1))
-      .cursor[RegistrationDetails]()
-      .collect[List](Integer.MAX_VALUE)
+    find(queryFilter).map(_.sortBy(_.createdDateTime)(Ordering.fromLessThan(_ isBefore _)))
   }
 }
