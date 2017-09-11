@@ -16,16 +16,16 @@
 
 package uk.gov.hmrc.agentepayeregistration.repository
 
-import org.joda.time.{DateTime, DateTimeZone, Duration, Seconds}
 import org.joda.time.format.ISODateTimeFormat
+import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import uk.gov.hmrc.agentepayeregistration.models.{Address, AgentReference, RegistrationRequest}
 import uk.gov.hmrc.mongo.MongoSpecSupport
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.immutable.List
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class AgentEpayeRegistrationRepositorySpec extends BaseRepositorySpec with MongoSpecSupport with BeforeAndAfterEach with BeforeAndAfterAll {
+class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with MongoSpecSupport with BeforeAndAfterEach with BeforeAndAfterAll {
   private lazy val repo = app.injector.instanceOf[AgentEpayeRegistrationRepository]
 
   val postcode = "AB11 AA11"

@@ -37,7 +37,6 @@ object ValidatedSemigroup {
 }
 
 object AgentEpayeRegistrationValidator {
-
   import ValidatedSemigroup._
 
   def validateRegistrationRequest(request: RegistrationRequest): Validated[Failure, Unit] = {
@@ -134,7 +133,8 @@ object AgentEpayeRegistrationValidator {
     else
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field is not a valid phone number"))
 
-  private def parseISODate(dateTxt: String) = LocalDate.parse(dateTxt, ISODateTimeFormat.date())
+  def parseISODate(dateTxt: String) = LocalDate.parse(dateTxt, ISODateTimeFormat.date())
+
   private[validators] def isISODate(param: String)(paramName: String) =
     Try(parseISODate(param)) match {
     case Success(_) =>

@@ -41,7 +41,7 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
 
   override def indexes: Seq[Index] =
     Seq(Index(key = Seq("agentReference" -> IndexType.Ascending), name = Some("agentRefIndex"), unique = true),
-      Index(key = Seq("createdDateTime" -> IndexType.Ascending), name = Some("createdDateTime"), unique = false))
+      Index(key = Seq("createdDateTime" -> IndexType.Ascending), name = Some("createdDateTimeIndex"), unique = false))
 
   val initialAgentReference: String = "HX2000"
 
