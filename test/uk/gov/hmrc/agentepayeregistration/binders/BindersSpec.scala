@@ -22,11 +22,11 @@ import org.scalatest.{EitherValues, Matchers, WordSpecLike}
 
 class BindersSpec extends WordSpecLike with Matchers with EitherValues {
   "LocalDate binder" should {
-    "pass perfectly valid dates" in {
+    "bind perfectly valid dates" in {
       Binders.localDateQueryBinder.bind("dateFrom", Map("dateFrom" -> Seq("2010-01-01"))) shouldBe
         Some(Right(LocalDate.parse("2010-01-01", ISODateTimeFormat.date())))
     }
-    "fail parameter if not in the format yyyy-MM-dd" in {
+    "fail to bind parameter if not in the format yyyy-MM-dd" in {
       val expectedFailure = Some(Left("'From' date must be in ISO format (yyyy-MM-dd)"))
       Binders.localDateQueryBinder.bind("dateFrom", Map("dateFrom" -> Seq("yyyy-MM-dd"))) shouldBe expectedFailure
       Binders.localDateQueryBinder.bind("dateFrom", Map("dateFrom" -> Seq("01-01-2017"))) shouldBe expectedFailure
@@ -34,12 +34,17 @@ class BindersSpec extends WordSpecLike with Matchers with EitherValues {
       Binders.localDateQueryBinder.bind("dateFrom", Map("dateFrom" -> Seq("2017-01-01 19:16:39+01:00"))) shouldBe expectedFailure
       Binders.localDateQueryBinder.bind("dateFrom", Map("dateFrom" -> Seq(""))) shouldBe expectedFailure
     }
-    "fail a string in the format yyyy-MM-dd but not a valid date" in {
+    "fail to bind  a string in the format yyyy-MM-dd but not a valid date" in {
       val feb29NotInLeapYear = "2017-02-29"
-      Binders.localDateQueryBinder.bind("dateFrom", Map("dateFrom" -> Seq(""))) shouldBe
+      Binders.localDateQueryBinder.bind("dateFrom", Map("dateFrom" -> Seq(feb29NotInLeapYear))) shouldBe
         Some(Left("'From' date must be in ISO format (yyyy-MM-dd)"))
-      Binders.localDateQueryBinder.bind("dateTo", Map("dateTo" -> Seq(""))) shouldBe
+      Binders.localDateQueryBinder.bind("dateTo", Map("dateTo" -> Seq(feb29NotInLeapYear))) shouldBe
         Some(Left("'To' date must be in ISO format (yyyy-MM-dd)"))
+    }
+    "unbind dates" in {
+      val someDate = LocalDate.parse("2010-01-01", ISODateTimeFormat.date())
+      Binders.localDateQueryBinder.unbind("Key", someDate) shouldBe
+        "dateKey=2010-01-01"
     }
   }
 }
