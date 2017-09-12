@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.agentepayeregistration.binders
+package uk.gov.hmrc.agentepayeregistration.controllers
 
 import org.joda.time.LocalDate
 import org.joda.time.format.ISODateTimeFormat
@@ -22,7 +22,7 @@ import play.api.mvc.QueryStringBindable
 
 import scala.util.Try
 
-object Binders {
+object UrlBinders {
   implicit def localDateQueryBinder = new QueryStringBindable[LocalDate] {
     override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, LocalDate]] = {
       params.get(key).flatMap(_.headOption).map { dateTxt: String => (Try {

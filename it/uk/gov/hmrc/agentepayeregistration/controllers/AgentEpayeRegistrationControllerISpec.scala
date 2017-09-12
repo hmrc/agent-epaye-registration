@@ -115,15 +115,6 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
           result.header("Content-Type") shouldBe Some("application/json")
 
           result.body should include("'From' date must be in ISO format (yyyy-MM-dd)")
-//            Json.parse(
-//            """{
-//              |  "statusCode" : [
-//              |    {
-//              |      "code" : "INVALID_DATE_FORMAT",
-//              |      "message" : "'From' date must be in ISO format (yyyy-MM-dd)"
-//              |    }
-//              |  ]
-//              |}""".stripMargin)
         }
 
         "date validation fails" in {

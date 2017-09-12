@@ -48,7 +48,7 @@ lazy val root = (project in file("."))
       Resolver.jcenterRepo
     ),
     libraryDependencies ++= compileDeps ++ testDeps("test") ++ testDeps("it"),
-    routesImport += "uk.gov.hmrc.agentepayeregistration.binders.Binders._",
+    routesImport += "uk.gov.hmrc.agentepayeregistration.controllers.UrlBinders._",
     publishingSettings,
     scoverageSettings
   )

@@ -22,8 +22,6 @@ import cats.data.Validated.{Invalid, Valid}
 import org.joda.time.{DateTimeZone, Days, LocalDate}
 import uk.gov.hmrc.agentepayeregistration.models.{Failure, RegistrationRequest}
 
-import scala.util.{Success, Try}
-
 object ValidatedSemigroup {
   implicit def validatedSemigroup[A] = new Semigroup[Validated[Failure, Unit]] {
     def combine(x: Validated[Failure, Unit], y: Validated[Failure, Unit]): Validated[Failure, Unit] = (x, y) match {
@@ -138,16 +136,12 @@ object AgentEpayeRegistrationValidator {
   }
 
   private[validators] def isValidDateRange(from: LocalDate, to: LocalDate) = {
-    Try(from.isAfter(to)) match {
-      case Success(true) =>
-        Invalid(Failure("INVALID_DATE_RANGE", "'To' date must be after 'From' date"))
-      case Success(false) =>
-        if (!to.equals(from.plusYears(1)) && Days.daysBetween(from, to).getDays > 365)
-          Invalid(Failure("INVALID_DATE_RANGE", "Date range must be 1 year or less"))
-        else
-          Valid(())
-      case _ => Invalid(Failure("INVALID_DATE_RANGE", "Both 'To' and 'From' dates are required"))
-    }
+    if(from.isAfter(to))
+      Invalid(Failure("INVALID_DATE_RANGE", "'To' date must be after 'From' date"))
+    else if (!to.equals(from.plusYears(1)) && Days.daysBetween(from, to).getDays > 365)
+      Invalid(Failure("INVALID_DATE_RANGE", "Date range must be 1 year or less"))
+    else
+      Valid(())
   }
 }
 
