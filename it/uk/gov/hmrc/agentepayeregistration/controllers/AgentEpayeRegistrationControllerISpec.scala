@@ -68,7 +68,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
           val result = getRegistrations("2001-01-01", "2001-01-01")
           result.status shouldBe 200
           result.header("Content-Type") shouldBe Some("application/json")
-          Json.parse(result.body) shouldBe Json.parse("""{ "registrations" : [] }""")
+          Json.parse(result.body) shouldBe Json.parse("""{ "registrations" : [], "complete" : true }""")
         }
       }
 
