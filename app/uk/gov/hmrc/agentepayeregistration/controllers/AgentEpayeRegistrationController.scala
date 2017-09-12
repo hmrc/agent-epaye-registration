@@ -18,9 +18,12 @@ package uk.gov.hmrc.agentepayeregistration.controllers
 
 import javax.inject._
 
+import akka.util.ByteString
 import org.joda.time.LocalDate
 import play.api.Logger
-import play.api.libs.json.Json
+import play.api.http.{HeaderNames, MimeTypes}
+import play.api.libs.iteratee.{Enumeratee, Enumerator}
+import play.api.libs.json.{Json, Writes}
 import play.api.mvc.Action
 import uk.gov.hmrc.agentepayeregistration.connectors.AuthConnector
 import uk.gov.hmrc.agentepayeregistration.models.RegistrationRequest
@@ -32,7 +35,7 @@ import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions, NoAct
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enrolment") strideEnrolment: String, service: AgentEpayeRegistrationService, val authConnector: AuthConnector) extends BaseController with AuthorisedFunctions {
@@ -49,9 +52,13 @@ class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enr
 
   def extract(dateFrom: LocalDate, dateTo: LocalDate) = Action.async { implicit request =>
     authorised(Enrolment(strideEnrolment) and AuthProviders(PrivilegedApplication)) {
-      service.extract(dateFrom, dateTo).map {
-        case Right(registrations) => Ok(Json.obj("registrations" -> Json.toJson(registrations)))
-        case Left(failure) => BadRequest(Json.toJson(failure))
+      service.extract(dateFrom, dateTo) match {
+        case Right(enumeratorRegExtracts) => {
+          val source = enumerateToJson(enumeratorRegExtracts, "registrations")
+
+          Future.successful(Ok.feed(source).withHeaders((HeaderNames.CONTENT_TYPE, MimeTypes.JSON)))
+        }
+        case Left(failure) => Future.successful(BadRequest(Json.toJson(failure)))
       }
     }.recoverWith {
       case ex: NoActiveSession =>
@@ -61,5 +68,14 @@ class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enr
         logger.warn("Authorisation exception whilst trying to extract registrations", ex)
         Future.successful(Forbidden)
     }
+  }
+
+  private def enumerateToJson[A](enumerator: Enumerator[A], key: String)(implicit writer: Writes[A], executionCtx: ExecutionContext) = {
+    val jsonArrayItems = enumerator.map(item => Json.toJson(item).toString())
+    val enumerateJson = Enumerator(s"""{"$key":[""")
+      .andThen(jsonArrayItems.through(Enumeratee.take(1)))
+      .andThen(jsonArrayItems.map("," + _))
+      .andThen(Enumerator("]}"))
+    enumerateJson.map(ByteString.apply)
   }
 }

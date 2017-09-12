@@ -20,6 +20,7 @@ import javax.inject.{Inject, Singleton}
 
 import cats.data.Validated.{Invalid, Valid}
 import org.joda.time.LocalDate
+import play.api.libs.iteratee.{Enumeratee, Enumerator}
 import uk.gov.hmrc.agentepayeregistration.models._
 import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
 import uk.gov.hmrc.agentepayeregistration.validators.AgentEpayeRegistrationValidator._
@@ -37,16 +38,17 @@ class AgentEpayeRegistrationService @Inject()(repository: AgentEpayeRegistration
   }
 
   def extract(dateFrom: LocalDate, dateTo: LocalDate)
-             (implicit ec: ExecutionContext): Future[Either[Failure, List[RegistrationExtraction]]] = {
+             (implicit ec: ExecutionContext): Either[Failure, Enumerator[RegistrationExtraction]]= {
     validateDateRange(dateFrom, dateTo) match {
       case Valid(_) =>
         val startOfDayFrom = dateFrom.toDateTimeAtStartOfDay
         val endOfDayTo = dateTo.toDateTimeAtStartOfDay.plusDays(1).minusMillis(1)
-        repository.findRegistrations(startOfDayFrom, endOfDayTo).map { registrations =>
-          Right(registrations.map(RegistrationExtraction.apply))
-        }
+
+        val toRegExtract = Enumeratee.map[RegistrationDetails](RegistrationExtraction.apply)
+
+        Right(repository.enumerateRegistrations(startOfDayFrom, endOfDayTo).through(toRegExtract))
       case Invalid(failure) =>
-        Future.successful(Left(failure))
+        Left(failure)
     }
   }
 }

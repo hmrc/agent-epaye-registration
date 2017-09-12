@@ -19,6 +19,7 @@ package uk.gov.hmrc.agentepayeregistration.repository
 import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import play.api.libs.iteratee.{Enumerator, Iteratee}
 import uk.gov.hmrc.agentepayeregistration.models.{Address, AgentReference, RegistrationRequest}
 import uk.gov.hmrc.mongo.MongoSpecSupport
 
@@ -46,6 +47,8 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Mon
     super.beforeEach()
     await(repo.ensureIndexes)
   }
+
+  private def consumeToList[Item](e: Enumerator[Item]): List[Item] = await(e.run(Iteratee.getChunks[Item]))
 
   "AgentEpayeRegistrationRepository" should {
     "create a RegistrationDetails record" in {
@@ -96,10 +99,10 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Mon
       await(repo.create(regDetails, day2Start))
       await(repo.create(regDetails, day2Start))
 
-      await(repo.findRegistrations(day1Start, day1End)).size shouldBe 1
-      await(repo.findRegistrations(day3Start, day3End)).size shouldBe 0
-      await(repo.findRegistrations(day1Start, day3End)).size shouldBe 3
-      await(repo.findRegistrations(day2Start, day2End)).size shouldBe 2
+      consumeToList(repo.enumerateRegistrations(day1Start, day1End)).size shouldBe 1
+      consumeToList(repo.enumerateRegistrations(day3Start, day3End)).size shouldBe 0
+      consumeToList(repo.enumerateRegistrations(day1Start, day3End)).size shouldBe 3
+      consumeToList(repo.enumerateRegistrations(day2Start, day2End)).size shouldBe 2
     }
 
     "return found registrations in ascending time order" in {
@@ -114,7 +117,7 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Mon
       val regRefOnDay2 = await(repo.create(regDetails, day2))
 
       val endOfDay3 = day3.plusHours(24).minusMillis(1)
-      val registrations = await(repo.findRegistrations(day1, endOfDay3))
+      val registrations = consumeToList(repo.enumerateRegistrations(day1, endOfDay3))
       registrations.map(_.agentReference) shouldBe Seq(regRefOnDay1, regRefOnDay2, regRefOnDay3)
     }
 
@@ -124,7 +127,7 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Mon
       val dateTo = dateFrom.minusDays(1)
 
       an[IllegalArgumentException] should be thrownBy {
-        repo.findRegistrations(dateFrom, dateTo)
+        repo.enumerateRegistrations(dateFrom, dateTo)
       }
     }
   }

@@ -17,7 +17,9 @@
 package uk.gov.hmrc.agentepayeregistration.repository
 
 import javax.inject.{Inject, Singleton}
+
 import org.joda.time.{DateTime, DateTimeZone}
+import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json.{JsValueWrapper, obj}
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.{Index, IndexType}
@@ -60,14 +62,20 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
     } yield nextAgentRef
   }
 
-  def findRegistrations(dateTimeFrom: DateTime, dateTimeTo: DateTime)
-                       (implicit ec: ExecutionContext): Future[List[RegistrationDetails]] = {
+  def enumerateRegistrations(dateTimeFrom: DateTime, dateTimeTo: DateTime)
+                            (implicit ec: ExecutionContext): Enumerator[RegistrationDetails] = {
     require(!dateTimeTo.isBefore(dateTimeFrom), "to date is before from date")
 
-    val queryFilter: (String, JsValueWrapper) = "createdDateTime" -> obj(
+    val queryFilter = obj(
+      "createdDateTime" -> obj(
         "$gte" -> obj("$date" -> dateTimeFrom.getMillis),
-        "$lte" -> obj("$date" -> dateTimeTo.getMillis))
+        "$lte" -> obj("$date" -> dateTimeTo.getMillis)
+      )
+    )
 
-    find(queryFilter).map(_.sortBy(_.createdDateTime)(Ordering.fromLessThan(_ isBefore _)))
+    collection.find(queryFilter)
+      .sort(obj("createdDateTime" -> 1))
+      .cursor[RegistrationDetails]()
+      .enumerate()
   }
 }
