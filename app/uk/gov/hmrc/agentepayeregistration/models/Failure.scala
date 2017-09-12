@@ -18,7 +18,7 @@ package uk.gov.hmrc.agentepayeregistration.models
 
 import play.api.libs.json.Json
 
-case class ValidationError(code: String, error: String)
+case class ValidationError(code: String, message: String)
 
 object ValidationError {
   implicit val validationErrorFormat = Json.format[ValidationError]

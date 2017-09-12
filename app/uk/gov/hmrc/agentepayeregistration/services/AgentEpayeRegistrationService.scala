@@ -19,7 +19,9 @@ package uk.gov.hmrc.agentepayeregistration.services
 import javax.inject.{Inject, Singleton}
 
 import cats.data.Validated.{Invalid, Valid}
-import uk.gov.hmrc.agentepayeregistration.models.{AgentReference, Failure, RegistrationRequest}
+import org.joda.time.LocalDate
+import play.api.libs.iteratee.{Enumeratee, Enumerator}
+import uk.gov.hmrc.agentepayeregistration.models._
 import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
 import uk.gov.hmrc.agentepayeregistration.validators.AgentEpayeRegistrationValidator._
 
@@ -29,9 +31,24 @@ import scala.concurrent.{ExecutionContext, Future}
 class AgentEpayeRegistrationService @Inject()(repository: AgentEpayeRegistrationRepository) {
 
   def register(request: RegistrationRequest)(implicit ec: ExecutionContext): Future[Either[Failure, AgentReference]] = {
-    validate(request) match {
+    validateRegistrationRequest(request) match {
       case Valid(_) => repository.create(request).map(Right(_))
       case Invalid(failure) => Future.successful(Left(failure))
+    }
+  }
+
+  def extract(dateFrom: LocalDate, dateTo: LocalDate)
+             (implicit ec: ExecutionContext): Either[Failure, Enumerator[RegistrationExtraction]]= {
+    validateDateRange(dateFrom, dateTo) match {
+      case Valid(_) =>
+        val startOfDayFrom = dateFrom.toDateTimeAtStartOfDay
+        val endOfDayTo = dateTo.toDateTimeAtStartOfDay.plusDays(1).minusMillis(1)
+
+        val toRegExtract = Enumeratee.map[RegistrationDetails](RegistrationExtraction.apply)
+
+        Right(repository.enumerateRegistrations(startOfDayFrom, endOfDayTo).through(toRegExtract))
+      case Invalid(failure) =>
+        Left(failure)
     }
   }
 }

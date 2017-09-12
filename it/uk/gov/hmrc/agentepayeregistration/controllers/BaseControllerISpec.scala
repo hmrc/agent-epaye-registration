@@ -7,8 +7,9 @@ import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.agentepayeregistration.support.{MongoApp, WireMockSupport}
+import uk.gov.hmrc.play.test.UnitSpec
 
-abstract class BaseControllerISpec extends WordSpecLike with Matchers with Eventually with GuiceOneServerPerSuite with MongoApp with WireMockSupport {
+abstract class BaseControllerISpec extends WordSpecLike with UnitSpec with Matchers with Eventually with GuiceOneServerPerSuite with MongoApp with WireMockSupport {
 
   def additionalTestConfiguration: Seq[(String, String)] = Seq.empty
 

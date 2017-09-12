@@ -19,13 +19,14 @@ package uk.gov.hmrc.agentepayeregistration.validators
 import cats.Semigroup
 import cats.data.Validated
 import cats.data.Validated.{Invalid, Valid}
+import org.joda.time.{DateTimeZone, Days, LocalDate}
 import uk.gov.hmrc.agentepayeregistration.models.{Failure, RegistrationRequest}
 
 object ValidatedSemigroup {
   implicit def validatedSemigroup[A] = new Semigroup[Validated[Failure, Unit]] {
     def combine(x: Validated[Failure, Unit], y: Validated[Failure, Unit]): Validated[Failure, Unit] = (x, y) match {
       case (Valid(_), Valid(_)) => Valid(())
-      case (Invalid(f1),Invalid(f2)) => Invalid(Failure(f1.errors ++ f2.errors))
+      case (Invalid(f1), Invalid(f2)) => Invalid(Failure(f1.errors ++ f2.errors))
       case (Valid(_), f@Invalid(_)) => f
       case (f@Invalid(_), Valid(_)) => f
     }
@@ -35,7 +36,7 @@ object ValidatedSemigroup {
 object AgentEpayeRegistrationValidator {
   import ValidatedSemigroup._
 
-  def validate(request: RegistrationRequest): Validated[Failure, Unit] = {
+  def validateRegistrationRequest(request: RegistrationRequest): Validated[Failure, Unit] = {
 
     def mandatoryChars(field: String, propertyName: String, limit: Int) =
       nonEmpty(field)(propertyName)
@@ -73,8 +74,20 @@ object AgentEpayeRegistrationValidator {
       request.address.addressLine4.map(x => validCharsWithLimit(x, "address line 4", 35))
     ).flatten
 
+    validate(validators ++ optionalFieldValidators)
+  }
+
+  def validateDateRange(dateFrom: LocalDate, dateTo: LocalDate): Validated[Failure, Unit] = {
+    validate(Seq(
+      isInPast(dateFrom)("From")
+        .andThen(_ => isInPast(dateTo)("To"))
+        .andThen(_ => isValidDateRange(dateFrom, dateTo))
+    ))
+  }
+
+  private def validate(validators: Seq[Validated[Failure, Unit]]): Validated[Failure, Unit] = {
     Semigroup[Validated[Failure, Unit]]
-      .combineAllOption(validators ++ optionalFieldValidators)
+      .combineAllOption(validators)
       .getOrElse(Valid(()))
   }
 
@@ -113,4 +126,22 @@ object AgentEpayeRegistrationValidator {
       Valid(())
     else
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field is not a valid phone number"))
+
+  private[validators] def isInPast(date: LocalDate)(paramName: String) = {
+    val today = LocalDate.now(DateTimeZone.UTC)
+    if (today.isAfter(date))
+      Valid(())
+    else
+      Invalid(Failure("INVALID_DATE_RANGE", s"'$paramName' date must be in the past"))
+  }
+
+  private[validators] def isValidDateRange(from: LocalDate, to: LocalDate) = {
+    if(from.isAfter(to))
+      Invalid(Failure("INVALID_DATE_RANGE", "'To' date must be after 'From' date"))
+    else if (!to.equals(from.plusYears(1)) && Days.daysBetween(from, to).getDays > 365)
+      Invalid(Failure("INVALID_DATE_RANGE", "Date range must be 1 year or less"))
+    else
+      Valid(())
+  }
 }
+
