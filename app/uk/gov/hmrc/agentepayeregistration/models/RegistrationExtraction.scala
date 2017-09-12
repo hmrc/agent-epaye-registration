@@ -19,7 +19,7 @@ package uk.gov.hmrc.agentepayeregistration.models
 import org.joda.time.DateTimeZone
 import play.api.libs.json.Json
 
-case class RegistrationExtraction(agentReference: AgentReference,
+case class RegistrationExtraction(agentReference: String,
                                   agentName: String,
                                   contactName: String,
                                   telephoneNumber: Option[String],
@@ -37,7 +37,7 @@ object RegistrationExtraction {
     import details._
     import details.registration._
     import details.registration.address._
-    RegistrationExtraction(agentReference,
+    RegistrationExtraction(agentReference.value,
       agentName,
       contactName,
       telephoneNumber,
@@ -51,6 +51,5 @@ object RegistrationExtraction {
       createdDateTime.toDateTime(DateTimeZone.UTC).toString)
   }
 
-  private implicit val agentReferenceWrites = Json.writes[AgentReference]
   implicit val registrationExtractionWrites = Json.writes[RegistrationExtraction]
 }

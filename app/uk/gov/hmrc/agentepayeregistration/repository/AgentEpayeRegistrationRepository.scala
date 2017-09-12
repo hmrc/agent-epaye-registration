@@ -76,6 +76,6 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
     collection.find(queryFilter)
       .sort(obj("createdDateTime" -> 1))
       .cursor[RegistrationDetails]()
-      .enumerate()
+      .enumerate(stopOnError = true)
   }
 }

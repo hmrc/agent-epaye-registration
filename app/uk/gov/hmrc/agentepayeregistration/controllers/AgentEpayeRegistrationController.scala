@@ -75,7 +75,7 @@ class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enr
     val enumerateJson = Enumerator(s"""{"$key":[""")
       .andThen(jsonArrayItems.through(Enumeratee.take(1)))
       .andThen(jsonArrayItems.map("," + _))
-      .andThen(Enumerator("]}"))
+      .andThen(Enumerator("], \"complete\":true }"))
     enumerateJson.map(ByteString.apply)
   }
 }
