@@ -72,6 +72,9 @@ An example of error code is ```MISSING_FIELD```.
 
 ### Extract registrations between a date range
 
+This endpoint is secured by the [STRIDE (internal) Auth](https://confluence.tools.tax.service.gov.uk/display/PE/STRIDE+%28Internal%29+Auth)
+model. It requires requests to be from signed in users authorised with the "T2 Technical" auth group.
+
     GET /agent-epaye-registration/registrations?dateFrom=yyyy-MM-dd&dateTo=yyyy-MM-dd
 
 The ```dateFrom``` and ```dateTo``` parameters follow the ISO 8604 date format with a full date as four digit year, two digit
