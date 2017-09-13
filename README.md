@@ -21,13 +21,15 @@ The OPRA system provides a way for PAYE agents (not otherwise known to PAYE syst
     sm --stop AGENT_EPAYE_REGISTRATION
     ./run-local
 
+It should then be listening on port 9445
+
 ## API
 
 We're still building this service so some/all of the API described here might not be implemented yet!
 
 ### Register for an Agent EPAYE reference code
 
-    POST /agent-epaue-registration/registrations
+    POST /agent-epaye-registration/registrations
 
 Request body:
 
@@ -60,13 +62,103 @@ Possible responses:
         "errors": [
             {
                 "code": "<ERROR_CODE>",
-                "error": "<Error message>"
+                "message": "<Error message>"
             }
         ]
     }
 
 This endpoint validates the json input and returns Bad Request with a collection of error codes and messages for invalid input.
 An example of error code is ```MISSING_FIELD```.
+
+### Extract registrations between a date range
+
+    GET /agent-epaye-registration/registrations?dateFrom=yyyy-MM-dd&dateTo=yyyy-MM-dd
+
+The ```dateFrom``` and ```dateTo``` parameters follow the ISO 8604 date format with a full date as four digit year, two digit
+month of year, and two digit day of month (yyyy-MM-dd), e.g. ```2017-02-27```.
+The date range may span 1 or more days, up to a year, but the dates must be in the past - today's date is not allowed.
+
+Possible responses:
+
+#### OK
+
+If there's no registrations within the date range, then a HTTP 200 response is returned with a body like:
+
+    {
+        "registrations": [],
+        "complete" : true
+    }
+
+If there are registrations withint the date range, a HTTP 200 response is given with a body like:
+
+    {
+        "registrations": [
+            {
+                "agentReference": "HX2000",
+                "agentName": "Dave Agent",
+                "contactName": "Charlie Contact",
+                "telephoneNumber": "04372895",
+                "faxNumber": "04372895",
+                "emailAddress": "some@email.com",
+                "addressLine1": "First line of address",
+                "addressLine2": "Second line of address",
+                "addressLine3": "Optional 3rd line of address",
+                "addressLine4": "Optional 4th line of address",
+                "postCode": "CC111CC",
+                "createdDateTime": "2017-09-08T10:03:29.544Z"
+            },
+            {
+                "agentReference": "HX2001",
+                "agentName": "Some Agent",
+                "contactName": "Some Contact",
+                "addressLine1": "First line of address",
+                "addressLine2": "Second line of address",
+                "postCode": "DD111DD",
+                "createdDateTime": "2017-09-09T01:01:01.000Z"
+            }
+        ],
+        "complete" : true
+    }
+
+The following JSON fields are optional and will be omitted if there is no value:
+- ```telephoneNumber```
+- ```faxNumber```
+- ```emailAddress```
+- ```addressLine3```
+- ```addressLine4```
+
+The ```createdDateTime``` field is a combined date and time in UTC in ISO 8601 format (format is yyyy-MM-ddTHH:mm:ss.SSSZZ).
+
+As the response is streamed, the ```complete``` field indicates whether all registrations were returned in
+their entirety and without error.
+If ```complete``` is true then no error occured and all registrations
+within the date range where returned.
+If ```complete``` is false then an error meant that not all
+registrations within the date range could be returned.
+
+#### Bad Request (date parsing failure)
+
+If one of the date parameters can not be parsed, a Bad Request is returned with a JSON body like:
+
+    {
+        "statusCode": 400,
+        "message": "'To' date must be in ISO format (yyyy-MM-dd)",
+        "requested": "/agent-epaye-registration/registrations?dateFrom=2017-08-10&dateTo=2017-09-1x"
+    }
+
+#### Bad Request (date validation failure)
+
+The endpoint validates the dates and returns a Bad Request with a collection of error codes and messages for invalid input.
+An example of an error code is ```INVALID_DATE_RANGE```.
+
+    {
+        "errors": [
+            {
+                "code": "<ERROR_CODE>",
+                "message": "<Error message>"
+            }
+        ]
+    }
 
 ### License
 
