@@ -132,7 +132,7 @@ The following JSON fields are optional and will be omitted if there is no value:
 
 The ```createdDateTime``` field is a combined date and time in UTC in ISO 8601 format (format is yyyy-MM-ddTHH:mm:ss.SSSZZ).
 
-As the response is streamed, the ```complete``` field acts as a sentinal value
+As the response is streamed, the ```complete``` field acts as a sentinel value
 indicating that all registrations were returned in their entirety and without error.
 If present, it's value will always be true and all of the registrations within the date range will have been streamed.
 If an error during streaming prevents a complete response, the ```complete``` field will not be present.
