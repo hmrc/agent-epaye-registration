@@ -1,7 +1,7 @@
 package uk.gov.hmrc.agentepayeregistration.controllers
 
 import org.joda.time._
-import play.api.libs.json.{JsObject, JsString, Json}
+import play.api.libs.json._
 import uk.gov.hmrc.agentepayeregistration.models.{Address, RegistrationRequest}
 import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
 import uk.gov.hmrc.agentepayeregistration.stubs.AuthStub
@@ -86,10 +86,14 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
           val result = getRegistrations(dateParam, dateParam)
           result.status shouldBe 200
 
-          val responseJson = Json.parse(result.body).toString()
-          responseJson should include("HX2000")
-          responseJson should include(creationTime.toString)
-        }}
+          val responseJson = Json.parse(result.body)
+          (responseJson \ "complete").toOption.get shouldBe JsBoolean(true)
+
+          val reg = (responseJson \ "registrations" \ 0)
+          (reg \ "agentReference").toOption.get shouldBe JsString("HX2000")
+          (reg \ "createdDateTime").toOption.get shouldBe JsString(creationTime.toString)
+        }
+      }
 
       "respond 403 Forbidden" when {
         "request is authenticated but not with expected stride enrolment" in {

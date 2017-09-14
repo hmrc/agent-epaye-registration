@@ -18,9 +18,12 @@ package uk.gov.hmrc.agentepayeregistration.repository
 
 import javax.inject.{Inject, Singleton}
 
+import akka.NotUsed
+import akka.stream.scaladsl.Source
 import org.joda.time.{DateTime, DateTimeZone}
 import play.api.libs.iteratee.Enumerator
-import play.api.libs.json.Json.{JsValueWrapper, obj}
+import play.api.libs.json.Json.obj
+import play.api.libs.streams.Streams
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.BSONObjectID
@@ -77,5 +80,13 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
       .sort(obj("createdDateTime" -> 1))
       .cursor[RegistrationDetails]()
       .enumerate(stopOnError = true)
+  }
+
+  def sourceRegistrations(dateTimeFrom: DateTime, dateTimeTo: DateTime)
+                          (implicit ec: ExecutionContext): Source[RegistrationDetails, NotUsed] = {
+    val enumerator = enumerateRegistrations(dateTimeFrom, dateTimeTo)
+    val publisher = Streams.enumeratorToPublisher(enumerator)
+
+    Source.fromPublisher(publisher)
   }
 }
