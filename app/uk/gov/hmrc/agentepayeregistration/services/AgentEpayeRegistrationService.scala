@@ -18,9 +18,10 @@ package uk.gov.hmrc.agentepayeregistration.services
 
 import javax.inject.{Inject, Singleton}
 
+import akka.NotUsed
+import akka.stream.scaladsl.Source
 import cats.data.Validated.{Invalid, Valid}
 import org.joda.time.LocalDate
-import play.api.libs.iteratee.{Enumeratee, Enumerator}
 import uk.gov.hmrc.agentepayeregistration.models._
 import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
 import uk.gov.hmrc.agentepayeregistration.validators.AgentEpayeRegistrationValidator._
@@ -38,15 +39,16 @@ class AgentEpayeRegistrationService @Inject()(repository: AgentEpayeRegistration
   }
 
   def extract(dateFrom: LocalDate, dateTo: LocalDate)
-             (implicit ec: ExecutionContext): Either[Failure, Enumerator[RegistrationExtraction]]= {
+             (implicit ec: ExecutionContext): Either[Failure, Source[RegistrationExtraction, NotUsed]]= {
     validateDateRange(dateFrom, dateTo) match {
       case Valid(_) =>
         val startOfDayFrom = dateFrom.toDateTimeAtStartOfDay
         val endOfDayTo = dateTo.toDateTimeAtStartOfDay.plusDays(1).minusMillis(1)
 
-        val toRegExtract = Enumeratee.map[RegistrationDetails](RegistrationExtraction.apply)
+        val sourceRegDetails = repository.sourceRegistrations(startOfDayFrom, endOfDayTo)
+        val sourceRegExtractions = sourceRegDetails.map(RegistrationExtraction.apply)
 
-        Right(repository.enumerateRegistrations(startOfDayFrom, endOfDayTo).through(toRegExtract))
+        Right(sourceRegExtractions)
       case Invalid(failure) =>
         Left(failure)
     }

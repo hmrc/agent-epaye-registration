@@ -18,11 +18,12 @@ package uk.gov.hmrc.agentepayeregistration.controllers
 
 import javax.inject._
 
+import akka.stream.scaladsl.{Concat, Source}
 import akka.util.ByteString
 import org.joda.time.LocalDate
 import play.api.Logger
-import play.api.http.{HeaderNames, MimeTypes}
-import play.api.libs.iteratee.{Enumeratee, Enumerator}
+import play.api.http.HttpEntity.Streamed
+import play.api.http.MimeTypes
 import play.api.libs.json.{Json, Writes}
 import play.api.mvc.Action
 import uk.gov.hmrc.agentepayeregistration.connectors.AuthConnector
@@ -53,10 +54,10 @@ class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enr
   def extract(dateFrom: LocalDate, dateTo: LocalDate) = Action.async { implicit request =>
     authorised(Enrolment(strideEnrolment) and AuthProviders(PrivilegedApplication)) {
       service.extract(dateFrom, dateTo) match {
-        case Right(enumeratorRegExtracts) => {
-          val source = enumerateToJson(enumeratorRegExtracts, "registrations")
+        case Right(sourceRegExtracts) => {
+          val streamedEntity = Streamed(sourceToJson(sourceRegExtracts, "registrations"), None, Some(MimeTypes.JSON))
 
-          Future.successful(Ok.feed(source).withHeaders((HeaderNames.CONTENT_TYPE, MimeTypes.JSON)))
+          Future.successful(Ok.sendEntity(streamedEntity))
         }
         case Left(failure) => Future.successful(BadRequest(Json.toJson(failure)))
       }
@@ -70,12 +71,12 @@ class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enr
     }
   }
 
-  private def enumerateToJson[A](enumerator: Enumerator[A], key: String)(implicit writer: Writes[A], executionCtx: ExecutionContext) = {
-    val jsonArrayItems = enumerator.map(item => Json.toJson(item).toString())
-    val enumerateJson = Enumerator(s"""{"$key":[""")
-      .andThen(jsonArrayItems.through(Enumeratee.take(1)))
-      .andThen(jsonArrayItems.map("," + _))
-      .andThen(Enumerator("], \"complete\":true }"))
-    enumerateJson.map(ByteString.apply)
+  private def sourceToJson[A](source: Source[A, _], key: String)(implicit writer: Writes[A], executionCtx: ExecutionContext) = {
+    val startJson = Source.single(s"""{ "$key" : [""")
+    val endJson = Source.single("""], "complete": true }""")
+    val jsonItems = source.map(extract => Json.toJson(extract).toString()).intersperse(",")
+    val combinedJsonStr = Source.combine(startJson, jsonItems, endJson)(Concat(_))
+
+    combinedJsonStr.map(ByteString.apply)
   }
 }
