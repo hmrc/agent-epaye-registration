@@ -70,17 +70,14 @@ class GraphiteStartUp @Inject()(val configuration: Configuration,
                                 implicit val ec: ExecutionContext) extends ServicesConfig {
 
   val metricsPluginEnabled: Boolean = getConfBool("metrics.enabled", default = false)
-
   val graphitePublisherEnabled: Boolean = getConfBool("microservice.metrics.graphite.enabled", default = false)
 
-  val graphiteEnabled: Boolean = metricsPluginEnabled && graphitePublisherEnabled
-
-  if (graphiteEnabled) {
+  if (metricsPluginEnabled && graphitePublisherEnabled) {
     val graphite = new Graphite(new InetSocketAddress(
-      getConfString("graphite.host", "graphite"),
-      getConfInt("graphite.port", 2003)))
+      getConfString("microservice.metrics.graphite.host", "graphite"),
+      getConfInt("microservice.metrics.graphite.port", 2003)))
 
-    val prefix: String = getConfString("graphite.prefix", s"tax.${configuration.getString("appName").get}")
+    val prefix: String = getConfString("microservice.metrics.graphite.prefix", s"play.${configuration.getString("appName").get}")
 
     val registryName: String = getConfString("metrics.name", "default")
 
@@ -93,7 +90,7 @@ class GraphiteStartUp @Inject()(val configuration: Configuration,
       .build(graphite)
 
     Logger.info("Graphite metrics enabled, starting the reporter")
-    reporter.start(getConfInt("graphite.interval", 10).toLong, SECONDS)
+    reporter.start(getConfInt("microservice.metrics.graphite.interval", 10).toLong, SECONDS)
 
     lifecycle.addStopHook { () =>
       Future successful reporter.stop()
