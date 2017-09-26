@@ -92,6 +92,122 @@ class ServicesConfigTest extends UnitSpec {
       servicesConfig.env shouldBe "Dev"
     }
   }
+
+  "getConfString" should {
+    "return key under microservice.services" in {
+      val servicesConfig = TestServicesConfig(
+        """
+          |Test {
+          |  microservice {
+          |   services {
+          |     foo {
+          |       bar = 1111
+          |     }
+          |   }
+          |  }
+          |}
+          |
+          |microservice {
+          |  services {
+          |    foo {
+          |      bar = 9999
+          |    }
+          |  }
+          |}
+          |
+          |Prod {
+          |  microservice {
+          |   services {
+          |     foo {
+          |       bar = 9922299
+          |     }
+          |   }
+          |  }
+          |}
+          |
+          |Dev {
+          |  foo {
+          |     bar = 33
+          |  }
+          |}
+        """.stripMargin, Mode.Test)
+      servicesConfig.getConfString("foo.bar","0") shouldBe "9999"
+    }
+
+    "return key under Prod.microservice.services" in {
+      val servicesConfig = TestServicesConfig(
+        """
+          |run.mode = Prod
+          |
+          |Test {
+          |  microservice {
+          |   services {
+          |     foo {
+          |       bar = 1111
+          |     }
+          |   }
+          |  }
+          |}
+          |
+          |Prod {
+          |  microservice {
+          |   services {
+          |     foo {
+          |       bar = 9999
+          |     }
+          |   }
+          |  }
+          |}
+          |
+          |Dev {
+          |  foo {
+          |     bar = 33
+          |  }
+          |}
+        """.stripMargin, Mode.Prod)
+      servicesConfig.getConfString("foo.bar","0") shouldBe "9999"
+    }
+
+    "return key under foo.bar" in {
+      val servicesConfig = TestServicesConfig(
+        """
+          |Test {
+          |  foo {
+          |     bar = 1111
+          |  }
+          |}
+          |foo {
+          |   bar = 9999
+          |}
+        """.stripMargin, Mode.Test)
+      servicesConfig.getConfString("foo.bar","0") shouldBe "9999"
+    }
+
+    "return key under Test.foo.bar" in {
+      val servicesConfig = TestServicesConfig(
+        """
+          |Dev {
+          |  foo {
+          |     bar = 9999
+          |  }
+          |}
+        """.stripMargin, Mode.Prod)
+      servicesConfig.getConfString("foo.bar","0") shouldBe "9999"
+    }
+
+    "return key under govuk-tax.Prod.services" in {
+      val servicesConfig = TestServicesConfig(
+        """
+          |run.mode = Prod
+          |govuk-tax.Prod.services {
+          |  foo {
+          |     bar = 9999
+          |  }
+          |}
+        """.stripMargin, Mode.Prod)
+      servicesConfig.getConfString("foo.bar","0") shouldBe "9999"
+    }
+  }
 }
 
 object TestServicesConfig {
