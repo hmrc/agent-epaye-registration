@@ -59,11 +59,7 @@ class AuditService @Inject()(val auditConnector: AuditConnector) {
   private def createEvent(event: AgentEpayeRegistrationEvent, transactionName: String, details: (String, Any)*)
                          (implicit hc: HeaderCarrier, request: Request[Any]): DataEvent = {
 
-    def toString(x: Any): String = x match {
-      case _ => x.toString
-    }
-
-    val detail = hc.toAuditDetails(details.map(pair => pair._1 -> toString(pair._2)): _*)
+    val detail = hc.toAuditDetails(details.map(pair => pair._1 -> pair._2.toString): _*)
     val tags = hc.toAuditTags(transactionName, request.path)
     DataEvent(auditSource = "agent-epaye-registration",
       auditType = event.toString,
