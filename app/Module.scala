@@ -25,6 +25,8 @@ import com.google.inject.name.Names
 import org.slf4j.MDC
 import play.api.inject.ApplicationLifecycle
 import play.api.{Configuration, Environment, Logger, Mode}
+import uk.gov.hmrc.play.audit.http.config.{AuditingConfig, BaseUri, Consumer}
+import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.http.{HttpGet, HttpPost}
 import wiring.WSVerbs
 
@@ -39,7 +41,7 @@ class Module(val environment: Environment, val configuration: Configuration) ext
     Logger.info(s"Starting microservice : $appName : in mode : ${environment.mode}")
     MDC.put("appName", appName)
     loggerDateFormat.foreach(str => MDC.put("logger.json.dateformat", str))
-
+    bind(classOf[AuditConnector]).to(classOf[MicroserviceAuditConnector])
     bind(classOf[HttpGet]).toInstance(new WSVerbs)
     bind(classOf[HttpPost]).toInstance(new WSVerbs)
     bindBaseUrl("auth")
@@ -99,6 +101,31 @@ class GraphiteStartUp @Inject()(val configuration: Configuration,
     Logger.warn(s"Graphite metrics disabled, plugin = $metricsPluginEnabled and publisher = $graphitePublisherEnabled")
   }
 
+}
+
+@Singleton
+class MicroserviceAuditConnector @Inject()(val configuration: Configuration) extends AuditConnector {
+
+  override def auditingConfig: AuditingConfig = configuration.getConfig("auditing") map { auditing =>
+      val enabled = auditing.getBoolean("enabled").getOrElse(false)
+      AuditingConfig(
+        enabled = enabled,
+        traceRequests = auditing.getBoolean("traceRequests").getOrElse(true),
+        consumer = Some(auditing.getConfig("consumer").map { consumer =>
+          Consumer(
+            baseUri = consumer.getConfig("baseUri").map { uri =>
+              BaseUri(
+                host = uri.getString("host").getOrElse(throw new Exception("Missing consumer host for auditing")),
+                port = uri.getInt("port").getOrElse(throw new Exception("Missing consumer port for auditing")),
+                protocol = uri.getString("protocol").getOrElse("http")
+              )
+            }.getOrElse(throw new Exception("Missing consumer baseUri for auditing"))
+          )
+        }.getOrElse(throw new Exception("Missing consumer configuration for auditing")))
+      )
+  } getOrElse {
+    AuditingConfig(consumer = None, enabled = false, traceRequests = false)
+  }
 }
 
 trait ServicesConfig {
