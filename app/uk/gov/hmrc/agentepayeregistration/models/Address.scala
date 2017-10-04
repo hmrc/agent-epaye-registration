@@ -24,10 +24,9 @@ case class Address(addressLine1: String,
                    addressLine4: Option[String],
                    postCode: String){
 
-  override def toString(): String  = Seq(Option(addressLine1),Option(addressLine2),addressLine3,addressLine4,Option(postCode))
-    .filter(i => i.isDefined && i.get.nonEmpty)
-    .map(_.get)
-    .mkString(" ")
+  override def toString(): String = Seq(Option(addressLine1), Option(addressLine2), addressLine3, addressLine4, Option(postCode))
+    .flatten.map(_.trim).filter(_.nonEmpty).mkString(" ")
+
 }
 
 object Address {
