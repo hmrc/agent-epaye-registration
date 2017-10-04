@@ -57,10 +57,6 @@ class MicroserviceAuditFilter @Inject()(implicit val mat: Materializer, ec: Exec
   override def appName: String = configuration.getString("appName").get
 }
 
-class MicroserviceAuditConnector @Inject()(val environment: Environment) extends AuditConnector {
-  override lazy val auditingConfig = LoadAuditingConfig(s"auditing")
-}
-
 class MicroserviceAuthFilter @Inject()(implicit val mat: Materializer, ec: ExecutionContext,
                                        configuration: Configuration, val connector: AuthConn) extends AuthorisationFilter {
   override def config: FilterConfig = FilterConfig(configuration.underlying.as[Config]("controllers"))

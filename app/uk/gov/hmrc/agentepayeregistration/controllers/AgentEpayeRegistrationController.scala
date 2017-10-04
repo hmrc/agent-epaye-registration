@@ -26,6 +26,7 @@ import play.api.http.HttpEntity.Streamed
 import play.api.http.MimeTypes
 import play.api.libs.json.{Json, Writes}
 import play.api.mvc.Action
+import uk.gov.hmrc.agentepayeregistration.audit.AuditService
 import uk.gov.hmrc.agentepayeregistration.connectors.AuthConnector
 import uk.gov.hmrc.agentepayeregistration.models.RegistrationRequest
 import uk.gov.hmrc.agentepayeregistration.services.AgentEpayeRegistrationService
@@ -39,13 +40,21 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enrolment") strideEnrolment: String, service: AgentEpayeRegistrationService, val authConnector: AuthConnector) extends BaseController with AuthorisedFunctions {
+class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enrolment") strideEnrolment: String,
+                                                 registrationService: AgentEpayeRegistrationService,
+                                                 val authConnector: AuthConnector,
+                                                 auditService: AuditService) extends BaseController with AuthorisedFunctions {
   lazy val logger = Logger("registrationController")
 
   val register = Action.async(parse.json) { implicit request =>
-    request.body.validate[RegistrationRequest].map { details =>
-      service.register(details).map {
-        case Right(x) => Ok(Json.toJson(x))
+
+    request.body.validate[RegistrationRequest].map { registrationRequest =>
+      registrationService.register(registrationRequest).map {
+        case Right(agentReference) => {
+
+          auditService.sendAgentEpayeRegistrationRecordCreated(registrationRequest, agentReference)
+          Ok(Json.toJson(agentReference))
+        }
         case Left(failure) => BadRequest(Json.toJson(failure))
       }
     }.recoverTotal(_ => Future.successful(BadRequest))
@@ -53,7 +62,7 @@ class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enr
 
   def extract(dateFrom: LocalDate, dateTo: LocalDate) = Action.async { implicit request =>
     authorised(Enrolment(strideEnrolment) and AuthProviders(PrivilegedApplication)) {
-      service.extract(dateFrom, dateTo) match {
+      registrationService.extract(dateFrom, dateTo) match {
         case Right(sourceRegExtracts) => {
           val streamedEntity = Streamed(sourceToJson(sourceRegExtracts, "registrations"), None, Some(MimeTypes.JSON))
 

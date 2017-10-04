@@ -2,15 +2,19 @@ package uk.gov.hmrc.agentepayeregistration.controllers
 
 import org.joda.time._
 import play.api.libs.json._
+import uk.gov.hmrc.agentepayeregistration.audit.AgentEpayeRegistrationEvent
 import uk.gov.hmrc.agentepayeregistration.models.{Address, RegistrationRequest}
 import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
-import uk.gov.hmrc.agentepayeregistration.stubs.AuthStub
+import uk.gov.hmrc.agentepayeregistration.stubs.{AuthStub, DataStreamStub}
 import uk.gov.hmrc.agentepayeregistration.support.RegistrationActions
 
-class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with AuthStub with RegistrationActions {
+class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with AuthStub with RegistrationActions with DataStreamStub {
 
-  override def additionalTestConfiguration: Seq[(String, String)] = Seq(
-    "extract.auth.stride.enrolment" -> "ValidStrideEnrolment"
+  override def additionalTestConfiguration: Seq[(String, Any)] = Seq(
+    "extract.auth.stride.enrolment" -> "ValidStrideEnrolment",
+    "auditing.enabled" -> true,
+    "auditing.consumer.baseUri.host" -> wireMockHost,
+    "auditing.consumer.baseUri.port" -> wireMockPort
   )
 
   val validPostData: JsObject = Json.obj(
@@ -27,10 +31,29 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
 
     "POST /registrations with valid details" should {
       "respond HTTP 200 with a the new unique PAYE code in the response body" in {
+        givenAuditConnector()
         val result = postRegistration(validPostData)
+        val requestPath: String = s"/agent-epaye-registration/registrations"
 
         result.status shouldBe 200
         result.json shouldBe Json.obj("payeAgentReference" -> "HX2000")
+
+        verifyAuditRequestSent(1,
+          event = AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated,
+          detail = Map(
+            "agentReference" -> "HX2000",
+            "agentName" -> "Jim Jiminy",
+            "contactName" -> "John Johnson",
+            "telephoneNumber" -> "",
+            "faxNumber" -> "",
+            "emailAddress" -> "",
+            "address" -> "Line 1 Line 2 AB111AA"
+          ),
+          tags = Map(
+            "transactionName" -> "agent-epaye-registration-record-created",
+            "path" -> requestPath
+          )
+        )
       }
     }
 
@@ -38,24 +61,33 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
       "respond with HTTP 400 Bad Request" when {
 
         "no details are given" in {
+          givenAuditConnector()
           val result = postRegistration(Json.obj())
           result.status shouldBe 400
+
+          verifyAuditRequestNotSent(event = AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated)
         }
 
         "some mandatory field was missing" in {
+          givenAuditConnector()
           val postDataMissingField = validPostData - "agentName"
 
           val result = postRegistration(postDataMissingField)
 
           result.status shouldBe 400
+
+          verifyAuditRequestNotSent(event = AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated)
         }
 
         "some field was invalid" in {
+          givenAuditConnector()
           val postDataInvalidField = validPostData + ("agentName" -> JsString("Invalid#Name"))
 
           val result = postRegistration(postDataInvalidField)
 
           result.status shouldBe 400
+
+          verifyAuditRequestNotSent(event = AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated)
         }
       }
     }

@@ -11,7 +11,7 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 abstract class BaseControllerISpec extends WordSpecLike with UnitSpec with Matchers with Eventually with GuiceOneServerPerSuite with MongoApp with WireMockSupport {
 
-  def additionalTestConfiguration: Seq[(String, String)] = Seq.empty
+  def additionalTestConfiguration: Seq[(String, Any)] = Seq.empty
 
   implicit override val patienceConfig: PatienceConfig = PatienceConfig(timeout = Span(4, Seconds), interval = Span(1, Seconds))
 
