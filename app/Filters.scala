@@ -18,18 +18,14 @@ import javax.inject.Inject
 
 import akka.stream.Materializer
 import com.kenshoo.play.metrics.MetricsFilter
-import com.typesafe.config.Config
-import net.ceedubs.ficus.Ficus._
+import play.api.Configuration
 import play.api.http.DefaultHttpFilters
-import play.api.{Configuration, Environment}
 import uk.gov.hmrc.auth.core.PlayAuthConnector
-import uk.gov.hmrc.auth.filter.{AuthorisationFilter, FilterConfig}
-import uk.gov.hmrc.play.audit.filters.AuditFilter
-import uk.gov.hmrc.play.audit.http.config.LoadAuditingConfig
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.config.inject.{DefaultRunMode, DefaultServicesConfig, RunMode}
-import uk.gov.hmrc.play.http.logging.filters.LoggingFilter
+import uk.gov.hmrc.http.hooks.HttpHooks
+import uk.gov.hmrc.http.{HttpDelete, HttpGet, HttpPost, HttpPut}
+import uk.gov.hmrc.play.config.inject.{AppName, DefaultServicesConfig}
 import uk.gov.hmrc.play.http.ws._
+import uk.gov.hmrc.play.microservice.filters.{AuditFilter, LoggingFilter}
 
 import scala.concurrent.ExecutionContext
 
@@ -39,35 +35,33 @@ import scala.concurrent.ExecutionContext
   * @param loggingFilter - used to log details of any http requests hitting the service
   * @param auditFilter   - used to call the datastream microservice and publish auditing events
   * @param metricsFilter - used to collect metrics and statistics relating to the service
-  * @param authFilter    - used to add authorisation to endpoints in the service if required
   */
-class Filters @Inject()(loggingFilter: LogFilter, auditFilter: MicroserviceAuditFilter, metricsFilter: MetricsFilter,
-                        authFilter: MicroserviceAuthFilter)
-  extends DefaultHttpFilters(loggingFilter, auditFilter, metricsFilter, authFilter)
+class Filters @Inject()(loggingFilter: LogFilter, auditFilter: MicroserviceAuditFilter, metricsFilter: MetricsFilter)
+  extends DefaultHttpFilters(loggingFilter, auditFilter, metricsFilter)
 
 class LogFilter @Inject()(implicit val mat: Materializer, configuration: Configuration) extends LoggingFilter {
   override def controllerNeedsLogging(controllerName: String): Boolean = configuration.getBoolean(s"controllers.$controllerName.needsLogging").getOrElse(true)
 }
 
 class MicroserviceAuditFilter @Inject()(implicit val mat: Materializer, ec: ExecutionContext,
-                                        configuration: Configuration, val auditConnector: MicroserviceAuditConnector) extends AuditFilter {
+                                        configuration: Configuration, val auditConnector: MicroserviceAuditConnector) extends AuditFilter with AppName {
 
   override def controllerNeedsAuditing(controllerName: String): Boolean = configuration.getBoolean(s"controllers.$controllerName.needsAuditing").getOrElse(true)
 
   override def appName: String = configuration.getString("appName").get
-}
 
-class MicroserviceAuthFilter @Inject()(implicit val mat: Materializer, ec: ExecutionContext,
-                                       configuration: Configuration, val connector: AuthConn) extends AuthorisationFilter {
-  override def config: FilterConfig = FilterConfig(configuration.underlying.as[Config]("controllers"))
+  override protected def appNameConfiguration: Configuration = configuration
 }
 
 class AuthConn @Inject()(defaultServicesConfig: DefaultServicesConfig,
-                         val http: WsVerbs) extends PlayAuthConnector {
+                         val http: WSHttp) extends PlayAuthConnector {
 
   override val serviceUrl: String = defaultServicesConfig.baseUrl("auth")
 }
 
-class WsVerbs extends WSHttp {
+trait Hooks extends HttpHooks {
   override val hooks = NoneRequired
 }
+
+class WSHttp @Inject()(implicit configuration: Configuration) extends HttpGet with WSGet with HttpPut
+  with WSPut with HttpPost with WSPost with HttpDelete with WSDelete with Hooks

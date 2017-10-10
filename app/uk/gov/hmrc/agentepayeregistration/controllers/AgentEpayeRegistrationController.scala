@@ -30,10 +30,8 @@ import uk.gov.hmrc.agentepayeregistration.audit.AuditService
 import uk.gov.hmrc.agentepayeregistration.connectors.AuthConnector
 import uk.gov.hmrc.agentepayeregistration.models.RegistrationRequest
 import uk.gov.hmrc.agentepayeregistration.services.AgentEpayeRegistrationService
-import uk.gov.hmrc.auth.core.authorise.Enrolment
-import uk.gov.hmrc.auth.core.retrieve.AuthProvider.PrivilegedApplication
-import uk.gov.hmrc.auth.core.retrieve._
-import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions, NoActiveSession}
+import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import uk.gov.hmrc.play.microservice.controller.BaseController
 

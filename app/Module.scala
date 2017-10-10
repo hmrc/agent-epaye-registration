@@ -25,10 +25,9 @@ import com.google.inject.name.Names
 import org.slf4j.MDC
 import play.api.inject.ApplicationLifecycle
 import play.api.{Configuration, Environment, Logger, Mode}
+import uk.gov.hmrc.http.{HttpGet, HttpPost}
 import uk.gov.hmrc.play.audit.http.config.{AuditingConfig, BaseUri, Consumer}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.http.{HttpGet, HttpPost}
-import wiring.WSVerbs
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -42,8 +41,8 @@ class Module(val environment: Environment, val configuration: Configuration) ext
     MDC.put("appName", appName)
     loggerDateFormat.foreach(str => MDC.put("logger.json.dateformat", str))
     bind(classOf[AuditConnector]).to(classOf[MicroserviceAuditConnector])
-    bind(classOf[HttpGet]).toInstance(new WSVerbs)
-    bind(classOf[HttpPost]).toInstance(new WSVerbs)
+    bind(classOf[HttpGet]).toInstance(new WSHttp()(configuration))
+    bind(classOf[HttpPost]).toInstance(new WSHttp()(configuration))
     bindBaseUrl("auth")
     bindProperty("extract.auth.stride.enrolment")
     bind(classOf[GraphiteStartUp]).asEagerSingleton()
@@ -110,7 +109,6 @@ class MicroserviceAuditConnector @Inject()(val configuration: Configuration) ext
       val enabled = auditing.getBoolean("enabled").getOrElse(false)
       AuditingConfig(
         enabled = enabled,
-        traceRequests = auditing.getBoolean("traceRequests").getOrElse(true),
         consumer = Some(auditing.getConfig("consumer").map { consumer =>
           Consumer(
             baseUri = consumer.getConfig("baseUri").map { uri =>
@@ -124,7 +122,7 @@ class MicroserviceAuditConnector @Inject()(val configuration: Configuration) ext
         }.getOrElse(throw new Exception("Missing consumer configuration for auditing")))
       )
   } getOrElse {
-    AuditingConfig(consumer = None, enabled = false, traceRequests = false)
+    AuditingConfig(consumer = None, enabled = false)
   }
 }
 
