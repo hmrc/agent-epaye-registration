@@ -22,6 +22,7 @@ import akka.NotUsed
 import akka.stream.scaladsl.Source
 import org.joda.time.{DateTime, DateTimeZone}
 import play.api.libs.iteratee.Enumerator
+import play.api.libs.json.Format
 import play.api.libs.json.Json.obj
 import play.api.libs.streams.Streams
 import play.modules.reactivemongo.ReactiveMongoComponent
@@ -29,8 +30,11 @@ import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.BSONObjectID
 import reactivemongo.core.errors.DatabaseException
 import uk.gov.hmrc.agentepayeregistration.models.{AgentReference, RegistrationDetails, RegistrationRequest}
+import uk.gov.hmrc.agentepayeregistration.models.RegistrationDetails._
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
+import play.api.libs.json.Json.{format, toJsFieldJsValueWrapper}
+import reactivemongo.play.json.ImplicitBSONHandlers._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -41,7 +45,6 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
     mongo.mongoConnector.db,
     RegistrationDetails.registrationDetailsFormat,
     ReactiveMongoFormats.objectIdFormats) {
-
 
   override def indexes: Seq[Index] =
     Seq(Index(key = Seq("agentReference" -> IndexType.Ascending), name = Some("agentRefIndex"), unique = true),

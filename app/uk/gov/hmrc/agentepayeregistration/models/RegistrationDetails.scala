@@ -18,7 +18,8 @@ package uk.gov.hmrc.agentepayeregistration.models
 
 import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{Format, JsPath}
+import play.api.libs.json._
+import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
 case class RegistrationDetails(agentReference: AgentReference,
@@ -27,7 +28,7 @@ case class RegistrationDetails(agentReference: AgentReference,
 
 object RegistrationDetails {
 
-  implicit val registrationDetailsFormat: Format[RegistrationDetails] = (
+  implicit val registrationDetailsFormat: OFormat[RegistrationDetails] = (
     (JsPath \ "agentReference").format[String] and
       (JsPath \ "agentName").format[String] and
       (JsPath \ "contactName").format[String] and
@@ -40,15 +41,15 @@ object RegistrationDetails {
     RegistrationDetails(AgentReference(agentRef),
       RegistrationRequest(agentName, contactName, telNo, faxNo, emailAddr, address),
       createdDateTime
-    ), (details => (
-      details.agentReference.value,
-      details.registration.agentName,
-      details.registration.contactName,
-      details.registration.telephoneNumber,
-      details.registration.faxNumber,
-      details.registration.emailAddress,
-      details.registration.address,
-      details.createdDateTime
-    )))
+    ), details => (
+    details.agentReference.value,
+    details.registration.agentName,
+    details.registration.contactName,
+    details.registration.telephoneNumber,
+    details.registration.faxNumber,
+    details.registration.emailAddress,
+    details.registration.address,
+    details.createdDateTime
+  ))
 
 }
