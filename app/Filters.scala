@@ -23,8 +23,6 @@ import play.api.http.DefaultHttpFilters
 import uk.gov.hmrc.auth.core.PlayAuthConnector
 import uk.gov.hmrc.http.hooks.HttpHooks
 import uk.gov.hmrc.http.{HttpDelete, HttpGet, HttpPost, HttpPut}
-import uk.gov.hmrc.play.audit.http.HttpAuditing
-import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.config.inject.{AppName, DefaultServicesConfig}
 import uk.gov.hmrc.play.http.ws._
 import uk.gov.hmrc.play.microservice.filters.{AuditFilter, LoggingFilter}

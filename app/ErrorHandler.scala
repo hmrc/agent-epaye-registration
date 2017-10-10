@@ -21,9 +21,9 @@ import play.api.http.Status._
 import play.api.libs.json.{Json, OFormat}
 import play.api.mvc.Results._
 import play.api.mvc.{RequestHeader, Result}
+import uk.gov.hmrc.http.{HttpException, Upstream4xxResponse, Upstream5xxResponse}
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HttpException, Upstream4xxResponse, Upstream5xxResponse }
 
 @Singleton
 class ErrorHandler extends HttpErrorHandler {

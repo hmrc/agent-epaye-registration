@@ -28,7 +28,6 @@ import play.api.{Configuration, Environment, Logger, Mode}
 import uk.gov.hmrc.http.{HttpGet, HttpPost}
 import uk.gov.hmrc.play.audit.http.config.{AuditingConfig, BaseUri, Consumer}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.config.RunMode
 
 import scala.concurrent.{ExecutionContext, Future}
 
