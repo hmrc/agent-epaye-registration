@@ -104,7 +104,7 @@ class GraphiteStartUp @Inject()(val configuration: Configuration,
 }
 
 @Singleton
-class MicroserviceAuditConnector @Inject()(val configuration: Configuration) extends AuditConnector with RunMode {
+class MicroserviceAuditConnector @Inject()(val configuration: Configuration) extends AuditConnector {
 
   override def auditingConfig: AuditingConfig = configuration.getConfig("auditing") map { auditing =>
       val enabled = auditing.getBoolean("enabled").getOrElse(false)
