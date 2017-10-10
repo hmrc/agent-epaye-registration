@@ -19,7 +19,6 @@ package uk.gov.hmrc.agentepayeregistration.models
 import org.joda.time.DateTime
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
 case class RegistrationDetails(agentReference: AgentReference,
@@ -28,7 +27,7 @@ case class RegistrationDetails(agentReference: AgentReference,
 
 object RegistrationDetails {
 
-  implicit val registrationDetailsFormat: OFormat[RegistrationDetails] = (
+  implicit val registrationDetailsFormat: Format[RegistrationDetails] = (
     (JsPath \ "agentReference").format[String] and
       (JsPath \ "agentName").format[String] and
       (JsPath \ "contactName").format[String] and
