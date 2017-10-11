@@ -56,7 +56,7 @@ class MicroserviceAuditFilter @Inject()(implicit val mat: Materializer, ec: Exec
 class AuthConn @Inject()(defaultServicesConfig: DefaultServicesConfig,
                          val http: WSHttp) extends PlayAuthConnector {
 
-  override val serviceUrl: String = defaultServicesConfig.baseUrl("auth")
+  override lazy val serviceUrl: String = defaultServicesConfig.baseUrl("auth")
 }
 
 trait Hooks extends HttpHooks {
