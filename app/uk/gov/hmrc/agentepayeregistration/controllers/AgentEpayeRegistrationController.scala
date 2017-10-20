@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.agentepayeregistration.controllers
 
+import java.time.LocalDateTime
 import javax.inject._
 
 import akka.stream.scaladsl.{Concat, Source}
@@ -64,6 +65,7 @@ class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enr
         case Right(sourceRegExtracts) => {
           val streamedEntity = Streamed(sourceToJson(sourceRegExtracts, "registrations"), None, Some(MimeTypes.JSON))
 
+          auditService.sendAgentEpayeRegistrationExtract("", LocalDateTime.now().toString, dateFrom.toString(), dateTo.toString())
           Future.successful(Ok.sendEntity(streamedEntity))
         }
         case Left(failure) => Future.successful(BadRequest(Json.toJson(failure)))

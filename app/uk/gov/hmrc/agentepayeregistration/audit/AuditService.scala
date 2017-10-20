@@ -33,6 +33,7 @@ import scala.util.Try
 
 object AgentEpayeRegistrationEvent extends Enumeration {
   val AgentEpayeRegistrationRecordCreated = Value
+  val AgentEpayeRegistrationExtract = Value
   type AgentEpayeRegistrationEvent = Value
 }
 
@@ -49,6 +50,16 @@ class AuditService @Inject()(val auditConnector: AuditConnector) {
         "faxNumber" -> registrationRequest.faxNumber.getOrElse(""),
         "emailAddress" -> registrationRequest.emailAddress.getOrElse(""),
         "address" -> s"${registrationRequest.address}"))
+  }
+
+  def sendAgentEpayeRegistrationExtract(userId: String, extractDate: String, dataFrom: String, dateTo: String)(implicit hc: HeaderCarrier, request: Request[Any]): Unit  = {
+    auditEvent(AgentEpayeRegistrationEvent.AgentEpayeRegistrationExtract, "agent-paye-registration-extract",
+      Seq("strideUserId" -> userId,
+          "extractDate" -> extractDate,
+          "dateFrom" -> dataFrom,
+          "dateTo" -> dateTo
+      )
+    )
   }
 
   private[audit] def auditEvent(event: AgentEpayeRegistrationEvent, transactionName: String, details: Seq[(String, Any)] = Seq.empty)
