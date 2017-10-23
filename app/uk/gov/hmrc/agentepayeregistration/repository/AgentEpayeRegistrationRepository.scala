@@ -34,6 +34,7 @@ import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Success
 
 @Singleton
 class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
@@ -80,6 +81,17 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
       .sort(obj("createdDateTime" -> 1))
       .cursor[RegistrationDetails]()
       .enumerate(stopOnError = true)
+  }
+
+  def countRecords(dateTimeFrom: DateTime, dateTimeTo: DateTime)(implicit ec: ExecutionContext): Future[Int] = {
+    require(!dateTimeTo.isBefore(dateTimeFrom), "to date is before from date")
+    val queryFilter = obj(
+      "createdDateTime" -> obj(
+        "$gte" -> obj("$date" -> dateTimeFrom.getMillis),
+        "$lte" -> obj("$date" -> dateTimeTo.getMillis)
+      )
+    )
+    collection.count(Option(queryFilter))
   }
 
   def sourceRegistrations(dateTimeFrom: DateTime, dateTimeTo: DateTime)

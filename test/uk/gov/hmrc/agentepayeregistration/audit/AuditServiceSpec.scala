@@ -28,9 +28,10 @@ import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.test.UnitSpec
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.{ Authorization, RequestId, SessionId }
+import uk.gov.hmrc.http.logging.{Authorization, RequestId, SessionId}
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
 
@@ -57,7 +58,7 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
         telephoneNumber = Some("12313"),
         faxNumber = Some("1234567"),
         emailAddress = Some("john.smith@email.com"),
-        address = Address("addressLine1", "addressLine2", Some("addressLine3"), Some("addressLine4"), "postCode" )
+        address = Address("addressLine1", "addressLine2", Some("addressLine3"), Some("addressLine4"), "postCode")
       )
 
       await(service.sendAgentEpayeRegistrationRecordCreated(
@@ -91,6 +92,46 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
         sentEvent.tags("X-Request-ID") shouldBe "dummy request id"
       }
     }
-  }
 
+    "send an AgentEpayeRegistrationRecordExtract event with the correct fields" in {
+      val mockConnector = mock[AuditConnector]
+      val service = new AuditService(mockConnector)
+
+
+      val hc = HeaderCarrier(
+        authorization = Some(Authorization("dummy bearer token")),
+        sessionId = Some(SessionId("dummy session id")),
+        requestId = Some(RequestId("dummy request id"))
+      )
+
+      await(service.sendAgentEpayeRegistrationExtract(
+        "userId", "extractDate", "dateFrom", "dateTo", Future(2))(
+        hc,
+        FakeRequest("GET", "/path")
+      ))
+
+      eventually {
+        val captor = ArgumentCaptor.forClass(classOf[DataEvent])
+        verify(mockConnector).sendEvent(captor.capture())(any[HeaderCarrier], any[ExecutionContext])
+        val sentEvent = captor.getValue.asInstanceOf[DataEvent]
+
+        sentEvent.auditType shouldBe "AgentEpayeRegistrationExtract"
+        sentEvent.auditSource shouldBe "agent-epaye-registration"
+        sentEvent.detail("strideUserId") shouldBe "userId"
+        sentEvent.detail("extractDate") shouldBe "extractDate"
+        sentEvent.detail("dateFrom") shouldBe "dateFrom"
+        sentEvent.detail("dateTo") shouldBe "dateTo"
+        sentEvent.detail("recordCount") shouldBe "2"
+
+        sentEvent.tags.contains("Authorization") shouldBe false
+        sentEvent.detail("Authorization") shouldBe "dummy bearer token"
+
+        sentEvent.tags("transactionName") shouldBe "agent-paye-registration-extract"
+        sentEvent.tags("path") shouldBe "/path"
+        sentEvent.tags("X-Session-ID") shouldBe "dummy session id"
+        sentEvent.tags("X-Request-ID") shouldBe "dummy request id"
+      }
+
+    }
+  }
 }

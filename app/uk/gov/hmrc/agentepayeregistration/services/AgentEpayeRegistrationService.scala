@@ -39,16 +39,15 @@ class AgentEpayeRegistrationService @Inject()(repository: AgentEpayeRegistration
   }
 
   def extract(dateFrom: LocalDate, dateTo: LocalDate)
-             (implicit ec: ExecutionContext): Either[Failure, Source[RegistrationExtraction, NotUsed]]= {
+             (implicit ec: ExecutionContext): Either[Failure, (Source[RegistrationExtraction, NotUsed], Future[Int])]= {
     validateDateRange(dateFrom, dateTo) match {
       case Valid(_) =>
         val startOfDayFrom = dateFrom.toDateTimeAtStartOfDay
         val endOfDayTo = dateTo.toDateTimeAtStartOfDay.plusDays(1).minusMillis(1)
-
         val sourceRegDetails = repository.sourceRegistrations(startOfDayFrom, endOfDayTo)
         val sourceRegExtractions = sourceRegDetails.map(RegistrationExtraction.apply)
-
-        Right(sourceRegExtractions)
+        val count = repository.countRecords(startOfDayFrom, endOfDayTo)
+        Right((sourceRegExtractions, count))
       case Invalid(failure) =>
         Left(failure)
     }

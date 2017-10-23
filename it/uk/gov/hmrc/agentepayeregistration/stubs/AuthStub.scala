@@ -16,7 +16,7 @@ trait AuthStub {
     this
   }
 
-  def givenAuthorisedFor(enrolment: String, authProvider: String): AuthStub = {
+  def givenAuthorisedFor(enrolment: String, authProvider: String, strideUserId: String): AuthStub = {
     stubFor(post(urlEqualTo("/auth/authorise")).atPriority(1)
       .withRequestBody(
         equalToJson(
@@ -37,7 +37,7 @@ trait AuthStub {
       .willReturn(aResponse()
         .withStatus(200)
         .withHeader("Content-Type","application/json")
-        .withBody("{}"))
+        .withBody(s"""{"authProviderId":{"paClientId":"$strideUserId"}}"""))
     )
 
     stubFor(post(urlEqualTo("/auth/authorise")).atPriority(2)

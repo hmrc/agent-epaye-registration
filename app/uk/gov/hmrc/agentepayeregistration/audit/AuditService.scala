@@ -52,14 +52,17 @@ class AuditService @Inject()(val auditConnector: AuditConnector) {
         "address" -> s"${registrationRequest.address}"))
   }
 
-  def sendAgentEpayeRegistrationExtract(userId: String, extractDate: String, dataFrom: String, dateTo: String)(implicit hc: HeaderCarrier, request: Request[Any]): Unit  = {
-    auditEvent(AgentEpayeRegistrationEvent.AgentEpayeRegistrationExtract, "agent-paye-registration-extract",
-      Seq("strideUserId" -> userId,
+  def sendAgentEpayeRegistrationExtract(userId: String, extractDate: String, dataFrom: String, dateTo: String, count: Int)(implicit hc: HeaderCarrier, request: Request[Any]): Unit  = {
+
+      auditEvent(AgentEpayeRegistrationEvent.AgentEpayeRegistrationExtract, "agent-epaye-registration-extract",
+        Seq(
+          "strideUserId" -> userId,
           "extractDate" -> extractDate,
           "dateFrom" -> dataFrom,
-          "dateTo" -> dateTo
+          "dateTo" -> dateTo,
+          "recordCount" -> count
+        )
       )
-    )
   }
 
   private[audit] def auditEvent(event: AgentEpayeRegistrationEvent, transactionName: String, details: Seq[(String, Any)] = Seq.empty)
