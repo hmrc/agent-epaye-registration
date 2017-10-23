@@ -34,7 +34,6 @@ import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Success
 
 @Singleton
 class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)

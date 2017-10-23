@@ -39,7 +39,6 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 import uk.gov.hmrc.auth.core.retrieve.Retrievals.authProviderId
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Success
 
 @Singleton
 class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enrolment") strideEnrolment: String,
@@ -62,16 +61,16 @@ class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enr
     }.recoverTotal(_ => Future.successful(BadRequest))
   }
 
-  protected def timeStamp: String = LocalDateTime.now().toString
-
   def extract(dateFrom: LocalDate, dateTo: LocalDate) = Action.async { implicit request =>
+    val extractTimestamp = LocalDateTime.now().toString
+
     authorised(Enrolment(strideEnrolment) and AuthProviders(PrivilegedApplication)).retrieve(authProviderId) {
       case authProviderId: PAClientId =>
         registrationService.extract(dateFrom, dateTo) match {
           case Right((sourceRegExtracts, count)) => {
             val streamedEntity = Streamed(sourceToJson(sourceRegExtracts, "registrations"), None, Some(MimeTypes.JSON))
             count.map( records =>
-              auditService.sendAgentEpayeRegistrationExtract(authProviderId.clientId, timeStamp, dateFrom.toString(), dateTo.toString(), records)
+              auditService.sendAgentEpayeRegistrationExtract(authProviderId.clientId, extractTimestamp, dateFrom.toString(), dateTo.toString(), records)
             ).flatMap( _ =>
               Future.successful(Ok.sendEntity(streamedEntity))
             )

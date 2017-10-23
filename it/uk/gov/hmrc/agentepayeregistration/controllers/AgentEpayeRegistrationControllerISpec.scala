@@ -99,8 +99,6 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
           givenAuditConnector()
           givenAuthorisedFor("ValidStrideEnrolment", "PrivilegedApplication", "StrideUserId")
 
-          val requestPath: String = s"/agent-epaye-registration/registrations"
-
           val result = getRegistrations("2001-01-01", "2001-01-01")
           result.status shouldBe 200
           result.header("Content-Type") shouldBe Some("application/json")
@@ -117,7 +115,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
             ),
             tags = Map(
               "transactionName" -> "agent-epaye-registration-extract",
-              "path" -> requestPath
+              "path" -> "/agent-epaye-registration/registrations"
             )
           )
         }
@@ -132,6 +130,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
           import scala.concurrent.ExecutionContext.Implicits.global
           await(repo.create(regReq, creationTime))
 
+          givenAuditConnector()
           givenAuthorisedFor("ValidStrideEnrolment", "PrivilegedApplication", "StrideUserId")
           val dateParam = creationTime.toLocalDate.toString
           val result = getRegistrations(dateParam, dateParam)
@@ -140,17 +139,33 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
           val responseJson = Json.parse(result.body)
           (responseJson \ "complete").toOption.get shouldBe JsBoolean(true)
 
-          val reg = (responseJson \ "registrations" \ 0)
+          val reg = responseJson \ "registrations" \ 0
           (reg \ "agentReference").toOption.get shouldBe JsString("HX2000")
           (reg \ "createdDateTime").toOption.get shouldBe JsString(creationTime.toString)
+
+          verifyAuditRequestSentWithExtractDate(1)
+          verifyAuditRequestSent(1,
+            event = AgentEpayeRegistrationEvent.AgentEpayeRegistrationExtract,
+            detail = Map(
+              "strideUserId" -> "StrideUserId",
+              "dateFrom" -> dateParam,
+              "dateTo" -> dateParam,
+              "recordCount" -> "1"
+            ),
+            tags = Map(
+              "transactionName" -> "agent-epaye-registration-extract",
+              "path" -> "/agent-epaye-registration/registrations"
+            )
+          )
         }
       }
 
       "respond 403 Forbidden" when {
         "request is authenticated but not with expected stride enrolment" in {
-          givenAuthorisedFor("ValidStrideEnrolment", "PrivilegedApplication", "StrideUserId")
+          givenAuthorisedFor("OtherStrideEnrolment", "PrivilegedApplication", "StrideUserId")
           val result = getRegistrations("2001-01-01", "2001-01-01")
           result.status shouldBe 403
+          verifyAuditRequestNotSent(AgentEpayeRegistrationEvent.AgentEpayeRegistrationExtract)
         }
       }
 
@@ -159,6 +174,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
           givenRequestIsNotAuthorised("MissingBearerToken")
           val result = getRegistrations("2001-01-01", "2001-01-01")
           result.status shouldBe 401
+          verifyAuditRequestNotSent(AgentEpayeRegistrationEvent.AgentEpayeRegistrationExtract)
         }
       }
 
@@ -170,6 +186,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
           result.header("Content-Type") shouldBe Some("application/json")
 
           result.body should include("'From' date must be in ISO format (yyyy-MM-dd)")
+          verifyAuditRequestNotSent(AgentEpayeRegistrationEvent.AgentEpayeRegistrationExtract)
         }
 
         "date validation fails" in {
@@ -186,6 +203,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
                   }
                 ]
               }""")
+          verifyAuditRequestNotSent(AgentEpayeRegistrationEvent.AgentEpayeRegistrationExtract)
         }
       }
     }

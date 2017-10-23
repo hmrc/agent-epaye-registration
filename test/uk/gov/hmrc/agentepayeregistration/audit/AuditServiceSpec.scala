@@ -126,12 +126,11 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
         sentEvent.tags.contains("Authorization") shouldBe false
         sentEvent.detail("Authorization") shouldBe "dummy bearer token"
 
-        sentEvent.tags("transactionName") shouldBe "agent-paye-registration-extract"
+        sentEvent.tags("transactionName") shouldBe "agent-epaye-registration-extract"
         sentEvent.tags("path") shouldBe "/path"
         sentEvent.tags("X-Session-ID") shouldBe "dummy session id"
         sentEvent.tags("X-Request-ID") shouldBe "dummy request id"
       }
-
     }
   }
 }
