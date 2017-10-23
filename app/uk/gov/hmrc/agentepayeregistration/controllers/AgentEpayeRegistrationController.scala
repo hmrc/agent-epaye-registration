@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.agentepayeregistration.controllers
 
+import java.time.LocalDateTime
 import javax.inject._
 
 import akka.stream.scaladsl.{Concat, Source}
@@ -29,11 +30,13 @@ import play.api.mvc.Action
 import uk.gov.hmrc.agentepayeregistration.audit.AuditService
 import uk.gov.hmrc.agentepayeregistration.connectors.AuthConnector
 import uk.gov.hmrc.agentepayeregistration.models.RegistrationRequest
-import uk.gov.hmrc.agentepayeregistration.services.AgentEpayeRegistrationService
+import uk.gov.hmrc.agentepayeregistration.services.{AgentEpayeRegistrationService, ExtractedRegistrations}
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.retrieve.PAClientId
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import uk.gov.hmrc.play.microservice.controller.BaseController
+import uk.gov.hmrc.auth.core.retrieve.Retrievals.authProviderId
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -59,15 +62,25 @@ class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enr
   }
 
   def extract(dateFrom: LocalDate, dateTo: LocalDate) = Action.async { implicit request =>
-    authorised(Enrolment(strideEnrolment) and AuthProviders(PrivilegedApplication)) {
-      registrationService.extract(dateFrom, dateTo) match {
-        case Right(sourceRegExtracts) => {
-          val streamedEntity = Streamed(sourceToJson(sourceRegExtracts, "registrations"), None, Some(MimeTypes.JSON))
+    val extractTimestamp = LocalDateTime.now().toString
 
-          Future.successful(Ok.sendEntity(streamedEntity))
+    authorised(Enrolment(strideEnrolment) and AuthProviders(PrivilegedApplication)).retrieve(authProviderId) {
+      case authProviderId: PAClientId =>
+        registrationService.extract(dateFrom, dateTo).flatMap {
+          case Right(ExtractedRegistrations(sourceRegExtracts, count)) =>
+            auditService.sendAgentEpayeRegistrationExtract(authProviderId.clientId, extractTimestamp, dateFrom.toString(), dateTo.toString(), count)
+
+            if(count == 0) {
+              Future.successful(NoContent)
+            } else {
+              val streamedEntity = Streamed(sourceToJson(sourceRegExtracts, "registrations"), None, Some(MimeTypes.JSON))
+              Future.successful(Ok.sendEntity(streamedEntity))
+            }
+          case Left(failure) =>
+            Future.successful(BadRequest(Json.toJson(failure)))
         }
-        case Left(failure) => Future.successful(BadRequest(Json.toJson(failure)))
-      }
+        //This part should never happen. This is to satisfy scala pattern match exhaustive check in order to compile.
+      case _ => Future.successful(Forbidden)
     }.recoverWith {
       case ex: NoActiveSession =>
         logger.warn("No active session whilst trying to extract registrations", ex)

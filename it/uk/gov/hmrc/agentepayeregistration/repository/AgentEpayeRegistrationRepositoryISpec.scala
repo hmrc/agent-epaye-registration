@@ -130,5 +130,24 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Mon
         repo.enumerateRegistrations(dateFrom, dateTo)
       }
     }
+
+    "count registrations in date range" in {
+      val isoDateFmt = ISODateTimeFormat.date()
+
+      val day1 = DateTime.parse("2000-01-01", isoDateFmt)
+      val day2 = DateTime.parse("2000-01-02", isoDateFmt)
+      val day3 = DateTime.parse("2000-01-03", isoDateFmt)
+
+      await(repo.create(regDetails, day1))
+      await(repo.create(regDetails, day2))
+      await(repo.create(regDetails, day3))
+
+      val endOfDay2 = day2.plusHours(24).minusMillis(1)
+      val endOfDay3 = day3.plusHours(24).minusMillis(1)
+
+      await(repo.countRecords(day1.withTimeAtStartOfDay(), endOfDay3)) shouldBe 3
+      await(repo.countRecords(day1.withTimeAtStartOfDay(), endOfDay2)) shouldBe 2
+      await(repo.countRecords(day2.withTimeAtStartOfDay(), endOfDay2)) shouldBe 1
+    }
   }
 }

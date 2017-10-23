@@ -25,6 +25,17 @@ trait DataStreamStub extends Eventually {
     }
   }
 
+  def verifyAuditRequestSentWithExtractDate(count: Int) = {
+    val iso8601Regex = "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.\\d{3}"
+    eventually {
+      verify(count, postRequestedFor(urlPathEqualTo(auditUrl))
+        .withRequestBody(
+          matchingJsonPath("$.detail.extractDate", matching(iso8601Regex))
+        )
+      )
+    }
+  }
+
   def verifyAuditRequestNotSent(event: AgentEpayeRegistrationEvent) = {
     eventually {
       verify(0, postRequestedFor(urlPathEqualTo(auditUrl))

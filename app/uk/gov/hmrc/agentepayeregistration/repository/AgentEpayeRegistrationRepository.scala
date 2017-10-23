@@ -82,6 +82,17 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
       .enumerate(stopOnError = true)
   }
 
+  def countRecords(dateTimeFrom: DateTime, dateTimeTo: DateTime)(implicit ec: ExecutionContext): Future[Int] = {
+    require(!dateTimeTo.isBefore(dateTimeFrom), "to date is before from date")
+    val queryFilter = obj(
+      "createdDateTime" -> obj(
+        "$gte" -> obj("$date" -> dateTimeFrom.getMillis),
+        "$lte" -> obj("$date" -> dateTimeTo.getMillis)
+      )
+    )
+    collection.count(Option(queryFilter))
+  }
+
   def sourceRegistrations(dateTimeFrom: DateTime, dateTimeTo: DateTime)
                           (implicit ec: ExecutionContext): Source[RegistrationDetails, NotUsed] = {
     val enumerator = enumerateRegistrations(dateTimeFrom, dateTimeTo)

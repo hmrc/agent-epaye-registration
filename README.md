@@ -85,12 +85,7 @@ Possible responses:
 
 #### OK
 
-If there's no registrations within the date range, then a HTTP 200 response is returned with a body like:
-
-    {
-        "registrations": [],
-        "complete" : true
-    }
+If there's no registrations within the date range, then a HTTP 204 response with no body is returned.
 
 If there are registrations within the date range, a HTTP 200 response is given with a body like:
 
