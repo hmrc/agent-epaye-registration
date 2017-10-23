@@ -100,9 +100,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
           givenAuthorisedFor("ValidStrideEnrolment", "PrivilegedApplication", "StrideUserId")
 
           val result = getRegistrations("2001-01-01", "2001-01-01")
-          result.status shouldBe 200
-          result.header("Content-Type") shouldBe Some("application/json")
-          Json.parse(result.body) shouldBe Json.parse("""{ "registrations" : [], "complete" : true }""")
+          result.status shouldBe 204
 
           verifyAuditRequestSentWithExtractDate(1)
           verifyAuditRequestSent(1,

@@ -30,7 +30,7 @@ import play.api.mvc.Action
 import uk.gov.hmrc.agentepayeregistration.audit.AuditService
 import uk.gov.hmrc.agentepayeregistration.connectors.AuthConnector
 import uk.gov.hmrc.agentepayeregistration.models.RegistrationRequest
-import uk.gov.hmrc.agentepayeregistration.services.AgentEpayeRegistrationService
+import uk.gov.hmrc.agentepayeregistration.services.{AgentEpayeRegistrationService, ExtractedRegistrations}
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.PAClientId
@@ -66,16 +66,18 @@ class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enr
 
     authorised(Enrolment(strideEnrolment) and AuthProviders(PrivilegedApplication)).retrieve(authProviderId) {
       case authProviderId: PAClientId =>
-        registrationService.extract(dateFrom, dateTo) match {
-          case Right((sourceRegExtracts, count)) => {
-            val streamedEntity = Streamed(sourceToJson(sourceRegExtracts, "registrations"), None, Some(MimeTypes.JSON))
-            count.map( records =>
-              auditService.sendAgentEpayeRegistrationExtract(authProviderId.clientId, extractTimestamp, dateFrom.toString(), dateTo.toString(), records)
-            ).flatMap( _ =>
+        registrationService.extract(dateFrom, dateTo).flatMap {
+          case Right(ExtractedRegistrations(sourceRegExtracts, count)) =>
+            auditService.sendAgentEpayeRegistrationExtract(authProviderId.clientId, extractTimestamp, dateFrom.toString(), dateTo.toString(), count)
+
+            if(count == 0) {
+              Future.successful(NoContent)
+            } else {
+              val streamedEntity = Streamed(sourceToJson(sourceRegExtracts, "registrations"), None, Some(MimeTypes.JSON))
               Future.successful(Ok.sendEntity(streamedEntity))
-            )
-          }
-          case Left(failure) => Future.successful(BadRequest(Json.toJson(failure)))
+            }
+          case Left(failure) =>
+            Future.successful(BadRequest(Json.toJson(failure)))
         }
         //This part should never happen. This is to satisfy scala pattern match exhaustive check in order to compile.
       case _ => Future.successful(Forbidden)
