@@ -98,7 +98,7 @@ object AgentEpayeRegistrationValidator {
       Invalid(Failure("MISSING_FIELD", s"The $propertyName field is mandatory"))
 
   private[validators] def isValidCharacters(field: String)(propertyName: String) =
-    if (field.matches("[A-Za-z0-9\\-,.&'\\\\/ ]+"))
+    if (field.matches("[A-Za-z0-9,.()\\!@\\- ]+"))
       Valid(())
     else
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field contains invalid characters"))
@@ -110,19 +110,19 @@ object AgentEpayeRegistrationValidator {
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field exceeds $maxLength characters"))
 
   private[validators] def isEmailAddress(field: String)(propertyName: String) =
-    if (field.matches("""^[a-zA-Z0-9\.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"""))
+    if (field.matches("""^[a-zA-Z0-9-.]+?@[a-zA-Z0-9-.]+$"""))
       Valid(())
     else
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field is not a valid email"))
 
   private[validators] def isPostcode(field: String)(propertyName: String) =
-    if (field.matches("^[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}$|BFPO\\s?[0-9]{1,5}$"))
+    if (field.matches("^[A-Z]{1,2}[0-9][0-9A-Z]?[0-9][A-Z]{2}$|BFPO[0-9]{1,5}$"))
       Valid(())
     else
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field is not a valid postcode"))
 
   private[validators] def isPhoneNumber(field: String)(propertyName: String) =
-    if (field.matches("^[0-9- +()#x ]*$"))
+    if (field.matches("^[0-9 ()]*$"))
       Valid(())
     else
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field is not a valid phone number"))

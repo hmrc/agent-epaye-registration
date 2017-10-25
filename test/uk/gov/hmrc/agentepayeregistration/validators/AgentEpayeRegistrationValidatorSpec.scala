@@ -59,10 +59,10 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
       AgentEpayeRegistrationValidator.isValidCharacters("~")("sample") shouldBe expectedInvalid
       AgentEpayeRegistrationValidator.isValidCharacters("[")("sample") shouldBe expectedInvalid
       AgentEpayeRegistrationValidator.isValidCharacters("#")("sample") shouldBe expectedInvalid
-      AgentEpayeRegistrationValidator.isValidCharacters("(")("sample") shouldBe expectedInvalid
-      AgentEpayeRegistrationValidator.isValidCharacters(")")("sample") shouldBe expectedInvalid
-      AgentEpayeRegistrationValidator.isValidCharacters("@")("sample") shouldBe expectedInvalid
-      AgentEpayeRegistrationValidator.isValidCharacters("!")("sample") shouldBe expectedInvalid
+      AgentEpayeRegistrationValidator.isValidCharacters("&")("sample") shouldBe expectedInvalid
+      AgentEpayeRegistrationValidator.isValidCharacters("'")("sample") shouldBe expectedInvalid
+      AgentEpayeRegistrationValidator.isValidCharacters("\\")("sample") shouldBe expectedInvalid
+      AgentEpayeRegistrationValidator.isValidCharacters("/")("sample") shouldBe expectedInvalid
     }
 
     "allow a-z" in {
@@ -74,8 +74,8 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
     "allow 0-9" in {
       AgentEpayeRegistrationValidator.nonEmpty("01234567890")("sample") shouldBe Valid(())
     }
-    "allow commas, periods, -, \\, /, ', &, and space" in {
-      AgentEpayeRegistrationValidator.nonEmpty(",.-\\/'& ")("sample") shouldBe Valid(())
+    "allow commas, periods, -, (, ), !, @ and space" in {
+      AgentEpayeRegistrationValidator.nonEmpty(",.-()!@ ")("sample") shouldBe Valid(())
     }
   }
 
@@ -97,13 +97,16 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
       AgentEpayeRegistrationValidator.isEmailAddress("a@b.com")("x") shouldBe Valid(())
     }
 
-    "allow email addresses with a hyphen, plus, period, underscore, exclamations, or numbers" in {
+    "allow email addresses with a hyphen, period, or numbers" in {
       AgentEpayeRegistrationValidator.isEmailAddress("a-b@b.com")("x") shouldBe Valid(())
-      AgentEpayeRegistrationValidator.isEmailAddress("a+b@b.com")("x") shouldBe Valid(())
       AgentEpayeRegistrationValidator.isEmailAddress("a.b@b.com")("x") shouldBe Valid(())
-      AgentEpayeRegistrationValidator.isEmailAddress("a_b@b.com")("x") shouldBe Valid(())
-      AgentEpayeRegistrationValidator.isEmailAddress("a!b@b.com")("x") shouldBe Valid(())
       AgentEpayeRegistrationValidator.isEmailAddress("1@b.com")("x") shouldBe Valid(())
+    }
+
+    "not allow an email address with a plus, underscore, or exclamation" in {
+      AgentEpayeRegistrationValidator.isEmailAddress("a+b@b.com")("x") shouldBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
+      AgentEpayeRegistrationValidator.isEmailAddress("a_b@b.com")("x") shouldBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
+      AgentEpayeRegistrationValidator.isEmailAddress("a!b@b.com")("x") shouldBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
     }
 
     "not allow an email address without an @ symbol" in {
@@ -138,8 +141,12 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
     }
 
     "pass BFPO codes" in {
-      AgentEpayeRegistrationValidator.isPostcode("BFPO 1")("x") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.isPostcode("BFPO1")("x") shouldBe Valid(())
       AgentEpayeRegistrationValidator.isPostcode("BFPO1234")("x") shouldBe Valid(())
+    }
+    "fail BFPO codes with spaces" in {
+      AgentEpayeRegistrationValidator.isPostcode("BFPO 1")("x") shouldBe
+        Invalid(Failure("INVALID_FIELD", "The x field is not a valid postcode"))
     }
 
     "fail a valid postcode with lowercase characters" in {
@@ -156,6 +163,11 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
       AgentEpayeRegistrationValidator.isPostcode("AA9A9AAAA")("x") shouldBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid postcode"))
     }
+
+    "fail a code with spaces" in {
+      AgentEpayeRegistrationValidator.isPostcode("AA99 9AA")("x") shouldBe
+        Invalid(Failure("INVALID_FIELD", "The x field is not a valid postcode"))
+    }
   }
 
   "isPhoneNumber validator" should {
@@ -165,24 +177,30 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
     "pass numbers separated by a space" in {
       AgentEpayeRegistrationValidator.isPhoneNumber("01234 567890")("x") shouldBe Valid(())
     }
-    "pass numbers with hash" in {
-      AgentEpayeRegistrationValidator.isPhoneNumber("#01234 567890")("x") shouldBe Valid(())
+    "fail numbers with hash" in {
+      AgentEpayeRegistrationValidator.isPhoneNumber("#01234 567890")("x") shouldBe
+        Invalid(Failure("INVALID_FIELD", "The x field is not a valid phone number"))
     }
     "pass numbers with an x" in {
-      AgentEpayeRegistrationValidator.isPhoneNumber("01234 567890x2")("x") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.isPhoneNumber("01234 567890x2")("x") shouldBe
+        Invalid(Failure("INVALID_FIELD", "The x field is not a valid phone number"))
     }
     "pass with a country code prefix" in {
-      AgentEpayeRegistrationValidator.isPhoneNumber("+441234 567890")("x") shouldBe Valid(())
       AgentEpayeRegistrationValidator.isPhoneNumber("00441234 567890")("x") shouldBe Valid(())
     }
-    "pass with bracketed area code" in {
-      AgentEpayeRegistrationValidator.isPhoneNumber("+44(0)1234 567890")("x") shouldBe Valid(())
+    "fail with a plus" in {
+      AgentEpayeRegistrationValidator.isPhoneNumber("+441234 567890")("x") shouldBe
+        Invalid(Failure("INVALID_FIELD", "The x field is not a valid phone number"))
     }
-    "pass with hyphens" in {
-      AgentEpayeRegistrationValidator.isPhoneNumber("44-1234-567890")("x") shouldBe Valid(())
+    "pass with bracketed area code" in {
+      AgentEpayeRegistrationValidator.isPhoneNumber("(0)1234 567890")("x") shouldBe Valid(())
+    }
+    "fail with hyphens" in {
+      AgentEpayeRegistrationValidator.isPhoneNumber("44-1234-567890")("x") shouldBe
+        Invalid(Failure("INVALID_FIELD", "The x field is not a valid phone number"))
     }
     "fail with letters" in {
-      AgentEpayeRegistrationValidator.isPhoneNumber("44-1234-ACME12")("x") shouldBe
+      AgentEpayeRegistrationValidator.isPhoneNumber("44 1234 ACME12")("x") shouldBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid phone number"))
     }
   }
