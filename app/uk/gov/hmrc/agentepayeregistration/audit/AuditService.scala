@@ -49,7 +49,11 @@ class AuditService @Inject()(val auditConnector: AuditConnector) {
         "telephoneNumber" -> registrationRequest.telephoneNumber.getOrElse(""),
         "faxNumber" -> registrationRequest.faxNumber.getOrElse(""),
         "emailAddress" -> registrationRequest.emailAddress.getOrElse(""),
-        "address" -> s"${registrationRequest.address}"))
+        "addressLine1" -> s"${registrationRequest.address.addressLine1}",
+        "addressLine2" -> s"${registrationRequest.address.addressLine2}",
+        "addressLine3" -> s"${registrationRequest.address.addressLine3.getOrElse("")}",
+        "addressLine4" -> s"${registrationRequest.address.addressLine4.getOrElse("")}",
+        "postcode" -> s"${registrationRequest.address.postCode}"))
   }
 
   def sendAgentEpayeRegistrationExtract(userId: String, extractDate: String, dataFrom: String, dateTo: String, count: Int)(implicit hc: HeaderCarrier, request: Request[Any]): Unit  = {
