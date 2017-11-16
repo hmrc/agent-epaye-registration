@@ -81,7 +81,11 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
         sentEvent.detail("telephoneNumber") shouldBe "12313"
         sentEvent.detail("faxNumber") shouldBe "1234567"
         sentEvent.detail("emailAddress") shouldBe "john.smith@email.com"
-        sentEvent.detail("address") shouldBe "addressLine1 addressLine2 addressLine3 addressLine4 postCode"
+        sentEvent.detail("addressLine1") shouldBe "addressLine1"
+        sentEvent.detail("addressLine2") shouldBe "addressLine2"
+        sentEvent.detail("addressLine3") shouldBe "addressLine3"
+        sentEvent.detail("addressLine4") shouldBe "addressLine4"
+        sentEvent.detail("postcode") shouldBe "postCode"
 
         sentEvent.tags.contains("Authorization") shouldBe false
         sentEvent.detail("Authorization") shouldBe "dummy bearer token"

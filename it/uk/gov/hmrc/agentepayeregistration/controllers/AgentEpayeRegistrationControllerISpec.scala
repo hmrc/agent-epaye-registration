@@ -47,7 +47,11 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
             "telephoneNumber" -> "",
             "faxNumber" -> "",
             "emailAddress" -> "",
-            "address" -> "Line 1 Line 2 AB111AA"
+            "addressLine1" -> "Line 1",
+            "addressLine2" -> "Line 2",
+            "addressLine3" -> "",
+            "addressLine4" -> "",
+            "postcode" -> "AB111AA"
           ),
           tags = Map(
             "transactionName" -> "agent-epaye-registration-record-created",
