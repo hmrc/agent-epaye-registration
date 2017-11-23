@@ -27,10 +27,55 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
     )
   )
 
+  val validPostDataComplete: JsObject = Json.obj(
+    "agentName" -> "Jim Jiminy",
+    "contactName" -> "John Johnson",
+    "telephoneNumber" -> "12345",
+    "faxNumber" -> "12345",
+    "emailAddress" -> "john.smith@email.com",
+    "address" -> Json.obj(
+      "addressLine1" -> "Line 1",
+      "addressLine2" -> "Line 2",
+      "addressLine3" -> "Line 3",
+      "addressLine4" -> "Line 4",
+      "postCode" -> "AB111AA"
+    )
+  )
+
   "RegistrationController" when {
 
     "POST /registrations with valid details" should {
       "respond HTTP 200 with a the new unique PAYE code in the response body" in {
+        givenAuditConnector()
+        val result = postRegistration(validPostDataComplete)
+        val requestPath: String = s"/agent-epaye-registration/registrations"
+
+        result.status shouldBe 200
+        result.json shouldBe Json.obj("payeAgentReference" -> "HX2000")
+
+        verifyAuditRequestSent(1,
+          event = AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated,
+          detail = Map(
+            "agentReference" -> "HX2000",
+            "agentName" -> "Jim Jiminy",
+            "contactName" -> "John Johnson",
+            "telephoneNumber" -> "12345",
+            "faxNumber" -> "12345",
+            "emailAddress" -> "john.smith@email.com",
+            "addressLine1" -> "Line 1",
+            "addressLine2" -> "Line 2",
+            "addressLine3" -> "Line 3",
+            "addressLine4" -> "Line 4",
+            "postcode" -> "AB111AA"
+          ),
+          tags = Map(
+            "transactionName" -> "agent-epaye-registration-record-created",
+            "path" -> requestPath
+          )
+        )
+      }
+
+      "respond HTTP 200 with a the new unique PAYE code in the response body and audit without optional fields" in {
         givenAuditConnector()
         val result = postRegistration(validPostData)
         val requestPath: String = s"/agent-epaye-registration/registrations"
@@ -44,13 +89,8 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
             "agentReference" -> "HX2000",
             "agentName" -> "Jim Jiminy",
             "contactName" -> "John Johnson",
-            "telephoneNumber" -> "",
-            "faxNumber" -> "",
-            "emailAddress" -> "",
             "addressLine1" -> "Line 1",
             "addressLine2" -> "Line 2",
-            "addressLine3" -> "",
-            "addressLine4" -> "",
             "postcode" -> "AB111AA"
           ),
           tags = Map(
