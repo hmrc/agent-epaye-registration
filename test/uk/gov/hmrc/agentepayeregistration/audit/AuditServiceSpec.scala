@@ -97,6 +97,58 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
       }
     }
 
+    "send an AgentEpayeRegistrationRecordCreated event with the correct and without optional fields" in {
+      val mockConnector = mock[AuditConnector]
+      val service = new AuditService(mockConnector)
+
+
+      val hc = HeaderCarrier(
+        authorization = Some(Authorization("dummy bearer token")),
+        sessionId = Some(SessionId("dummy session id")),
+        requestId = Some(RequestId("dummy request id"))
+      )
+
+      val agentReference = AgentReference("HX2345")
+      val registrationRequest = RegistrationRequest(
+        agentName = "John Smith",
+        contactName = "John Anderson Smith",
+        telephoneNumber = None,
+        faxNumber = None,
+        emailAddress = None,
+        address = Address("addressLine1", "addressLine2", None, None, "postCode")
+      )
+
+      await(service.sendAgentEpayeRegistrationRecordCreated(
+        registrationRequest,
+        agentReference)(
+        hc,
+        FakeRequest("GET", "/path")
+      ))
+
+      eventually {
+        val captor = ArgumentCaptor.forClass(classOf[DataEvent])
+        verify(mockConnector).sendEvent(captor.capture())(any[HeaderCarrier], any[ExecutionContext])
+        val sentEvent = captor.getValue.asInstanceOf[DataEvent]
+
+        sentEvent.auditType shouldBe "AgentEpayeRegistrationRecordCreated"
+        sentEvent.auditSource shouldBe "agent-epaye-registration"
+        sentEvent.detail("agentReference") shouldBe "HX2345"
+        sentEvent.detail("agentName") shouldBe "John Smith"
+        sentEvent.detail("contactName") shouldBe "John Anderson Smith"
+        sentEvent.detail("addressLine1") shouldBe "addressLine1"
+        sentEvent.detail("addressLine2") shouldBe "addressLine2"
+        sentEvent.detail("postcode") shouldBe "postCode"
+
+        sentEvent.tags.contains("Authorization") shouldBe false
+        sentEvent.detail("Authorization") shouldBe "dummy bearer token"
+
+        sentEvent.tags("transactionName") shouldBe "agent-epaye-registration-record-created"
+        sentEvent.tags("path") shouldBe "/path"
+        sentEvent.tags("X-Session-ID") shouldBe "dummy session id"
+        sentEvent.tags("X-Request-ID") shouldBe "dummy request id"
+      }
+    }
+
     "send an AgentEpayeRegistrationRecordExtract event with the correct fields" in {
       val mockConnector = mock[AuditConnector]
       val service = new AuditService(mockConnector)
