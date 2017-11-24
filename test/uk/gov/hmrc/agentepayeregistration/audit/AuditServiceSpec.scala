@@ -75,7 +75,7 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
 
         sentEvent.auditType shouldBe "AgentEpayeRegistrationRecordCreated"
         sentEvent.auditSource shouldBe "agent-epaye-registration"
-        sentEvent.detail("agentReference") shouldBe "HX2345"
+        sentEvent.detail("payeAgentRef") shouldBe "HX2345"
         sentEvent.detail("agentName") shouldBe "John Smith"
         sentEvent.detail("contactName") shouldBe "John Anderson Smith"
         sentEvent.detail("telephoneNumber") shouldBe "12313"
@@ -132,7 +132,7 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
 
         sentEvent.auditType shouldBe "AgentEpayeRegistrationRecordCreated"
         sentEvent.auditSource shouldBe "agent-epaye-registration"
-        sentEvent.detail("agentReference") shouldBe "HX2345"
+        sentEvent.detail("payeAgentRef") shouldBe "HX2345"
         sentEvent.detail("agentName") shouldBe "John Smith"
         sentEvent.detail("contactName") shouldBe "John Anderson Smith"
         sentEvent.detail("addressLine1") shouldBe "addressLine1"

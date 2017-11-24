@@ -56,7 +56,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
         verifyAuditRequestSent(1,
           event = AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated,
           detail = Map(
-            "agentReference" -> "HX2000",
+            "payeAgentRef" -> "HX2000",
             "agentName" -> "Jim Jiminy",
             "contactName" -> "John Johnson",
             "telephoneNumber" -> "12345",
@@ -86,7 +86,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
         verifyAuditRequestSent(1,
           event = AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated,
           detail = Map(
-            "agentReference" -> "HX2000",
+            "payeAgentRef" -> "HX2000",
             "agentName" -> "Jim Jiminy",
             "contactName" -> "John Johnson",
             "addressLine1" -> "Line 1",
