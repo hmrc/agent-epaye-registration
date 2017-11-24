@@ -69,7 +69,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
             "postcode" -> "AB111AA"
           ),
           tags = Map(
-            "transactionName" -> "agent-epaye-registration-record-created",
+            "transactionName" -> "Agent ePAYE registration created",
             "path" -> requestPath
           )
         )
@@ -94,7 +94,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
             "postcode" -> "AB111AA"
           ),
           tags = Map(
-            "transactionName" -> "agent-epaye-registration-record-created",
+            "transactionName" -> "Agent ePAYE registration created",
             "path" -> requestPath
           )
         )
