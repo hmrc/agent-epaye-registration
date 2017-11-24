@@ -43,7 +43,7 @@ class AuditService @Inject()(val auditConnector: AuditConnector) {
   def sendAgentEpayeRegistrationRecordCreated(registrationRequest: RegistrationRequest, agentReference: AgentReference)(implicit hc: HeaderCarrier, request: Request[Any]): Unit = {
 
     auditEvent(AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated, "agent-epaye-registration-record-created",
-      Seq("agentReference" -> agentReference.value,
+      Seq("payeAgentRef" -> agentReference.value,
         "agentName" -> registrationRequest.agentName,
         "contactName" -> registrationRequest.contactName,
         "telephoneNumber" -> registrationRequest.telephoneNumber.getOrElse(""),
