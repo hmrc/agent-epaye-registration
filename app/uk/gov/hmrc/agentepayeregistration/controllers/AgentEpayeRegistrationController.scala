@@ -28,14 +28,14 @@ import play.api.http.MimeTypes
 import play.api.libs.json.{Json, Writes}
 import play.api.mvc.Action
 import uk.gov.hmrc.agentepayeregistration.audit.AuditService
-import uk.gov.hmrc.agentepayeregistration.connectors.AuthConnector
+import uk.gov.hmrc.agentepayeregistration.connectors.MicroserviceAuthConnector
 import uk.gov.hmrc.agentepayeregistration.models.RegistrationRequest
 import uk.gov.hmrc.agentepayeregistration.services.{AgentEpayeRegistrationService, ExtractedRegistrations}
 import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve.PAClientId
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
-import uk.gov.hmrc.play.microservice.controller.BaseController
+import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import uk.gov.hmrc.auth.core.retrieve.Retrievals.authProviderId
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -43,7 +43,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enrolment") strideEnrolment: String,
                                                  registrationService: AgentEpayeRegistrationService,
-                                                 val authConnector: AuthConnector,
+                                                 val authConnector: MicroserviceAuthConnector,
                                                  auditService: AuditService) extends BaseController with AuthorisedFunctions {
   lazy val logger = Logger("registrationController")
 

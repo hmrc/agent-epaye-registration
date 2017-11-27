@@ -2,19 +2,19 @@ import sbt.Tests.{Group, SubProcess}
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
 lazy val compileDeps = Seq(
-  "uk.gov.hmrc" %% "auth-client" % "2.3.0",
+  "uk.gov.hmrc" %% "bootstrap-play-25" % "1.0.0",
+  "uk.gov.hmrc" %% "auth-client" % "2.4.0",
   "de.threedimensions" %% "metrics-play" % "2.5.13",
   "uk.gov.hmrc" %% "play-reactivemongo" % "6.1.0",
-  "uk.gov.hmrc" %% "microservice-bootstrap" % "6.9.0",
   "org.typelevel" %% "cats" % "0.9.0"
 )
 
 def testDeps(scope: String) = Seq(
-  "org.scalatest" %% "scalatest" % "2.2.6" % scope,
-  "org.mockito" % "mockito-core" % "2.8.9" % scope,
-  "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.0" % scope,
+  "org.scalatest" %% "scalatest" % "3.0.4" % scope,
+  "org.mockito" % "mockito-core" % "2.12.0" % scope,
+  "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1" % scope,
   "uk.gov.hmrc" %% "hmrctest" % "3.0.0" % scope,
-  "com.github.tomakehurst" % "wiremock" % "2.8.0" % scope,
+  "com.github.tomakehurst" % "wiremock" % "2.11.0" % scope,
   "uk.gov.hmrc" %% "reactivemongo-test" % "3.0.0" % scope
 )
 

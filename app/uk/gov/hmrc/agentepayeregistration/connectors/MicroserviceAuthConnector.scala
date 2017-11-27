@@ -23,7 +23,7 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.{ HttpGet, HttpPost }
 
 @Singleton
-class AuthConnector @Inject()(@Named("auth-baseUrl") baseUrl: URL, val http: HttpGet with HttpPost) extends PlayAuthConnector {
+class MicroserviceAuthConnector @Inject()(@Named("auth-baseUrl") baseUrl: URL, val http: HttpGet with HttpPost) extends PlayAuthConnector {
 
   val serviceUrl = baseUrl.toString
 }

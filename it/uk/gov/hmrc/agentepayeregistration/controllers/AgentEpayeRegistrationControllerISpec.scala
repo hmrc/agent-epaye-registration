@@ -227,7 +227,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
           result.status shouldBe 400
           result.header("Content-Type") shouldBe Some("application/json")
 
-          result.body should include("'From' date must be in ISO format (yyyy-MM-dd)")
+          result.body should include("bad request")
           verifyAuditRequestNotSent(AgentEpayeRegistrationEvent.AgentEpayeRegistrationExtract)
         }
 
