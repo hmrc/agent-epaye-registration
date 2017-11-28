@@ -67,8 +67,8 @@ object AgentEpayeRegistrationValidator {
 
 
     val optionalFieldValidators = Seq(
-      request.telephoneNumber.map(x => phoneValidatorWithLimit(x, "telephone number", 24)),
-      request.faxNumber.map(x => phoneValidatorWithLimit(x, "fax number", 24)),
+      request.telephoneNumber.map(x => phoneValidatorWithLimit(x, "telephone number", 35)),
+      request.faxNumber.map(x => phoneValidatorWithLimit(x, "fax number", 35)),
       request.emailAddress.map(x => emailValidatorWithLimit(x, "email address", 129)),
       request.address.addressLine3.map(x => validCharsWithLimit(x, "address line 3", 35)),
       request.address.addressLine4.map(x => validCharsWithLimit(x, "address line 4", 35))
@@ -122,7 +122,7 @@ object AgentEpayeRegistrationValidator {
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field is not a valid postcode"))
 
   private[validators] def isPhoneNumber(field: String)(propertyName: String) =
-    if (field.matches("^[0-9 ()]*$"))
+    if (field.matches("^[0-9 ]*$"))
       Valid(())
     else
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field is not a valid phone number"))

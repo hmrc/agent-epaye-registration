@@ -192,15 +192,16 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
       AgentEpayeRegistrationValidator.isPhoneNumber("+441234 567890")("x") shouldBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid phone number"))
     }
-    "pass with bracketed area code" in {
-      AgentEpayeRegistrationValidator.isPhoneNumber("(0)1234 567890")("x") shouldBe Valid(())
-    }
     "fail with hyphens" in {
       AgentEpayeRegistrationValidator.isPhoneNumber("44-1234-567890")("x") shouldBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid phone number"))
     }
     "fail with letters" in {
       AgentEpayeRegistrationValidator.isPhoneNumber("44 1234 ACME12")("x") shouldBe
+        Invalid(Failure("INVALID_FIELD", "The x field is not a valid phone number"))
+    }
+    "fail with brackets" in {
+      AgentEpayeRegistrationValidator.isPhoneNumber("(44) 123 345 567")("x") shouldBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid phone number"))
     }
   }
@@ -372,13 +373,13 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
       validateRegistrationRequest(regRequest.copy(contactName = padField(57))) shouldBe
         anError("INVALID_FIELD", "The contact name field exceeds 56 characters")
     }
-    "the telephone number is longer than 24 characters" in {
-      validateRegistrationRequest(regRequest.copy(telephoneNumber = Some(padField(25)))) shouldBe
-        anError("INVALID_FIELD", "The telephone number field exceeds 24 characters")
+    "the telephone number is longer than 35 characters" in {
+      validateRegistrationRequest(regRequest.copy(telephoneNumber = Some(padField(36)))) shouldBe
+        anError("INVALID_FIELD", "The telephone number field exceeds 35 characters")
     }
-    "the fax number is longer than 24 characters" in {
-      validateRegistrationRequest(regRequest.copy(faxNumber = Some(padField(25)))) shouldBe
-        anError("INVALID_FIELD", "The fax number field exceeds 24 characters")
+    "the fax number is longer than 35 characters" in {
+      validateRegistrationRequest(regRequest.copy(faxNumber = Some(padField(36)))) shouldBe
+        anError("INVALID_FIELD", "The fax number field exceeds 35 characters")
     }
     "the email address is longer than 129 characters" in {
       validateRegistrationRequest(regRequest.copy(emailAddress = Some(s"${padField(130)}@example.org"))) shouldBe
