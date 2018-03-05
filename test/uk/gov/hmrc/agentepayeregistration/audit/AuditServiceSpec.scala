@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,9 +55,9 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
       val registrationRequest = RegistrationRequest(
         agentName = "John Smith",
         contactName = "John Anderson Smith",
-        telephoneNumber = Some("12313"),
+        phoneNo = Some("12313"),
         faxNumber = Some("1234567"),
-        emailAddress = Some("john.smith@email.com"),
+        email = Some("john.smith@email.com"),
         address = Address("addressLine1", "addressLine2", Some("addressLine3"), Some("addressLine4"), "postCode")
       )
 
@@ -112,9 +112,9 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
       val registrationRequest = RegistrationRequest(
         agentName = "John Smith",
         contactName = "John Anderson Smith",
-        telephoneNumber = None,
+        phoneNo = None,
         faxNumber = None,
-        emailAddress = None,
+        email = None,
         address = Address("addressLine1", "addressLine2", None, None, "postCode")
       )
 

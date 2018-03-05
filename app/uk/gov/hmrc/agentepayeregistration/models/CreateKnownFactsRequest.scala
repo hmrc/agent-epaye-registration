@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.agentepayeregistration.connectors
+package uk.gov.hmrc.agentepayeregistration.models
 
-import java.net.URL
-import javax.inject.{Inject, Named, Singleton}
+import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
+import play.api.libs.json.Json
 
-import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.http.{ HttpGet, HttpPost }
+case class CreateKnownFactsRequest(regRequest: RegistrationRequest,
+                                   createdDate: String = DateTimeFormat.forPattern("yyyy-MM-dd").print(DateTime.now))
 
-@Singleton
-class MicroserviceAuthConnector @Inject()(@Named("auth-baseUrl") baseUrl: URL, val http: HttpGet with HttpPost) extends PlayAuthConnector {
-
-  val serviceUrl = baseUrl.toString
+object CreateKnownFactsRequest {
+  implicit val createKnownFactsRequestFormat = Json.format[CreateKnownFactsRequest]
 }

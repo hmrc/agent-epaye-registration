@@ -20,7 +20,7 @@ import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import play.api.libs.iteratee.{Enumerator, Iteratee}
-import uk.gov.hmrc.agentepayeregistration.models.{Address, AgentReference, RegistrationRequest}
+import uk.gov.hmrc.agentepayeregistration.models.{Address, AgentReference, RegistrationDetails, RegistrationRequest}
 import uk.gov.hmrc.mongo.MongoSpecSupport
 
 import scala.collection.immutable.List
@@ -38,10 +38,11 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Mon
 
   val agentName = "Agent Name"
   val contactName = "Contact Name"
-  val telephoneNumber = Some("0123456789")
+  val phoneNo = Some("0123456789")
   val faxNumber = Some("0123456780")
-  val emailAddress = Some("a@b.com")
-  val regDetails = RegistrationRequest(agentName, contactName, telephoneNumber, faxNumber, emailAddress, regAddress)
+  val email = Some("a@b.com")
+  val regRequest = RegistrationRequest(agentName, contactName, phoneNo, faxNumber, email, regAddress)
+
 
   override def beforeEach() {
     super.beforeEach()
@@ -55,16 +56,17 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Mon
       await(repo.find("agentName" -> agentName)) shouldBe List.empty
 
       val beforeCreation = DateTime.now(DateTimeZone.UTC)
-      val result = await(repo.create(regDetails))
+      val result = await(repo.create(regRequest))
+      val regDetails = RegistrationDetails(AgentReference("HX2000"), regRequest, DateTime.now(DateTimeZone.UTC))
       val afterCreation = DateTime.now(DateTimeZone.UTC)
 
-      result shouldBe AgentReference("HX2000")
+      result.registration.address shouldBe regDetails.registration.address
 
       val details = await(repo.find("agentName" -> agentName)).head
 
       details should have(
         'agentReference (AgentReference("HX2000")),
-        'registration (regDetails)
+        'registration (regRequest)
       )
 
       details.createdDateTime.getMillis should be >= (beforeCreation.getMillis)
@@ -72,9 +74,9 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Mon
     }
 
     "create new records and generate a new unique Agent PAYE Reference code" in {
-      await(repo.create(regDetails))
-      await(repo.create(regDetails))
-      await(repo.create(regDetails))
+      await(repo.create(regRequest))
+      await(repo.create(regRequest))
+      await(repo.create(regRequest))
 
       val results = await(repo.find("agentName" -> agentName))
 
@@ -95,9 +97,9 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Mon
       val day3Start = DateTime.parse("2000-01-03", isoDateFmt)
       val day3End = day3Start.plusDays(1).minusMillis(1)
 
-      await(repo.create(regDetails, day1Start))
-      await(repo.create(regDetails, day2Start))
-      await(repo.create(regDetails, day2Start))
+      await(repo.create(regRequest, day1Start))
+      await(repo.create(regRequest, day2Start))
+      await(repo.create(regRequest, day2Start))
 
       consumeToList(repo.enumerateRegistrations(day1Start, day1End)).size shouldBe 1
       consumeToList(repo.enumerateRegistrations(day3Start, day3End)).size shouldBe 0
@@ -112,13 +114,13 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Mon
       val day2 = DateTime.parse("2000-01-02", isoDateFmt)
       val day3 = DateTime.parse("2000-01-03", isoDateFmt)
 
-      val regRefOnDay1 = await(repo.create(regDetails, day1))
-      val regRefOnDay3 = await(repo.create(regDetails, day3))
-      val regRefOnDay2 = await(repo.create(regDetails, day2))
+      val regRefOnDay1 = await(repo.create(regRequest, day1))
+      val regRefOnDay3 = await(repo.create(regRequest, day3))
+      val regRefOnDay2 = await(repo.create(regRequest, day2))
 
       val endOfDay3 = day3.plusHours(24).minusMillis(1)
       val registrations = consumeToList(repo.enumerateRegistrations(day1, endOfDay3))
-      registrations.map(_.agentReference) shouldBe Seq(regRefOnDay1, regRefOnDay2, regRefOnDay3)
+      registrations.map(_.agentReference) shouldBe Seq(regRefOnDay1.agentReference, regRefOnDay2.agentReference, regRefOnDay3.agentReference)
     }
 
     "fail to find registration if the to date is before from date" in {
@@ -138,9 +140,9 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Mon
       val day2 = DateTime.parse("2000-01-02", isoDateFmt)
       val day3 = DateTime.parse("2000-01-03", isoDateFmt)
 
-      await(repo.create(regDetails, day1))
-      await(repo.create(regDetails, day2))
-      await(repo.create(regDetails, day3))
+      await(repo.create(regRequest, day1))
+      await(repo.create(regRequest, day2))
+      await(repo.create(regRequest, day3))
 
       val endOfDay2 = day2.plusHours(24).minusMillis(1)
       val endOfDay3 = day3.plusHours(24).minusMillis(1)

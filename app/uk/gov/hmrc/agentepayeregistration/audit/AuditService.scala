@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,13 @@ import javax.inject.Inject
 import com.google.inject.Singleton
 import play.api.mvc.Request
 import uk.gov.hmrc.agentepayeregistration.audit.AgentEpayeRegistrationEvent.AgentEpayeRegistrationEvent
-import uk.gov.hmrc.agentepayeregistration.models.{AgentReference, RegistrationRequest}
+import uk.gov.hmrc.agentepayeregistration.models.{AgentReference, RegistrationDetails, RegistrationRequest}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
+
 
 import scala.concurrent.Future
 import scala.util.Try
@@ -46,14 +47,31 @@ class AuditService @Inject()(val auditConnector: AuditConnector) {
       Seq("payeAgentRef" -> agentReference.value,
         "agentName" -> registrationRequest.agentName,
         "contactName" -> registrationRequest.contactName,
-        "telephoneNumber" -> registrationRequest.telephoneNumber.getOrElse(""),
+        "phoneNo" -> registrationRequest.phoneNo.getOrElse(""),
         "faxNumber" -> registrationRequest.faxNumber.getOrElse(""),
-        "emailAddress" -> registrationRequest.emailAddress.getOrElse(""),
+        "email" -> registrationRequest.email.getOrElse(""),
         "addressLine1" -> s"${registrationRequest.address.addressLine1}",
         "addressLine2" -> s"${registrationRequest.address.addressLine2}",
         "addressLine3" -> s"${registrationRequest.address.addressLine3.getOrElse("")}",
         "addressLine4" -> s"${registrationRequest.address.addressLine4.getOrElse("")}",
         "postcode" -> s"${registrationRequest.address.postCode}").filter(_._2 != ""))
+  }
+
+  def sendAgentKnownFactsCreated(registrationDetails: RegistrationDetails)(implicit hc: HeaderCarrier, request: Request[Any]): Unit = {
+
+    auditEvent(AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated, "Agent ePAYE registration created",
+      Seq("payeAgentRef" -> registrationDetails.agentReference.value,
+        "agentName" -> registrationDetails.registration.agentName,
+        "contactName" -> registrationDetails.registration.contactName,
+        "phoneNo" -> registrationDetails.registration.phoneNo.getOrElse(""),
+        "faxNumber" -> registrationDetails.registration.faxNumber.getOrElse(""),
+        "email" -> registrationDetails.registration.email.getOrElse(""),
+        "addressLine1" -> s"${registrationDetails.registration.address.addressLine1}",
+        "addressLine2" -> s"${registrationDetails.registration.address.addressLine2}",
+        "addressLine3" -> s"${registrationDetails.registration.address.addressLine3.getOrElse("")}",
+        "addressLine4" -> s"${registrationDetails.registration.address.addressLine4.getOrElse("")}",
+        "postcode" -> s"${registrationDetails.registration.address.postCode}",
+        "createdDate" -> s"${registrationDetails.createdDateTime.toDate.toString}").filter(_._2 != ""))
   }
 
   def sendAgentEpayeRegistrationExtract(userId: String, extractDate: String, dataFrom: String, dateTo: String, count: Int)(implicit hc: HeaderCarrier, request: Request[Any]): Unit  = {

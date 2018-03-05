@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,19 +50,22 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
   val initialAgentReference: String = "HX2000"
 
   def create(request: RegistrationRequest, createdDate: DateTime = DateTime.now(DateTimeZone.UTC))
-            (implicit ec: ExecutionContext): Future[AgentReference] = {
+            (implicit ec: ExecutionContext): Future[RegistrationDetails] = {
     val mongoCodeDuplicateKey: Int = 11000
 
     for {
       maybeRegDetails <- collection.find(obj()).sort(obj("agentReference" -> -1)).one[RegistrationDetails]
-      nextAgentRef = maybeRegDetails match {
-        case Some(regDetails) => regDetails.agentReference.newReference
-        case None => AgentReference(initialAgentReference)
+      regDetails = {
+        val nextAgentRef = maybeRegDetails match {
+          case Some(regDetails) => regDetails.agentReference.newReference
+          case None => AgentReference(initialAgentReference)
+        }
+        RegistrationDetails(nextAgentRef, request, createdDate)
       }
-      _ <- insert(RegistrationDetails(nextAgentRef, request, createdDate)) recover {
-        case error: DatabaseException if error.code.contains(mongoCodeDuplicateKey) => create(request)
-      }
-    } yield nextAgentRef
+      _ <- insert(regDetails) recover {
+          case error: DatabaseException if error.code.contains(mongoCodeDuplicateKey) => create(request)
+        }
+    } yield regDetails
   }
 
   def enumerateRegistrations(dateTimeFrom: DateTime, dateTimeTo: DateTime)

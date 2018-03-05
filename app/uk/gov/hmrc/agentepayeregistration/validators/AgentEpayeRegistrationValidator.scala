@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,9 +67,9 @@ object AgentEpayeRegistrationValidator {
 
 
     val optionalFieldValidators = Seq(
-      request.telephoneNumber.map(x => phoneValidatorWithLimit(x, "telephone number", 35)),
+      request.phoneNo.map(x => phoneValidatorWithLimit(x, "telephone number", 35)),
       request.faxNumber.map(x => phoneValidatorWithLimit(x, "fax number", 35)),
-      request.emailAddress.map(x => emailValidatorWithLimit(x, "email address", 129)),
+      request.email.map(x => emailValidatorWithLimit(x, "email address", 129)),
       request.address.addressLine3.map(x => validCharsWithLimit(x, "address line 3", 35)),
       request.address.addressLine4.map(x => validCharsWithLimit(x, "address line 4", 35))
     ).flatten
@@ -144,4 +144,3 @@ object AgentEpayeRegistrationValidator {
       Valid(())
   }
 }
-

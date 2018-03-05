@@ -30,9 +30,9 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
   val validPostDataComplete: JsObject = Json.obj(
     "agentName" -> "Jim Jiminy",
     "contactName" -> "John Johnson",
-    "telephoneNumber" -> "12345",
+    "phoneNo" -> "12345",
     "faxNumber" -> "12345",
-    "emailAddress" -> "john.smith@email.com",
+    "email" -> "john.smith@email.com",
     "address" -> Json.obj(
       "addressLine1" -> "Line 1",
       "addressLine2" -> "Line 2",
@@ -59,9 +59,9 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
             "payeAgentRef" -> "HX2000",
             "agentName" -> "Jim Jiminy",
             "contactName" -> "John Johnson",
-            "telephoneNumber" -> "12345",
+            "phoneNo" -> "12345",
             "faxNumber" -> "12345",
-            "emailAddress" -> "john.smith@email.com",
+            "email" -> "john.smith@email.com",
             "addressLine1" -> "Line 1",
             "addressLine2" -> "Line 2",
             "addressLine3" -> "Line 3",

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,9 +44,9 @@ object RegistrationDetails {
     details.agentReference.value,
     details.registration.agentName,
     details.registration.contactName,
-    details.registration.telephoneNumber,
+    details.registration.phoneNo,
     details.registration.faxNumber,
-    details.registration.emailAddress,
+    details.registration.email,
     details.registration.address,
     details.createdDateTime
   ))
