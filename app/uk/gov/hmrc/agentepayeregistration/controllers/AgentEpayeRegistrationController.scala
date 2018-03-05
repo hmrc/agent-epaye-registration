@@ -37,7 +37,6 @@ import uk.gov.hmrc.auth.core.retrieve.PAClientId
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import uk.gov.hmrc.auth.core.retrieve.Retrievals.authProviderId
-
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton

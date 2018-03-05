@@ -28,10 +28,10 @@ import uk.gov.hmrc.agentepayeregistration.models._
 import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
 import uk.gov.hmrc.agentepayeregistration.validators.AgentEpayeRegistrationValidator._
 import uk.gov.hmrc.http.HeaderCarrier
-import play.api.mvc.Action
 import play.api.mvc.Request
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Success
 
 @Singleton
 class AgentEpayeRegistrationService @Inject()(repository: AgentEpayeRegistrationRepository,
@@ -39,13 +39,13 @@ class AgentEpayeRegistrationService @Inject()(repository: AgentEpayeRegistration
                                               auditService : AuditService) {
 
   def register(regRequest: RegistrationRequest)
-              (implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[Failure, AgentReference]] = {
+              (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[Any]): Future[Either[Failure, AgentReference]] = {
       validateRegistrationRequest(regRequest) match {
         case Valid(_) => {
           for {
             regDetails <- repository.create(regRequest)
-            _ <- desConnector.createAgentKnownFacts(CreateKnownFactsRequest(regRequest), regDetails.agentReference).map { _ =>
-              implicit request: Request[Any] => auditService.sendAgentKnownFactsCreated(regDetails)
+            _ <- desConnector.createAgentKnownFacts(CreateKnownFactsRequest(regRequest), regDetails.agentReference).andThen {
+              case Success(_) => auditService.sendAgentKnownFactsCreated(regDetails)
             }
           } yield Right(regDetails.agentReference)
 

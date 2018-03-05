@@ -51,7 +51,7 @@ class DesConnector @Inject()(@Named("des-baseUrl") odsBaseUrl: URL,
   }""")
 
   def createAgentKnownFacts(knownFactDetails: CreateKnownFactsRequest, agentRef: AgentReference, regime: String="PAYE")(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
-    postWithDesHeaders("DES",
+    postWithDesHeaders("createAgentKnownFactsAPI#1337",
       new URL(s"$odsBaseUrl/agents/regime/$regime/agentid/${agentRef.value}/known-facts"),
       createAgentKnownFactsJson(knownFactDetails))
   }
