@@ -21,7 +21,8 @@ import javax.inject.{Inject, Singleton}
 import akka.NotUsed
 import akka.stream.scaladsl.Source
 import cats.data.Validated.{Invalid, Valid}
-import org.joda.time.LocalDate
+import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.format.DateTimeFormat
 import uk.gov.hmrc.agentepayeregistration.audit.AuditService
 import uk.gov.hmrc.agentepayeregistration.connectors.DesConnector
 import uk.gov.hmrc.agentepayeregistration.models._
@@ -44,7 +45,8 @@ class AgentEpayeRegistrationService @Inject()(repository: AgentEpayeRegistration
         case Valid(_) => {
           for {
             regDetails <- repository.create(regRequest)
-            _ <- desConnector.createAgentKnownFacts(CreateKnownFactsRequest(regRequest), regDetails.agentReference).andThen {
+            currentDate = DateTimeFormat.forPattern("yyyy-MM-dd").print(DateTime.now)
+            _ <- desConnector.createAgentKnownFacts(CreateKnownFactsRequest(regRequest, currentDate), regDetails.agentReference).andThen {
               case Success(_) => auditService.sendAgentKnownFactsCreated(regDetails)
             }
           } yield Right(regDetails.agentReference)

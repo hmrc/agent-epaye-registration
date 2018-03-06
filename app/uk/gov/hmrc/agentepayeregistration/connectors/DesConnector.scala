@@ -20,12 +20,13 @@ import java.net.URL
 import javax.inject.{Inject, Named}
 
 import com.codahale.metrics.MetricRegistry
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json._
 import uk.gov.hmrc.agentepayeregistration.models.{AgentReference, CreateKnownFactsRequest}
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.http.{HeaderCarrier, HttpPost, HttpReads, HttpResponse}
 import uk.gov.hmrc.agent.kenshoo.monitoring.HttpAPIMonitor
 import com.kenshoo.play.metrics.Metrics
+import play.libs.Json
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -37,25 +38,10 @@ class DesConnector @Inject()(@Named("des-baseUrl") odsBaseUrl: URL,
 
   override val kenshooRegistry: MetricRegistry = metrics.defaultRegistry
 
-  private def createAgentKnownFactsJson(knownFactDetails: CreateKnownFactsRequest) = Json.parse(
-  s"""{
-      "agentName": "${knownFactDetails.regRequest.agentName}",
-      "contactName": "${knownFactDetails.regRequest.contactName}",
-      "addressLine1": "${knownFactDetails.regRequest.address.addressLine1}",
-      "addressLine2": "${knownFactDetails.regRequest.address.addressLine2}",
-      "addressLine3": "${knownFactDetails.regRequest.address.addressLine3.getOrElse("")}",
-      "addressLine4": "${knownFactDetails.regRequest.address.addressLine4.getOrElse("")}",
-      "postCode": "${knownFactDetails.regRequest.address.postCode}",
-      "phoneNo": "${knownFactDetails.regRequest.phoneNo.getOrElse("")}",
-      "faxNumber": "${knownFactDetails.regRequest.faxNumber.getOrElse("")}",
-      "email": "${knownFactDetails.regRequest.email.getOrElse("")}",
-      "createdDate": "${knownFactDetails.createdDate}"
-  }""")
-
   def createAgentKnownFacts(knownFactDetails: CreateKnownFactsRequest, agentRef: AgentReference, regime: String="PAYE")(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[HttpResponse] = {
-    postWithDesHeaders("createAgentKnownFactsAPI1337",
+    postWithDesHeaders[CreateKnownFactsRequest, HttpResponse]("createAgentKnownFactsAPI1337",
       new URL(s"$odsBaseUrl/agents/regime/$regime/agentid/${agentRef.value}/known-facts"),
-      createAgentKnownFactsJson(knownFactDetails))
+      knownFactDetails)
   }
 
   private def postWithDesHeaders[A: Writes, B: HttpReads](apiName: String, url: URL, body: A)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[B] = {

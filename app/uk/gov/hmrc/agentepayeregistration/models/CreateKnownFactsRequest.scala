@@ -16,13 +16,36 @@
 
 package uk.gov.hmrc.agentepayeregistration.models
 
-import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
 import play.api.libs.json.Json
 
-case class CreateKnownFactsRequest(regRequest: RegistrationRequest,
-                                   createdDate: String = DateTimeFormat.forPattern("yyyy-MM-dd").print(DateTime.now))
+case class CreateKnownFactsRequest(agentName: Option[String],
+                                   contactName: Option[String],
+                                   addressLine1: String,
+                                   addressLine2: String,
+                                   addressLine3: Option[String],
+                                   addressLine4: Option[String],
+                                   postCode: String,
+                                   phoneNo: Option[String],
+                                   faxNumber: Option[String],
+                                   email: Option[String],
+                                   createdDate: String)
 
 object CreateKnownFactsRequest {
   implicit val createKnownFactsRequestFormat = Json.format[CreateKnownFactsRequest]
+
+  def apply(regRequest: RegistrationRequest, createdDate: String) : CreateKnownFactsRequest = {
+    CreateKnownFactsRequest (
+      Some(regRequest.agentName),
+      Some(regRequest.contactName),
+      regRequest.address.addressLine1,
+      regRequest.address.addressLine2,
+      regRequest.address.addressLine3,
+      regRequest.address.addressLine4,
+      regRequest.address.postCode,
+      regRequest.phoneNo,
+      regRequest.faxNumber,
+      regRequest.email,
+      createdDate
+    )
+  }
 }
