@@ -3,7 +3,7 @@ package uk.gov.hmrc.agentepayeregistration.controllers
 import org.joda.time._
 import play.api.libs.json._
 import uk.gov.hmrc.agentepayeregistration.audit.AgentEpayeRegistrationEvent
-import uk.gov.hmrc.agentepayeregistration.models.{Address, RegistrationRequest}
+import uk.gov.hmrc.agentepayeregistration.models.{Address, AgentReference, RegistrationRequest}
 import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
 import uk.gov.hmrc.agentepayeregistration.stubs.{AuthStub, DataStreamStub}
 import uk.gov.hmrc.agentepayeregistration.support.RegistrationActions
@@ -47,21 +47,23 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
     "POST /registrations with valid details" should {
       "respond HTTP 200 with a the new unique PAYE code in the response body" in {
         givenAuditConnector()
+        givenAgentKnownFactsComplete(AgentReference("HX2000"))
+
         val result = postRegistration(validPostDataComplete)
         val requestPath: String = s"/agent-epaye-registration/registrations"
 
         result.status shouldBe 200
         result.json shouldBe Json.obj("payeAgentReference" -> "HX2000")
 
-        verifyAuditRequestSent(1,
+        verifyAuditRequestSent(2,
           event = AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated,
           detail = Map(
             "payeAgentRef" -> "HX2000",
             "agentName" -> "Jim Jiminy",
             "contactName" -> "John Johnson",
-            "phoneNo" -> "12345",
+            "telephoneNumber" -> "12345",
             "faxNumber" -> "12345",
-            "email" -> "john.smith@email.com",
+            "emailAddress" -> "john.smith@email.com",
             "addressLine1" -> "Line 1",
             "addressLine2" -> "Line 2",
             "addressLine3" -> "Line 3",
@@ -77,13 +79,15 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
 
       "respond HTTP 200 with a the new unique PAYE code in the response body and audit without optional fields" in {
         givenAuditConnector()
+        givenAgentKnownFactsIncomplete(AgentReference("HX2000"))
+
         val result = postRegistration(validPostData)
         val requestPath: String = s"/agent-epaye-registration/registrations"
 
         result.status shouldBe 200
         result.json shouldBe Json.obj("payeAgentReference" -> "HX2000")
 
-        verifyAuditRequestSent(1,
+        verifyAuditRequestSent(2,
           event = AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated,
           detail = Map(
             "payeAgentRef" -> "HX2000",

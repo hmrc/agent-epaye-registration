@@ -92,4 +92,36 @@ trait DesStub {
       .willReturn(aResponse().withStatus(400)))
   }
 
+  def givenAgentKnownFactsComplete(agentRef: AgentReference): Unit = {
+    stubFor(post(urlEqualTo(s"/agents/regime/PAYE/agentid/${agentRef.value}/known-facts"))
+      .withHeader("Content-Type", equalTo("application/json"))
+      .withRequestBody(equalToJson(
+        s"""{
+           |  "agentName": "Jim Jiminy",
+           |  "contactName": "John Johnson",
+           |  "addressLine1": "Line 1",
+           |  "addressLine2": "Line 2",
+           |  "addressLine3": "Line 3",
+           |  "addressLine4": "Line 4",
+           |  "postCode": "AB111AA",
+           |  "phoneNo": "12345",
+           |  "faxNumber": "12345",
+           |  "email": "john.smith@email.com"
+                                  }""".stripMargin, true, true))
+      .willReturn(aResponse().withStatus(204)))
+  }
+
+    def givenAgentKnownFactsIncomplete(agentRef: AgentReference): Unit = {
+    stubFor(post(urlEqualTo(s"/agents/regime/PAYE/agentid/${agentRef.value}/known-facts"))
+      .withHeader("Content-Type", equalTo("application/json"))
+      .withRequestBody(equalToJson(s"""{
+                                      |  "agentName": "Jim Jiminy",
+                                      |  "contactName": "John Johnson",
+                                      |  "addressLine1": "Line 1",
+                                      |  "addressLine2": "Line 2",
+                                      |  "postCode": "AB111AA"
+                                  }""".stripMargin, true, true))
+      .willReturn(aResponse().withStatus(204)))
+  }
+
 }
