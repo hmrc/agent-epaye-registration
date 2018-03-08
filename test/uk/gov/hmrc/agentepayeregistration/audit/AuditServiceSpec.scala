@@ -55,9 +55,9 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
       val registrationRequest = RegistrationRequest(
         agentName = "John Smith",
         contactName = "John Anderson Smith",
-        phoneNo = Some("12313"),
+        telephoneNumber = Some("12313"),
         faxNumber = Some("1234567"),
-        email = Some("john.smith@email.com"),
+        emailAddress = Some("john.smith@email.com"),
         address = Address("addressLine1", "addressLine2", Some("addressLine3"), Some("addressLine4"), "postCode")
       )
 
@@ -112,9 +112,9 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
       val registrationRequest = RegistrationRequest(
         agentName = "John Smith",
         contactName = "John Anderson Smith",
-        phoneNo = None,
+        telephoneNumber = None,
         faxNumber = None,
-        email = None,
+        emailAddress = None,
         address = Address("addressLine1", "addressLine2", None, None, "postCode")
       )
 

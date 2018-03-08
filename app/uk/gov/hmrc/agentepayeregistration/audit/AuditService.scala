@@ -34,6 +34,7 @@ import scala.util.Try
 
 object AgentEpayeRegistrationEvent extends Enumeration {
   val AgentEpayeRegistrationRecordCreated = Value
+  val AgentKnownFactsRecordCreated = Value
   val AgentEpayeRegistrationExtract = Value
   type AgentEpayeRegistrationEvent = Value
 }
@@ -47,9 +48,9 @@ class AuditService @Inject()(val auditConnector: AuditConnector) {
       Seq("payeAgentRef" -> agentReference.value,
         "agentName" -> registrationRequest.agentName,
         "contactName" -> registrationRequest.contactName,
-        "telephoneNumber" -> registrationRequest.phoneNo.getOrElse(""),
+        "telephoneNumber" -> registrationRequest.telephoneNumber.getOrElse(""),
         "faxNumber" -> registrationRequest.faxNumber.getOrElse(""),
-        "emailAddress" -> registrationRequest.email.getOrElse(""),
+        "emailAddress" -> registrationRequest.emailAddress.getOrElse(""),
         "addressLine1" -> s"${registrationRequest.address.addressLine1}",
         "addressLine2" -> s"${registrationRequest.address.addressLine2}",
         "addressLine3" -> s"${registrationRequest.address.addressLine3.getOrElse("")}",
@@ -59,19 +60,18 @@ class AuditService @Inject()(val auditConnector: AuditConnector) {
 
   def sendAgentKnownFactsCreated(registrationDetails: RegistrationDetails)(implicit hc: HeaderCarrier, request: Request[Any]): Unit = {
 
-    auditEvent(AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated, "Agent ePAYE registration created",
-      Seq("payeAgentRef" -> registrationDetails.agentReference.value,
+    auditEvent(AgentEpayeRegistrationEvent.AgentKnownFactsRecordCreated, "Send agent known facts to API1337",
+      Seq("agentReference" -> registrationDetails.agentReference.value,
         "agentName" -> registrationDetails.registration.agentName,
         "contactName" -> registrationDetails.registration.contactName,
-        "telephoneNumber" -> registrationDetails.registration.phoneNo.getOrElse(""),
+        "telephoneNumber" -> registrationDetails.registration.telephoneNumber.getOrElse(""),
         "faxNumber" -> registrationDetails.registration.faxNumber.getOrElse(""),
-        "emailAddress" -> registrationDetails.registration.email.getOrElse(""),
+        "emailAddress" -> registrationDetails.registration.emailAddress.getOrElse(""),
         "addressLine1" -> s"${registrationDetails.registration.address.addressLine1}",
         "addressLine2" -> s"${registrationDetails.registration.address.addressLine2}",
         "addressLine3" -> s"${registrationDetails.registration.address.addressLine3.getOrElse("")}",
         "addressLine4" -> s"${registrationDetails.registration.address.addressLine4.getOrElse("")}",
-        "postcode" -> s"${registrationDetails.registration.address.postCode}",
-        "createdDate" -> s"${registrationDetails.createdDateTime.toDate.toString}").filter(_._2 != ""))
+        "postcode" -> s"${registrationDetails.registration.address.postCode}").filter(_._2 != ""))
   }
 
   def sendAgentEpayeRegistrationExtract(userId: String, extractDate: String, dataFrom: String, dateTo: String, count: Int)(implicit hc: HeaderCarrier, request: Request[Any]): Unit  = {

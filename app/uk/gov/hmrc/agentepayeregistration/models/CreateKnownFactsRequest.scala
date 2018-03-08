@@ -42,9 +42,9 @@ object CreateKnownFactsRequest {
       regRequest.address.addressLine3,
       regRequest.address.addressLine4,
       regRequest.address.postCode,
-      regRequest.phoneNo,
+      regRequest.telephoneNumber,
       regRequest.faxNumber,
-      regRequest.email,
+      regRequest.emailAddress,
       createdDate
     )
   }

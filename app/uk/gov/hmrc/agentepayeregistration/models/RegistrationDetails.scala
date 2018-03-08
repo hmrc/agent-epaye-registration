@@ -44,9 +44,9 @@ object RegistrationDetails {
     details.agentReference.value,
     details.registration.agentName,
     details.registration.contactName,
-    details.registration.phoneNo,
+    details.registration.telephoneNumber,
     details.registration.faxNumber,
-    details.registration.email,
+    details.registration.emailAddress,
     details.registration.address,
     details.createdDateTime
   ))

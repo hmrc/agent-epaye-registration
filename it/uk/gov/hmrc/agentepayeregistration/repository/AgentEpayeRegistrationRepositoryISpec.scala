@@ -38,10 +38,10 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Mon
 
   val agentName = "Agent Name"
   val contactName = "Contact Name"
-  val phoneNo = Some("0123456789")
+  val telephoneNumber = Some("0123456789")
   val faxNumber = Some("0123456780")
-  val email = Some("a@b.com")
-  val regRequest = RegistrationRequest(agentName, contactName, phoneNo, faxNumber, email, regAddress)
+  val emailAddress = Some("a@b.com")
+  val regRequest = RegistrationRequest(agentName, contactName, telephoneNumber, faxNumber, emailAddress, regAddress)
 
 
   override def beforeEach() {
