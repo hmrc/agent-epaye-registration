@@ -92,6 +92,11 @@ trait DesStub {
       .willReturn(aResponse().withStatus(400)))
   }
 
+  def createAgentKnownFactsFailsWithStatus(agentRef: AgentReference, status: Int) = {
+    stubFor(post(urlPathEqualTo(s"/agents/regime/PAYE/agentid/${agentRef.value}/known-facts"))
+      .willReturn(aResponse().withStatus(status)))
+  }
+
   def givenAgentKnownFactsComplete(agentRef: AgentReference): Unit = {
     stubFor(post(urlEqualTo(s"/agents/regime/PAYE/agentid/${agentRef.value}/known-facts"))
       .withHeader("Content-Type", equalTo("application/json"))
@@ -107,21 +112,21 @@ trait DesStub {
            |  "phoneNo": "12345",
            |  "faxNumber": "12345",
            |  "email": "john.smith@email.com"
-                                  }""".stripMargin, true, true))
+        }""".stripMargin, true, true))
       .willReturn(aResponse().withStatus(204)))
   }
 
-    def givenAgentKnownFactsIncomplete(agentRef: AgentReference): Unit = {
+  def givenAgentKnownFactsIncomplete(agentRef: AgentReference): Unit = {
     stubFor(post(urlEqualTo(s"/agents/regime/PAYE/agentid/${agentRef.value}/known-facts"))
       .withHeader("Content-Type", equalTo("application/json"))
-      .withRequestBody(equalToJson(s"""{
-                                      |  "agentName": "Jim Jiminy",
-                                      |  "contactName": "John Johnson",
-                                      |  "addressLine1": "Line 1",
-                                      |  "addressLine2": "Line 2",
-                                      |  "postCode": "AB111AA"
-                                  }""".stripMargin, true, true))
+      .withRequestBody(equalToJson(
+        s"""{
+           |  "agentName": "Jim Jiminy",
+           |  "contactName": "John Johnson",
+           |  "addressLine1": "Line 1",
+           |  "addressLine2": "Line 2",
+           |  "postCode": "AB111AA"
+        }""".stripMargin, true, true))
       .willReturn(aResponse().withStatus(204)))
   }
-
 }

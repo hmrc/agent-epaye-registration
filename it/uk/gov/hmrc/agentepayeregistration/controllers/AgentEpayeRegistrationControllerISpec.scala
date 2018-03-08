@@ -105,6 +105,12 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
       }
     }
 
+    "POST /registrations returns error message if DES is unavailable" in {
+      createAgentKnownFactsFailsWithStatus(AgentReference("HX2000"), 500)
+      val result = postRegistration(validPostDataComplete)
+      result.status shouldBe 502
+    }
+
     "POST /registrations with invalid details" should {
       "respond with HTTP 400 Bad Request" when {
 

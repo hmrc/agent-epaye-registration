@@ -1,7 +1,7 @@
 package uk.gov.hmrc.agentepayeregistration.connectors
 
 import uk.gov.hmrc.agentepayeregistration.models._
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, Upstream5xxResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -30,7 +30,6 @@ class DesConnectorISpec extends BaseConnectorISpec {
       createAgentKnownFactsInvalidAgentId(AgentReference("ZZ0000"))
       an[BadRequestException] should be thrownBy {
         await(connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("ZZ0000")))
-            .status shouldBe 400
       }
     }
 
@@ -38,7 +37,6 @@ class DesConnectorISpec extends BaseConnectorISpec {
       createAgentKnownFactsInvalidRegime(AgentReference("HX2001"))
       an[BadRequestException] should be thrownBy {
         await(connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("HX2001"), "AAA"))
-          .status shouldBe 400
       }
     }
 
@@ -46,7 +44,6 @@ class DesConnectorISpec extends BaseConnectorISpec {
       createAgentKnownFactsInvalidBoth
       an[BadRequestException] should be thrownBy {
         await(connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("ZZ0000"), "AAA"))
-          .status shouldBe 400
       }
     }
 
@@ -54,7 +51,13 @@ class DesConnectorISpec extends BaseConnectorISpec {
       createAgentKnownFactsInvalidPayload(AgentReference("HX2001"))
       an[BadRequestException] should be thrownBy {
         await(connector.createAgentKnownFacts(createInvalidKnownFactsRequest, AgentReference("HX2001")))
-          .status shouldBe 400
+      }
+    }
+
+    "return 500 when DES is failing" in {
+      createAgentKnownFactsFailsWithStatus(AgentReference("HX2001"), 503)
+      an[Upstream5xxResponse] should be thrownBy {
+        await(connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("HX2001")))
       }
     }
   }
