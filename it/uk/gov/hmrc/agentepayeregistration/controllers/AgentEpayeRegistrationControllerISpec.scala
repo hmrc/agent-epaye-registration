@@ -3,7 +3,7 @@ package uk.gov.hmrc.agentepayeregistration.controllers
 import org.joda.time._
 import play.api.libs.json._
 import uk.gov.hmrc.agentepayeregistration.audit.AgentEpayeRegistrationEvent
-import uk.gov.hmrc.agentepayeregistration.models.{Address, RegistrationRequest}
+import uk.gov.hmrc.agentepayeregistration.models.{Address, AgentReference, RegistrationRequest}
 import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
 import uk.gov.hmrc.agentepayeregistration.stubs.{AuthStub, DataStreamStub}
 import uk.gov.hmrc.agentepayeregistration.support.RegistrationActions
@@ -47,6 +47,8 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
     "POST /registrations with valid details" should {
       "respond HTTP 200 with a the new unique PAYE code in the response body" in {
         givenAuditConnector()
+        givenAgentKnownFactsComplete(AgentReference("HX2000"))
+
         val result = postRegistration(validPostDataComplete)
         val requestPath: String = s"/agent-epaye-registration/registrations"
 
@@ -77,6 +79,8 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
 
       "respond HTTP 200 with a the new unique PAYE code in the response body and audit without optional fields" in {
         givenAuditConnector()
+        givenAgentKnownFactsIncomplete(AgentReference("HX2000"))
+
         val result = postRegistration(validPostData)
         val requestPath: String = s"/agent-epaye-registration/registrations"
 
@@ -99,6 +103,12 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
           )
         )
       }
+    }
+
+    "POST /registrations returns error message if DES is unavailable" in {
+      createAgentKnownFactsFailsWithStatus(AgentReference("HX2000"), 500)
+      val result = postRegistration(validPostDataComplete)
+      result.status shouldBe 502
     }
 
     "POST /registrations with invalid details" should {
