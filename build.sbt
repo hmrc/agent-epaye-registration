@@ -2,12 +2,12 @@ import sbt.Tests.{Group, SubProcess}
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
 lazy val compileDeps = Seq(
-  "uk.gov.hmrc" %% "bootstrap-play-25" % "1.0.0",
-  "uk.gov.hmrc" %% "auth-client" % "2.4.0",
+  "uk.gov.hmrc" %% "bootstrap-play-25" % "1.5.0",
+  "uk.gov.hmrc" %% "auth-client" % "2.6.0",
   "de.threedimensions" %% "metrics-play" % "2.5.13",
   "uk.gov.hmrc" %% "play-reactivemongo" % "6.1.0",
   "org.typelevel" %% "cats" % "0.9.0",
-  "uk.gov.hmrc" %% "agent-kenshoo-monitoring" % "2.4.0"
+  "uk.gov.hmrc" %% "agent-kenshoo-monitoring" % "3.0.1"
 )
 
 def testDeps(scope: String) = Seq(
@@ -16,7 +16,7 @@ def testDeps(scope: String) = Seq(
   "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1" % scope,
   "uk.gov.hmrc" %% "hmrctest" % "3.0.0" % scope,
   "com.github.tomakehurst" % "wiremock" % "2.11.0" % scope,
-  "uk.gov.hmrc" %% "reactivemongo-test" % "3.0.0" % scope
+  "uk.gov.hmrc" %% "reactivemongo-test" % "3.1.0" % scope
 )
 
 lazy val scoverageSettings = {
