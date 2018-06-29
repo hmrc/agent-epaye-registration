@@ -2,7 +2,7 @@ import sbt.Tests.{Group, SubProcess}
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
 lazy val compileDeps = Seq(
-  "uk.gov.hmrc" %% "bootstrap-play-25" % "1.6.0",
+  "uk.gov.hmrc" %% "bootstrap-play-25" % "1.7.0",
   "uk.gov.hmrc" %% "auth-client" % "2.6.0",
   "de.threedimensions" %% "metrics-play" % "2.5.13",
   "uk.gov.hmrc" %% "play-reactivemongo" % "6.2.0",
