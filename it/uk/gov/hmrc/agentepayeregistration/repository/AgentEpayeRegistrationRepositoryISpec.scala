@@ -82,9 +82,9 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Mon
 
       results.size shouldBe 3
 
-      results.head.agentReference shouldBe AgentReference("HX2000")
-      results.drop(1).head.agentReference shouldBe AgentReference("HX2001")
-      results.last.agentReference shouldBe AgentReference("HX2002")
+      results.head.value shouldBe AgentReference("HX2000")
+      results.drop(1).head.value shouldBe AgentReference("HX2001")
+      results.last.value shouldBe AgentReference("HX2002")
     }
 
     "find registrations between a positive datetime range" in {

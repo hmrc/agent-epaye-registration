@@ -55,29 +55,4 @@ class AgentEpayeRegistrationService @Inject()(repository: AgentEpayeRegistration
         case Invalid(failure) => Future.successful(Left(failure))
       }
     }
-
-  def extract(dateFrom: LocalDate, dateTo: LocalDate)
-             (implicit ec: ExecutionContext): Future[Either[Failure, ExtractedRegistrations]] = {
-    validateDateRange(dateFrom, dateTo) match {
-      case Valid(_) =>
-        val startOfDayFrom = dateFrom.toDateTimeAtStartOfDay
-        val endOfDayTo = dateTo.toDateTimeAtStartOfDay.plusDays(1).minusMillis(1)
-
-        for {
-          count <- repository.countRecords(startOfDayFrom, endOfDayTo)
-        } yield count match {
-          case 0 =>
-            Right(ExtractedRegistrations(Source.empty, 0))
-          case count =>
-            val sourceRegDetails = repository.sourceRegistrations(startOfDayFrom, endOfDayTo)
-            val sourceRegExtractions = sourceRegDetails.map(RegistrationExtraction.apply)
-
-            Right(ExtractedRegistrations(sourceRegExtractions, count))
-        }
-      case Invalid(failure) =>
-        Future.successful(Left(failure))
-    }
-  }
 }
-
-case class ExtractedRegistrations(stream: Source[RegistrationExtraction, NotUsed], count: Int)
