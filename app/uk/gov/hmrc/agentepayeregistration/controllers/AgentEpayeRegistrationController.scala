@@ -16,34 +16,22 @@
 
 package uk.gov.hmrc.agentepayeregistration.controllers
 
-import java.time.LocalDateTime
 import javax.inject._
 
-import akka.stream.scaladsl.{Concat, Source}
-import akka.util.ByteString
-import org.joda.time.LocalDate
 import play.api.Logger
-import play.api.http.HttpEntity.Streamed
-import play.api.http.MimeTypes
-import play.api.libs.json.{Json, Writes}
+import play.api.libs.json.Json
 import play.api.mvc.Action
 import uk.gov.hmrc.agentepayeregistration.audit.AuditService
-import uk.gov.hmrc.agentepayeregistration.connectors.MicroserviceAuthConnector
 import uk.gov.hmrc.agentepayeregistration.models.RegistrationRequest
-import uk.gov.hmrc.agentepayeregistration.services.{AgentEpayeRegistrationService, ExtractedRegistrations}
-import uk.gov.hmrc.auth.core.AuthProvider.PrivilegedApplication
-import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve.PAClientId
+import uk.gov.hmrc.agentepayeregistration.services.AgentEpayeRegistrationService
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
-import uk.gov.hmrc.auth.core.retrieve.Retrievals.authProviderId
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 @Singleton
 class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enrolment") strideEnrolment: String,
                                                  registrationService: AgentEpayeRegistrationService,
-                                                 val authConnector: MicroserviceAuthConnector,
-                                                 auditService: AuditService) extends BaseController with AuthorisedFunctions {
+                                                 auditService: AuditService) extends BaseController {
   lazy val logger = Logger("registrationController")
 
   val register = Action.async(parse.json) { implicit request =>
@@ -58,44 +46,5 @@ class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enr
         case Left(failure) => BadRequest(Json.toJson(failure))
       }
     }.recoverTotal(_ => Future.successful(BadRequest))
-  }
-
-  def extract(dateFrom: LocalDate, dateTo: LocalDate) = Action.async { implicit request =>
-    val extractTimestamp = LocalDateTime.now().toString
-
-    authorised(Enrolment(strideEnrolment) and AuthProviders(PrivilegedApplication)).retrieve(authProviderId) {
-      case authProviderId: PAClientId =>
-        registrationService.extract(dateFrom, dateTo).flatMap {
-          case Right(ExtractedRegistrations(sourceRegExtracts, count)) =>
-            auditService.sendAgentEpayeRegistrationExtract(authProviderId.clientId, extractTimestamp, dateFrom.toString(), dateTo.toString(), count)
-
-            if(count == 0) {
-              Future.successful(NoContent)
-            } else {
-              val streamedEntity = Streamed(sourceToJson(sourceRegExtracts, "registrations"), None, Some(MimeTypes.JSON))
-              Future.successful(Ok.sendEntity(streamedEntity))
-            }
-          case Left(failure) =>
-            Future.successful(BadRequest(Json.toJson(failure)))
-        }
-        //This part should never happen. This is to satisfy scala pattern match exhaustive check in order to compile.
-      case _ => Future.successful(Forbidden)
-    }.recoverWith {
-      case ex: NoActiveSession =>
-        logger.warn("No active session whilst trying to extract registrations", ex)
-        Future.successful(Unauthorized)
-      case ex: AuthorisationException =>
-        logger.warn("Authorisation exception whilst trying to extract registrations", ex)
-        Future.successful(Forbidden)
-    }
-  }
-
-  private def sourceToJson[A](source: Source[A, _], key: String)(implicit writer: Writes[A], executionCtx: ExecutionContext) = {
-    val startJson = Source.single(s"""{ "$key" : [""")
-    val endJson = Source.single("""], "complete": true }""")
-    val jsonItems = source.map(extract => Json.toJson(extract).toString()).intersperse(",")
-    val combinedJsonStr = Source.combine(startJson, jsonItems, endJson)(Concat(_))
-
-    combinedJsonStr.map(ByteString.apply)
   }
 }
