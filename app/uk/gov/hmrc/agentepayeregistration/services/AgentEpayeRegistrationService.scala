@@ -18,10 +18,8 @@ package uk.gov.hmrc.agentepayeregistration.services
 
 import javax.inject.{Inject, Singleton}
 
-import akka.NotUsed
-import akka.stream.scaladsl.Source
 import cats.data.Validated.{Invalid, Valid}
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import uk.gov.hmrc.agentepayeregistration.audit.AuditService
 import uk.gov.hmrc.agentepayeregistration.connectors.DesConnector
