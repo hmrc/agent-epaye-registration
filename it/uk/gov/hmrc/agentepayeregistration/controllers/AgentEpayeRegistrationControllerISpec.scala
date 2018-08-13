@@ -52,9 +52,6 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
         val result = postRegistration(validPostDataComplete)
         val requestPath: String = s"/agent-epaye-registration/registrations"
 
-
-        println(s"######################################################${result.json}#############################################")
-
         result.status shouldBe 200
 
         result.json shouldBe Json.obj("payeAgentReference" -> "HX2000")
