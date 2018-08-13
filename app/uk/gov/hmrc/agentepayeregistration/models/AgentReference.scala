@@ -78,5 +78,5 @@ object AgentReference {
   private val mongoReads: Reads[AgentReference] =
     (__ \ "agentReference").read[String].map(AgentReference(_))
 
-  val mogoFormat: Format[AgentReference] = Format(mongoReads, mongoWrites)
+  val mongoFormat: Format[AgentReference] = Format(mongoReads, mongoWrites)
 }

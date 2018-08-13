@@ -17,15 +17,15 @@
 package uk.gov.hmrc.agentepayeregistration.controllers
 
 import javax.inject._
-
 import play.api.Logger
-import play.api.libs.json.Json
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Action
 import uk.gov.hmrc.agentepayeregistration.audit.AuditService
 import uk.gov.hmrc.agentepayeregistration.models.RegistrationRequest
 import uk.gov.hmrc.agentepayeregistration.services.AgentEpayeRegistrationService
 import uk.gov.hmrc.play.http.logging.MdcLoggingExecutionContext._
 import uk.gov.hmrc.play.bootstrap.controller.BaseController
+
 import scala.concurrent.Future
 
 @Singleton
@@ -34,7 +34,7 @@ class AgentEpayeRegistrationController @Inject()(@Named("extract.auth.stride.enr
                                                  auditService: AuditService) extends BaseController {
   lazy val logger = Logger("registrationController")
 
-  val register = Action.async(parse.json) { implicit request =>
+  val register: Action[JsValue] = Action.async(parse.json) { implicit request =>
 
     request.body.validate[RegistrationRequest].map { registrationRequest =>
       registrationService.register(registrationRequest).map {

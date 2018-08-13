@@ -36,7 +36,7 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
   extends ReactiveRepository[AgentReference, BSONObjectID](
     "agent-epaye-registration-record",
     mongo.mongoConnector.db,
-    AgentReference.mogoFormat,
+    AgentReference.mongoFormat,
     ReactiveMongoFormats.objectIdFormats) {
 
   override def indexes: Seq[Index] =
