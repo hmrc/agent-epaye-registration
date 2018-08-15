@@ -52,104 +52,24 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Mon
   private def consumeToList[Item](e: Enumerator[Item]): List[Item] = await(e.run(Iteratee.getChunks[Item]))
 
   "AgentEpayeRegistrationRepository" should {
-    "create a RegistrationDetails record" in {
-      await(repo.find("agentName" -> agentName)) shouldBe List.empty
+    "create a AgentReference record" in {
+      await(repo.find("agentReference" -> "HX2000")) shouldBe List.empty
+      await(repo.create(regRequest))
 
-      val beforeCreation = DateTime.now(DateTimeZone.UTC)
-      val result = await(repo.create(regRequest))
-      val regDetails = RegistrationDetails(AgentReference("HX2000"), regRequest, DateTime.now(DateTimeZone.UTC))
-      val afterCreation = DateTime.now(DateTimeZone.UTC)
-
-      result.registration.address shouldBe regDetails.registration.address
-
-      val details = await(repo.find("agentName" -> agentName)).head
-
-      details should have(
-        'agentReference (AgentReference("HX2000")),
-        'registration (regRequest)
-      )
-
-      details.createdDateTime.getMillis should be >= (beforeCreation.getMillis)
-      details.createdDateTime.getMillis should be <= (afterCreation.getMillis)
+      await(repo.find("agentReference" -> "HX2000")).head shouldBe AgentReference("HX2000")
     }
 
     "create new records and generate a new unique Agent PAYE Reference code" in {
       await(repo.create(regRequest))
+      await(repo.find("agentReference" -> "HX2000")).head shouldBe AgentReference("HX2000")
+
       await(repo.create(regRequest))
+      await(repo.find("agentReference" -> "HX2001")).head shouldBe AgentReference("HX2001")
+
       await(repo.create(regRequest))
+      await(repo.find("agentReference" -> "HX2002")).head shouldBe AgentReference("HX2002")
 
-      val results = await(repo.find("agentName" -> agentName))
-
-      results.size shouldBe 3
-
-      results.head.agentReference shouldBe AgentReference("HX2000")
-      results.drop(1).head.agentReference shouldBe AgentReference("HX2001")
-      results.last.agentReference shouldBe AgentReference("HX2002")
     }
 
-    "find registrations between a positive datetime range" in {
-      val isoDateFmt = ISODateTimeFormat.date()
-
-      val day1Start = DateTime.parse("2000-01-01", isoDateFmt)
-      val day1End = day1Start.plusDays(1).minusMillis(1)
-      val day2Start = DateTime.parse("2000-01-02", isoDateFmt)
-      val day2End = day2Start.plusDays(1).minusMillis(1)
-      val day3Start = DateTime.parse("2000-01-03", isoDateFmt)
-      val day3End = day3Start.plusDays(1).minusMillis(1)
-
-      await(repo.create(regRequest, day1Start))
-      await(repo.create(regRequest, day2Start))
-      await(repo.create(regRequest, day2Start))
-
-      consumeToList(repo.enumerateRegistrations(day1Start, day1End)).size shouldBe 1
-      consumeToList(repo.enumerateRegistrations(day3Start, day3End)).size shouldBe 0
-      consumeToList(repo.enumerateRegistrations(day1Start, day3End)).size shouldBe 3
-      consumeToList(repo.enumerateRegistrations(day2Start, day2End)).size shouldBe 2
-    }
-
-    "return found registrations in ascending time order" in {
-      val isoDateFmt = ISODateTimeFormat.date()
-
-      val day1 = DateTime.parse("2000-01-01", isoDateFmt)
-      val day2 = DateTime.parse("2000-01-02", isoDateFmt)
-      val day3 = DateTime.parse("2000-01-03", isoDateFmt)
-
-      val regRefOnDay1 = await(repo.create(regRequest, day1))
-      val regRefOnDay3 = await(repo.create(regRequest, day3))
-      val regRefOnDay2 = await(repo.create(regRequest, day2))
-
-      val endOfDay3 = day3.plusHours(24).minusMillis(1)
-      val registrations = consumeToList(repo.enumerateRegistrations(day1, endOfDay3))
-      registrations.map(_.agentReference) shouldBe Seq(regRefOnDay1.agentReference, regRefOnDay2.agentReference, regRefOnDay3.agentReference)
-    }
-
-    "fail to find registration if the to date is before from date" in {
-      val isoDateFmt = ISODateTimeFormat.date()
-      val dateFrom = DateTime.parse("2000-01-01", isoDateFmt)
-      val dateTo = dateFrom.minusDays(1)
-
-      an[IllegalArgumentException] should be thrownBy {
-        repo.enumerateRegistrations(dateFrom, dateTo)
-      }
-    }
-
-    "count registrations in date range" in {
-      val isoDateFmt = ISODateTimeFormat.date()
-
-      val day1 = DateTime.parse("2000-01-01", isoDateFmt)
-      val day2 = DateTime.parse("2000-01-02", isoDateFmt)
-      val day3 = DateTime.parse("2000-01-03", isoDateFmt)
-
-      await(repo.create(regRequest, day1))
-      await(repo.create(regRequest, day2))
-      await(repo.create(regRequest, day3))
-
-      val endOfDay2 = day2.plusHours(24).minusMillis(1)
-      val endOfDay3 = day3.plusHours(24).minusMillis(1)
-
-      await(repo.countRecords(day1.withTimeAtStartOfDay(), endOfDay3)) shouldBe 3
-      await(repo.countRecords(day1.withTimeAtStartOfDay(), endOfDay2)) shouldBe 2
-      await(repo.countRecords(day2.withTimeAtStartOfDay(), endOfDay2)) shouldBe 1
-    }
   }
 }

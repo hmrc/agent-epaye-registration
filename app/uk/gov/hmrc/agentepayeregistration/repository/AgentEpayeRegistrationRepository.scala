@@ -18,12 +18,8 @@ package uk.gov.hmrc.agentepayeregistration.repository
 
 import javax.inject.{Inject, Singleton}
 
-import akka.NotUsed
-import akka.stream.scaladsl.Source
 import org.joda.time.{DateTime, DateTimeZone}
-import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json.{obj, toJsFieldJsValueWrapper}
-import play.api.libs.streams.Streams
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.BSONObjectID
@@ -37,15 +33,14 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
-  extends ReactiveRepository[RegistrationDetails, BSONObjectID](
+  extends ReactiveRepository[AgentReference, BSONObjectID](
     "agent-epaye-registration-record",
     mongo.mongoConnector.db,
-    RegistrationDetails.registrationDetailsFormat,
+    AgentReference.mongoFormat,
     ReactiveMongoFormats.objectIdFormats) {
 
   override def indexes: Seq[Index] =
-    Seq(Index(key = Seq("agentReference" -> IndexType.Ascending), name = Some("agentRefIndex"), unique = true),
-      Index(key = Seq("createdDateTime" -> IndexType.Ascending), name = Some("createdDateTimeIndex"), unique = false))
+    Seq(Index(key = Seq("agentReference" -> IndexType.Ascending), name = Some("agentRefIndex"), unique = true))
 
   val initialAgentReference: String = "HX2000"
 
@@ -54,53 +49,17 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
     val mongoCodeDuplicateKey: Int = 11000
 
     for {
-      maybeRegDetails <- collection.find(obj()).sort(obj("agentReference" -> -1)).one[RegistrationDetails]
+      oAgentRef <- collection.find(obj()).sort(obj("agentReference" -> -1)).one[AgentReference]
       regDetails = {
-        val nextAgentRef = maybeRegDetails match {
-          case Some(regDetails) => regDetails.agentReference.newReference
+        val nextAgentRef = oAgentRef match {
+          case Some(ref) => ref.newReference
           case None => AgentReference(initialAgentReference)
         }
         RegistrationDetails(nextAgentRef, request, createdDate)
       }
-      _ <- insert(regDetails) recover {
+      _ <- insert(regDetails.agentReference) recover {
           case error: DatabaseException if error.code.contains(mongoCodeDuplicateKey) => create(request)
         }
     } yield regDetails
-  }
-
-  def enumerateRegistrations(dateTimeFrom: DateTime, dateTimeTo: DateTime)
-                            (implicit ec: ExecutionContext): Enumerator[RegistrationDetails] = {
-    require(!dateTimeTo.isBefore(dateTimeFrom), "to date is before from date")
-
-    val queryFilter = obj(
-      "createdDateTime" -> obj(
-        "$gte" -> obj("$date" -> dateTimeFrom.getMillis),
-        "$lte" -> obj("$date" -> dateTimeTo.getMillis)
-      )
-    )
-
-    collection.find(queryFilter)
-      .sort(obj("createdDateTime" -> 1))
-      .cursor[RegistrationDetails]()
-      .enumerate(stopOnError = true)
-  }
-
-  def countRecords(dateTimeFrom: DateTime, dateTimeTo: DateTime)(implicit ec: ExecutionContext): Future[Int] = {
-    require(!dateTimeTo.isBefore(dateTimeFrom), "to date is before from date")
-    val queryFilter = obj(
-      "createdDateTime" -> obj(
-        "$gte" -> obj("$date" -> dateTimeFrom.getMillis),
-        "$lte" -> obj("$date" -> dateTimeTo.getMillis)
-      )
-    )
-    collection.count(Option(queryFilter))
-  }
-
-  def sourceRegistrations(dateTimeFrom: DateTime, dateTimeTo: DateTime)
-                          (implicit ec: ExecutionContext): Source[RegistrationDetails, NotUsed] = {
-    val enumerator = enumerateRegistrations(dateTimeFrom, dateTimeTo)
-    val publisher = Streams.enumeratorToPublisher(enumerator)
-
-    Source.fromPublisher(publisher)
   }
 }

@@ -71,4 +71,12 @@ case class AgentReference(value: String) {
 object AgentReference {
   implicit val agentReferenceWrites: Writes[AgentReference] =
     (__ \ "payeAgentReference").write[String].contramap(_.value)
+
+  private val mongoWrites: Writes[AgentReference] =
+    (__ \ "agentReference").write[String].contramap(_.value)
+
+  private val mongoReads: Reads[AgentReference] =
+    (__ \ "agentReference").read[String].map(AgentReference(_))
+
+  val mongoFormat: Format[AgentReference] = Format(mongoReads, mongoWrites)
 }

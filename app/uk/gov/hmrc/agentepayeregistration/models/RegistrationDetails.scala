@@ -17,38 +17,8 @@
 package uk.gov.hmrc.agentepayeregistration.models
 
 import org.joda.time.DateTime
-import play.api.libs.functional.syntax._
-import play.api.libs.json._
-import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
 case class RegistrationDetails(agentReference: AgentReference,
                                registration: RegistrationRequest,
                                createdDateTime: DateTime)
 
-object RegistrationDetails {
-
-  implicit val registrationDetailsFormat: Format[RegistrationDetails] = (
-    (JsPath \ "agentReference").format[String] and
-      (JsPath \ "agentName").format[String] and
-      (JsPath \ "contactName").format[String] and
-      (JsPath \ "telephoneNumber").formatNullable[String] and
-      (JsPath \ "faxNumber").formatNullable[String] and
-      (JsPath \ "emailAddress").formatNullable[String] and
-      (JsPath \ "address").format[Address] and
-      (JsPath \ "createdDateTime").format[DateTime](ReactiveMongoFormats.dateTimeFormats)
-    ) ((agentRef, agentName, contactName, telNo, faxNo, emailAddr, address, createdDateTime) =>
-    RegistrationDetails(AgentReference(agentRef),
-      RegistrationRequest(agentName, contactName, telNo, faxNo, emailAddr, address),
-      createdDateTime
-    ), details => (
-    details.agentReference.value,
-    details.registration.agentName,
-    details.registration.contactName,
-    details.registration.telephoneNumber,
-    details.registration.faxNumber,
-    details.registration.emailAddress,
-    details.registration.address,
-    details.createdDateTime
-  ))
-
-}
