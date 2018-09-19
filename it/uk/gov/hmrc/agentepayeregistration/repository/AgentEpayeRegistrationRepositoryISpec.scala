@@ -43,7 +43,6 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Mon
   val emailAddress = Some("a@b.com")
   val regRequest = RegistrationRequest(agentName, contactName, telephoneNumber, faxNumber, emailAddress, regAddress)
 
-
   override def beforeEach() {
     super.beforeEach()
     await(repo.ensureIndexes)
@@ -70,6 +69,5 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Mon
       await(repo.find("agentReference" -> "HX2002")).head shouldBe AgentReference("HX2002")
 
     }
-
   }
 }
