@@ -17,6 +17,7 @@
 package uk.gov.hmrc.agentepayeregistration.controllers.test
 
 import javax.inject.Inject
+import play.api.Logger
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
 import uk.gov.hmrc.agentepayeregistration.services.AdminService
@@ -24,13 +25,16 @@ import uk.gov.hmrc.play.bootstrap.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class RemoveStaleReferenceController @Inject()(val mongoRepository: AgentEpayeRegistrationRepository) extends RemoveStaleReferenceControllert
+class RemoveStaleReferenceControllerImpl @Inject()(val mongoRepository: AgentEpayeRegistrationRepository) extends RemoveStaleReferenceController
 
-trait RemoveStaleReferenceControllert extends BaseController with AdminService {
+trait RemoveStaleReferenceController extends BaseController with AdminService {
 
   def mongo(): Action[AnyContent] = Action.async {
     implicit request =>
-      deleteStaleDocuments().map(_ => Ok)
+      deleteStaleDocuments().map { res =>
+        if (res.contains(false)) Logger.error("[RemoveStaleReferenceController] Failed to delete data from all retrieved documents")
+        Ok
+      }
   }
 }
 

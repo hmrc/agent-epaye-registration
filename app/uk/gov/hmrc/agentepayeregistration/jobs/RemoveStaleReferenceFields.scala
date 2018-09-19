@@ -29,9 +29,8 @@ import scala.concurrent.{ExecutionContext, Future}
 
 
 @Singleton
-class RemoveStaleReferenceFieldsImpl @Inject()(
-                                                val mongoRepository: AgentEpayeRegistrationRepository,
-                                                val adminService: AdminService) extends RemoveStaleReferenceFields {
+class RemoveStaleReferenceFieldsImpl @Inject()(val mongoRepository: AgentEpayeRegistrationRepository,
+                                               val adminService: AdminService) extends RemoveStaleReferenceFields {
   val name: String = "remove-stale-reference-fields-jobs"
   val mongoRepo: AgentEpayeRegistrationRepository = mongoRepository
   override lazy val lock: LockKeeper = new LockKeeper() {
@@ -53,7 +52,7 @@ trait RemoveStaleReferenceFields extends ExclusiveScheduledJob with JobConfig wi
     if (deleteStaleDocuments().isCompleted) {
       lock.tryLock {
         adminService.deleteStaleDocuments() map { deletions =>
-          Result(s"Successfully deleted $deletions stale documents")
+          Result(s"Successfully deleted ${deletions.size} stale documents")
         }
       } map {
         case Some(x) =>

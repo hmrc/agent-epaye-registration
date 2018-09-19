@@ -30,10 +30,10 @@ trait AdminService {
 
   val mongoRepository: AgentEpayeRegistrationRepository
 
-  def deleteStaleDocuments()(implicit ec: ExecutionContext): Future[List[UpdateWriteResult]] = {
+  def deleteStaleDocuments()(implicit ec: ExecutionContext): Future[List[Boolean]] = {
     mongoRepository.findStaleReferenceFields(5) flatMap { documents =>
+      Logger.info(s"Found ${documents.size} stale documents")
       Future.sequence(documents map { document =>
-        Logger.info(s"$document was updated")
         mongoRepository.removeRedundantFields(document.value)
       })
     }

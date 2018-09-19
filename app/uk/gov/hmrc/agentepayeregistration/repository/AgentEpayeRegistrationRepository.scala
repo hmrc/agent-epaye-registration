@@ -88,7 +88,7 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
       .collect[List](count, logOnError)
   }
 
-def removeRedundantFields(id: String)(implicit ec: ExecutionContext): Future[UpdateWriteResult] = {
+def removeRedundantFields(id: String)(implicit ec: ExecutionContext): Future[Boolean] = {
 
     val selector = BSONDocument("agentReference" -> id)
 
@@ -102,6 +102,9 @@ def removeRedundantFields(id: String)(implicit ec: ExecutionContext): Future[Upd
         "createdDateTime" -> 1
       )
     )
-    collection.update(selector,modifier)
+    collection.update(selector,modifier) map {
+      Logger.info(s"AgentReference: $id had stale fields pruned")
+      _.ok
+    }
   }
 }

@@ -22,7 +22,7 @@ import com.google.inject.name.Names
 import org.slf4j.MDC
 import play.api.{Configuration, Environment, Logger, Play}
 import uk.gov.hmrc.agentepayeregistration.connectors.MicroserviceAuthConnector
-import uk.gov.hmrc.agentepayeregistration.controllers.test.{RemoveStaleReferenceController, RemoveStaleReferenceControllert}
+import uk.gov.hmrc.agentepayeregistration.controllers.test.{RemoveStaleReferenceController, RemoveStaleReferenceControllerImpl}
 import uk.gov.hmrc.agentepayeregistration.jobs.RemoveStaleReferenceFieldsImpl
 import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
 import uk.gov.hmrc.agentepayeregistration.services.{AdminService, AdminServiceImpl}
@@ -53,7 +53,7 @@ class MicroserviceModule(val environment: Environment, val configuration: Config
     bind(classOf[HttpGet]).to(classOf[HttpVerbs])
     bind(classOf[HttpPost]).to(classOf[HttpVerbs])
     bind(classOf[AuthConnector]).to(classOf[MicroserviceAuthConnector])
-    bind(classOf[RemoveStaleReferenceControllert]).to(classOf[RemoveStaleReferenceController])
+    bind(classOf[RemoveStaleReferenceController]).to(classOf[RemoveStaleReferenceControllerImpl])
     bind(classOf[AdminService]).to(classOf[AdminServiceImpl])
 
     bind(classOf[ScheduledJob]).annotatedWith(Names.named("remove-stale-reference-fields-jobs")).to(classOf[RemoveStaleReferenceFieldsImpl])
