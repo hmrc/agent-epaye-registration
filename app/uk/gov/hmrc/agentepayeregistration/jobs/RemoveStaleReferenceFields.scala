@@ -48,24 +48,19 @@ trait RemoveStaleReferenceFields extends ExclusiveScheduledJob with JobConfig wi
   val adminService: AdminService
 
   override def executeInMutex(implicit ec: ExecutionContext) = {
-
-    if (deleteStaleDocuments().isCompleted) {
-      lock.tryLock {
-        adminService.deleteStaleDocuments() map { deletions =>
-          Result(s"Successfully deleted ${deletions.size} stale documents")
-        }
-      } map {
-        case Some(x) =>
-          Logger.info(s"successfully acquired lock for $name")
-          x
-        case None =>
-          Logger.info(s"failed to acquire lock for $name")
-          Result(s"$name failed")
-      } recover {
-        case _: Exception => Result(s"$name failed")
+    lock.tryLock {
+      adminService.deleteStaleDocuments() map { deletions =>
+        Result(s"Successfully deleted ${deletions.size} stale documents")
       }
-    } else {
-      Future.successful(Result("Successfully deleted stale documents"))
+    } map {
+      case Some(x) =>
+        Logger.info(s"successfully acquired lock for $name")
+        x
+      case None =>
+        Logger.info(s"failed to acquire lock for $name")
+        Result(s"$name failed")
+    } recover {
+      case _: Exception => Result(s"$name failed")
     }
   }
 }
