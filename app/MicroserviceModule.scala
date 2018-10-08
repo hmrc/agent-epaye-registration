@@ -34,11 +34,10 @@ import uk.gov.hmrc.play.config.{RunMode, ServicesConfig}
 import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.scheduling.{RunningOfScheduledJobs, ScheduledJob}
 
-class MicroserviceModule(val environment: Environment, val configuration: Configuration) extends AbstractModule with ServicesConfig  with RunMode with RunningOfScheduledJobs {
+class MicroserviceModule(val environment: Environment, val configuration: Configuration) extends AbstractModule with ServicesConfig  with RunMode {
 
   override val runModeConfiguration: Configuration = configuration
   override protected def mode = environment.mode
-  override lazy val scheduledJobs = Play.current.injector.instanceOf[Jobs].lookupJobs()
 
   def configure(): Unit = {
     val appName = "agent-epaye-registration"
@@ -131,17 +130,3 @@ class HttpVerbs @Inject() (val auditConnector: AuditConnector, @Named("appName")
   override val hooks = Seq(AuditingHook)
 }
 
-
-trait JobsList {
-  def lookupJobs(): Seq[ScheduledJob] = Seq()
-}
-
-@Singleton
-class Jobs @Inject()(
-                      @Named("remove-stale-reference-fields-jobs") removeStaleFieldsJob: ScheduledJob
-                    ) extends JobsList {
-  override def lookupJobs(): Seq[ScheduledJob] =
-    Seq(
-      removeStaleFieldsJob
-    )
-}
