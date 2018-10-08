@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package config
+package uk.gov.hmrc.agentepayeregistration.config
 
 import javax.inject.{Inject, Named, Singleton}
 import play.api.Play
@@ -23,7 +23,6 @@ import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.http.ws.WSHttp
 import uk.gov.hmrc.play.scheduling.{RunningOfScheduledJobs, ScheduledJob}
-
 
 object MicroserviceGlobal extends RunningOfScheduledJobs {
 
