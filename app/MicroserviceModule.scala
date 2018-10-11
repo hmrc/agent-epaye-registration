@@ -15,26 +15,21 @@
  */
 
 import java.net.URL
+import javax.inject.{ Inject, Provider, Singleton }
 
-import javax.inject.{Inject, Named, Provider, Singleton}
 import com.google.inject.AbstractModule
-import com.google.inject.name.Names
+import com.google.inject.name.{ Named, Names }
 import org.slf4j.MDC
-import play.api.{Configuration, Environment, Logger, Play}
+import play.api.{ Configuration, Environment, Logger }
 import uk.gov.hmrc.agentepayeregistration.connectors.MicroserviceAuthConnector
-import uk.gov.hmrc.agentepayeregistration.controllers.test.{RemoveStaleReferenceController, RemoveStaleReferenceControllerImpl}
-import uk.gov.hmrc.agentepayeregistration.jobs.RemoveStaleReferenceFieldsImpl
-import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
-import uk.gov.hmrc.agentepayeregistration.services.{AdminService, AdminServiceImpl}
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.http._
 import uk.gov.hmrc.play.audit.http.HttpAuditing
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
-import uk.gov.hmrc.play.config.{RunMode, ServicesConfig}
+import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.ws.WSHttp
-import uk.gov.hmrc.play.scheduling.{RunningOfScheduledJobs, ScheduledJob}
 
-class MicroserviceModule(val environment: Environment, val configuration: Configuration) extends AbstractModule with ServicesConfig  with RunMode {
+class MicroserviceModule(val environment: Environment, val configuration: Configuration) extends AbstractModule with ServicesConfig {
 
   override val runModeConfiguration: Configuration = configuration
   override protected def mode = environment.mode
@@ -52,10 +47,6 @@ class MicroserviceModule(val environment: Environment, val configuration: Config
     bind(classOf[HttpGet]).to(classOf[HttpVerbs])
     bind(classOf[HttpPost]).to(classOf[HttpVerbs])
     bind(classOf[AuthConnector]).to(classOf[MicroserviceAuthConnector])
-    bind(classOf[RemoveStaleReferenceController]).to(classOf[RemoveStaleReferenceControllerImpl])
-    bind(classOf[AdminService]).to(classOf[AdminServiceImpl])
-
-    bind(classOf[ScheduledJob]).annotatedWith(Names.named("remove-stale-reference-fields-jobs")).to(classOf[RemoveStaleReferenceFieldsImpl])
 
     bindProperty("extract.auth.stride.enrolment")
 
@@ -129,4 +120,3 @@ class HttpVerbs @Inject() (val auditConnector: AuditConnector, @Named("appName")
   extends HttpGet with HttpPost with HttpPut with HttpPatch with HttpDelete with WSHttp with HttpAuditing {
   override val hooks = Seq(AuditingHook)
 }
-

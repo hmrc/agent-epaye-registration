@@ -2,22 +2,19 @@ import sbt.Tests.{Group, SubProcess}
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
 lazy val compileDeps = Seq(
-  "uk.gov.hmrc" %% "bootstrap-play-25" % "3.3.0",
+  "uk.gov.hmrc" %% "bootstrap-play-25" % "3.0.0",
   "uk.gov.hmrc" %% "auth-client" % "2.6.0",
   "de.threedimensions" %% "metrics-play" % "2.5.13",
   "uk.gov.hmrc" %% "play-reactivemongo" % "6.2.0",
   "org.typelevel" %% "cats" % "0.9.0",
-  "uk.gov.hmrc" %% "agent-kenshoo-monitoring" % "3.0.1",
-
-  "uk.gov.hmrc" %% "mongo-lock" % "5.1.0",
-  "uk.gov.hmrc" %% "play-scheduling" % "4.1.0"
+  "uk.gov.hmrc" %% "agent-kenshoo-monitoring" % "3.0.1"
 )
 
 def testDeps(scope: String) = Seq(
   "org.scalatest" %% "scalatest" % "3.0.5" % scope,
   "org.mockito" % "mockito-core" % "2.13.0" % scope,
   "org.scalatestplus.play" %% "scalatestplus-play" % "2.0.1" % scope,
-  "uk.gov.hmrc" %% "hmrctest" % "3.1.0" % scope,
+  "uk.gov.hmrc" %% "hmrctest" % "3.0.0" % scope,
   "com.github.tomakehurst" % "wiremock" % "2.17.0" % scope,
   "uk.gov.hmrc" %% "reactivemongo-test" % "3.1.0" % scope
 )
@@ -59,8 +56,7 @@ lazy val root = (project in file("."))
     parallelExecution in IntegrationTest := false,
     testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value)
   )
-  .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) : _*)
-  .settings(majorVersion := 0)
+  .enablePlugins(Seq(PlayScala,SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin) : _*)
 
 def oneForkedJvmPerTest(tests: Seq[TestDefinition]) = {
   tests.map { test =>
