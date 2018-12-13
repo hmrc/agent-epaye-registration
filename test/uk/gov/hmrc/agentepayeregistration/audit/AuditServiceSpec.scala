@@ -88,7 +88,6 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
         sentEvent.detail("postcode") shouldBe "postCode"
 
         sentEvent.tags.contains("Authorization") shouldBe false
-        sentEvent.detail("Authorization") shouldBe "dummy bearer token"
 
         sentEvent.tags("transactionName") shouldBe "Agent ePAYE registration created"
         sentEvent.tags("path") shouldBe "/path"
@@ -140,7 +139,6 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
         sentEvent.detail("postcode") shouldBe "postCode"
 
         sentEvent.tags.contains("Authorization") shouldBe false
-        sentEvent.detail("Authorization") shouldBe "dummy bearer token"
 
         sentEvent.tags("transactionName") shouldBe "Agent ePAYE registration created"
         sentEvent.tags("path") shouldBe "/path"
@@ -180,7 +178,6 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
         sentEvent.detail("recordCount") shouldBe "2"
 
         sentEvent.tags.contains("Authorization") shouldBe false
-        sentEvent.detail("Authorization") shouldBe "dummy bearer token"
 
         sentEvent.tags("transactionName") shouldBe "agent-epaye-registration-extract"
         sentEvent.tags("path") shouldBe "/path"

@@ -19,6 +19,7 @@ import java.net.URL
 import javax.inject.{Inject, Named, Provider, Singleton}
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
+import com.typesafe.config.Config
 import org.slf4j.MDC
 import play.api.{Configuration, Environment, Logger, Play}
 import uk.gov.hmrc.agentepayeregistration.connectors.MicroserviceAuthConnector
@@ -128,5 +129,7 @@ class MicroserviceModule(val environment: Environment, val configuration: Config
 class HttpVerbs @Inject() (val auditConnector: AuditConnector, @Named("appName") val appName: String)
   extends HttpGet with HttpPost with HttpPut with HttpPatch with HttpDelete with WSHttp with HttpAuditing {
   override val hooks = Seq(AuditingHook)
+
+  override protected def configuration: Option[Config] = Some(Play.current.configuration.underlying)
 }
 

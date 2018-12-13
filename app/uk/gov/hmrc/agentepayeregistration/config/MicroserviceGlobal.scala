@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.agentepayeregistration.config
 
+import com.typesafe.config.Config
 import javax.inject.{Inject, Named, Singleton}
 import play.api.Play
 import uk.gov.hmrc.http._
@@ -32,6 +33,8 @@ object MicroserviceGlobal extends RunningOfScheduledJobs {
   class HttpVerbs @Inject()(val auditConnector: AuditConnector, @Named("appName") val appName: String)
     extends HttpGet with HttpPost with HttpPut with HttpPatch with HttpDelete with WSHttp with HttpAuditing {
     override val hooks = Seq(AuditingHook)
+
+    override protected def configuration: Option[Config] = Some(Play.current.configuration.underlying)
   }
 
 
