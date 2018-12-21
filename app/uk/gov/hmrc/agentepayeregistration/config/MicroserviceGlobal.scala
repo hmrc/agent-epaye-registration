@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.agentepayeregistration.config
 
+import akka.actor.ActorSystem
 import com.typesafe.config.Config
 import javax.inject.{Inject, Named, Singleton}
 import play.api.Play
@@ -30,7 +31,7 @@ object MicroserviceGlobal extends RunningOfScheduledJobs {
   override lazy val scheduledJobs = Play.current.injector.instanceOf[Jobs].lookupJobs()
 
   @Singleton
-  class HttpVerbs @Inject()(val auditConnector: AuditConnector, @Named("appName") val appName: String)
+  class HttpVerbs @Inject()(val actorSystem: ActorSystem, val auditConnector: AuditConnector, @Named("appName") val appName: String)
     extends HttpGet with HttpPost with HttpPut with HttpPatch with HttpDelete with WSHttp with HttpAuditing {
     override val hooks = Seq(AuditingHook)
 

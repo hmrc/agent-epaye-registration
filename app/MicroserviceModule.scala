@@ -16,6 +16,7 @@
 
 import java.net.URL
 
+import akka.actor.ActorSystem
 import javax.inject.{Inject, Named, Provider, Singleton}
 import com.google.inject.AbstractModule
 import com.google.inject.name.Names
@@ -126,7 +127,7 @@ class MicroserviceModule(val environment: Environment, val configuration: Config
 }
 
 @Singleton
-class HttpVerbs @Inject() (val auditConnector: AuditConnector, @Named("appName") val appName: String)
+class HttpVerbs @Inject() (val actorSystem: ActorSystem, val auditConnector: AuditConnector, @Named("appName") val appName: String)
   extends HttpGet with HttpPost with HttpPut with HttpPatch with HttpDelete with WSHttp with HttpAuditing {
   override val hooks = Seq(AuditingHook)
 
