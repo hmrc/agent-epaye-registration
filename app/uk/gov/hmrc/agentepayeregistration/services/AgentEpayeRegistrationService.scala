@@ -40,7 +40,7 @@ class AgentEpayeRegistrationService @Inject()(repository: AgentEpayeRegistration
   def register(regRequest: RegistrationRequest)
               (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[Any]): Future[Either[Failure, AgentReference]] = {
       validateRegistrationRequest(regRequest) match {
-        case Valid(_) => {
+        case Valid(_) =>
           for {
             regDetails <- repository.create(regRequest)
             currentDate = DateTimeFormat.forPattern("yyyy-MM-dd").print(DateTime.now)
@@ -49,7 +49,6 @@ class AgentEpayeRegistrationService @Inject()(repository: AgentEpayeRegistration
             }
           } yield Right(regDetails.agentReference)
 
-        }
         case Invalid(failure) => Future.successful(Left(failure))
       }
     }

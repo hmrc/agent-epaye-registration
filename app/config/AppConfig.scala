@@ -14,15 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.agentepayeregistration.config
+package config
 
-import com.google.inject.AbstractModule
-import com.google.inject.name.Names
-import uk.gov.hmrc.agentepayeregistration.jobs.RemoveStaleReferenceFieldsImpl
-import uk.gov.hmrc.play.scheduling.ScheduledJob
+import com.google.inject.Inject
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-class Module extends AbstractModule {
-  override def configure(): Unit = {
-    bind(classOf[ScheduledJob]).annotatedWith(Names.named("remove-stale-reference-fields-jobs")).to(classOf[RemoveStaleReferenceFieldsImpl])
-  }
+class AppConfig @Inject()(config: ServicesConfig) {
+
+  lazy val authEnrolment: String = config.getString("extract.auth.stride.enrolment")
+  lazy val authURL: String       = config.baseUrl("auth")
+
+  lazy val desURL: String    = config.baseUrl("des")
+  lazy val desEnv: String    = config.getString("microservice.services.des.environment")
+  lazy val desToken: String  = config.getString("microservice.services.des.authorization-token")
+
 }

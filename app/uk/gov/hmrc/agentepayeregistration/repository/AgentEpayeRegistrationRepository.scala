@@ -19,11 +19,10 @@ package uk.gov.hmrc.agentepayeregistration.repository
 import javax.inject.{Inject, Singleton}
 import org.joda.time.{DateTime, DateTimeZone}
 import play.api.Logger
-import play.api.libs.json._
 import play.api.libs.json.Json.{obj, toJsFieldJsValueWrapper}
+import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoComponent
 import reactivemongo.api.Cursor
-import reactivemongo.api.commands.UpdateWriteResult
 import reactivemongo.api.indexes.{Index, IndexType}
 import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import reactivemongo.core.errors.DatabaseException
@@ -31,12 +30,13 @@ import reactivemongo.play.json.ImplicitBSONHandlers._
 import uk.gov.hmrc.agentepayeregistration.models.{AgentReference, RegistrationDetails, RegistrationRequest}
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
   extends ReactiveRepository[AgentReference, BSONObjectID](
-    "agent-epaye-registration-record",
+    collectionName = "agent-epaye-registration-record",
     mongo.mongoConnector.db,
     AgentReference.mongoFormat,
     ReactiveMongoFormats.objectIdFormats) {
@@ -77,7 +77,7 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
     ))
 
     val logOnError = Cursor.ContOnError[List[AgentReference]]((_, ex) =>
-      Logger.error(s"[removeStaleDocuments] Mongo failed, problem occured in collect - ex: ${ex.getMessage}")
+      Logger.error(s"[removeStaleDocuments] Mongo failed, problem occurred in collect - ex: ${ex.getMessage}")
     )
     val ascending = Json.obj("agentReference" -> 1)
 
@@ -88,23 +88,4 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
       .collect[List](count, logOnError)
   }
 
-def removeRedundantFields(id: String)(implicit ec: ExecutionContext): Future[Boolean] = {
-
-    val selector = BSONDocument("agentReference" -> id)
-
-    val modifier = BSONDocument(
-      "$unset" -> BSONDocument(
-        "agentName" -> 1,
-        "contactName" -> 1,
-        "telephoneNumber" -> 1,
-        "emailAddress" -> 1,
-        "address" -> 1,
-        "createdDateTime" -> 1
-      )
-    )
-    collection.update(selector,modifier) map {
-      Logger.info(s"AgentReference: $id had stale fields pruned")
-      _.ok
-    }
-  }
 }
