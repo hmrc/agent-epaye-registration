@@ -14,17 +14,18 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.agentepayeregistration.models
+package config
 
-import play.api.libs.json.Json
+import com.google.inject.Inject
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-case class RegistrationRequest(agentName: String,
-                               contactName: String,
-                               telephoneNumber: Option[String],
-                               faxNumber: Option[String],
-                               emailAddress: Option[String],
-                               address: Address)
+class AppConfig @Inject()(config: ServicesConfig) {
 
-object RegistrationRequest {
-  implicit val registrationRequestFormat = Json.format[RegistrationRequest]
+  lazy val authEnrolment: String = config.getString("extract.auth.stride.enrolment")
+  lazy val authURL: String       = config.baseUrl("auth")
+
+  lazy val desURL: String    = config.baseUrl("des")
+  lazy val desEnv: String    = config.getString("microservice.services.des.environment")
+  lazy val desToken: String  = config.getString("microservice.services.des.authorization-token")
+
 }
