@@ -2,13 +2,13 @@ import sbt.Tests.{Group, SubProcess}
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
 lazy val compileDeps = Seq(
-  "uk.gov.hmrc" %% "bootstrap-play-26" % "0.36.0",
-  "uk.gov.hmrc" %% "auth-client" % "2.19.0-play-26",
+  "uk.gov.hmrc" %% "bootstrap-play-26" % "0.45.0",
+  "uk.gov.hmrc" %% "auth-client" % "2.27.0-play-26",
   "de.threedimensions" %% "metrics-play" % "2.5.13",
-  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.12.0-play-26",
+  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.20.0-play-26",
   "org.typelevel" %% "cats" % "0.9.0",
-  "uk.gov.hmrc" %% "agent-kenshoo-monitoring" % "3.4.0",
-  "uk.gov.hmrc" %% "mongo-lock" % "6.10.0-play-26",
+  "uk.gov.hmrc" %% "agent-kenshoo-monitoring" % "3.8.0",
+  "uk.gov.hmrc" %% "mongo-lock" % "6.15.0-play-26",
   "com.typesafe.play" %% "play-json" % "2.7.1"
 )
 
@@ -16,9 +16,9 @@ def testDeps(scope: String) = Seq(
   "org.scalatest" %% "scalatest" % "3.0.5" % scope,
   "org.mockito" % "mockito-core" % "2.24.5" % scope,
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % scope,
-  "uk.gov.hmrc" %% "hmrctest" % "3.5.0-play-26" % scope,
-  "com.github.tomakehurst" % "wiremock" % "2.21.0" % scope,
-  "uk.gov.hmrc" %% "reactivemongo-test" % "4.8.0-play-26" % scope
+  "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-26" % scope,
+  "com.github.tomakehurst" % "wiremock" % "2.24.1" % scope,
+  "uk.gov.hmrc" %% "reactivemongo-test" % "4.15.0-play-26" % scope
 )
 
 lazy val scoverageSettings = {
