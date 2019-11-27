@@ -7,7 +7,7 @@ lazy val compileDeps = Seq(
   "de.threedimensions" %% "metrics-play" % "2.5.13",
   "uk.gov.hmrc" %% "simple-reactivemongo" % "7.21.0-play-26",
   "org.typelevel" %% "cats" % "0.9.0",
-  "uk.gov.hmrc" %% "agent-kenshoo-monitoring" % "4.3.0",
+  "uk.gov.hmrc" %% "agent-kenshoo-monitoring" % "3.8.0",
   "uk.gov.hmrc" %% "mongo-lock" % "6.15.0-play-26",
   "uk.gov.hmrc" %% "emailaddress" % "3.3.0",
   "com.typesafe.play" %% "play-json" % "2.7.1"
@@ -15,10 +15,10 @@ lazy val compileDeps = Seq(
 
 def testDeps(scope: String) = Seq(
   "org.scalatest" %% "scalatest" % "3.0.5" % scope,
-  "org.mockito" % "mockito-core" % "2.24.5" % scope,
+  "org.mockito" % "mockito-core" % "3.1.0" % scope,
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % scope,
   "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-26" % scope,
-  "com.github.tomakehurst" % "wiremock" % "2.24.1" % scope,
+  "com.github.tomakehurst" % "wiremock" % "2.25.1" % scope,
   "uk.gov.hmrc" %% "reactivemongo-test" % "4.15.0-play-26" % scope
 )
 
