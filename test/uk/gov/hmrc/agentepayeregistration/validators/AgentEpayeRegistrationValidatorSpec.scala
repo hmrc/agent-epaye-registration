@@ -97,16 +97,25 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
       AgentEpayeRegistrationValidator.isEmailAddress("a@b.com")("x") shouldBe Valid(())
     }
 
-    "allow email addresses with a hyphen, period, or numbers" in {
+    "allow email addresses with a hyphen, period, numbers, plus, underscore, exclamation, number sign or question mark" in {
       AgentEpayeRegistrationValidator.isEmailAddress("a-b@b.com")("x") shouldBe Valid(())
       AgentEpayeRegistrationValidator.isEmailAddress("a.b@b.com")("x") shouldBe Valid(())
       AgentEpayeRegistrationValidator.isEmailAddress("1@b.com")("x") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a+b@b.com")("x") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a_b@b.com")("x") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a!b@b.com")("x") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a#b@b.com")("x") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a?b@b.com")("x") shouldBe Valid(())
     }
 
-    "not allow an email address with a plus, underscore, or exclamation" in {
-      AgentEpayeRegistrationValidator.isEmailAddress("a+b@b.com")("x") shouldBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
-      AgentEpayeRegistrationValidator.isEmailAddress("a_b@b.com")("x") shouldBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
-      AgentEpayeRegistrationValidator.isEmailAddress("a!b@b.com")("x") shouldBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
+    "not allow an email address with a comma, colon, semicolon, parenthesis, pound sign or backslash" in {
+      AgentEpayeRegistrationValidator.isEmailAddress("a,b@b.com")("x") shouldBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
+      AgentEpayeRegistrationValidator.isEmailAddress("a:b@b.com")("x") shouldBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
+      AgentEpayeRegistrationValidator.isEmailAddress("a;b@b.com")("x") shouldBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
+      AgentEpayeRegistrationValidator.isEmailAddress("a(b@b.com")("x") shouldBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
+      AgentEpayeRegistrationValidator.isEmailAddress("a)b@b.com")("x") shouldBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
+      AgentEpayeRegistrationValidator.isEmailAddress("a£b@b.com")("x") shouldBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
+      AgentEpayeRegistrationValidator.isEmailAddress("a\\b@b.com")("x") shouldBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
     }
 
     "not allow an email address without an @ symbol" in {

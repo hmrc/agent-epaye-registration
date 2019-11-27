@@ -21,6 +21,7 @@ import cats.data.Validated
 import cats.data.Validated.{Invalid, Valid}
 import org.joda.time.{DateTimeZone, Days, LocalDate}
 import uk.gov.hmrc.agentepayeregistration.models.{Failure, RegistrationRequest}
+import uk.gov.hmrc.emailaddress.EmailAddress.isValid
 
 object ValidatedSemigroup {
   implicit def validatedSemigroup[A] = new Semigroup[Validated[Failure, Unit]] {
@@ -110,7 +111,7 @@ object AgentEpayeRegistrationValidator {
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field exceeds $maxLength characters"))
 
   private[validators] def isEmailAddress(field: String)(propertyName: String) =
-    if (field.matches("""^[a-zA-Z0-9-.]+?@[a-zA-Z0-9-.]+$"""))
+    if (isValid(field))
       Valid(())
     else
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field is not a valid email"))

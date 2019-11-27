@@ -2,13 +2,14 @@ import sbt.Tests.{Group, SubProcess}
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
 lazy val compileDeps = Seq(
-  "uk.gov.hmrc" %% "bootstrap-play-26" % "0.45.0",
-  "uk.gov.hmrc" %% "auth-client" % "2.27.0-play-26",
+  "uk.gov.hmrc" %% "bootstrap-play-26" % "1.3.0",
+  "uk.gov.hmrc" %% "auth-client" % "2.31.0-play-26",
   "de.threedimensions" %% "metrics-play" % "2.5.13",
-  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.20.0-play-26",
+  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.21.0-play-26",
   "org.typelevel" %% "cats" % "0.9.0",
-  "uk.gov.hmrc" %% "agent-kenshoo-monitoring" % "3.8.0",
+  "uk.gov.hmrc" %% "agent-kenshoo-monitoring" % "4.3.0",
   "uk.gov.hmrc" %% "mongo-lock" % "6.15.0-play-26",
+  "uk.gov.hmrc" %% "emailaddress" % "3.3.0",
   "com.typesafe.play" %% "play-json" % "2.7.1"
 )
 
