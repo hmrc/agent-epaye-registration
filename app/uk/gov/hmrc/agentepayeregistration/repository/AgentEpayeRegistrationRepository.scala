@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
     val mongoCodeDuplicateKey: Int = 11000
 
     for {
-      oAgentRef <- collection.find(obj()).sort(obj("agentReference" -> -1)).one[AgentReference]
+      oAgentRef <- collection.find(obj(), Option.empty[JsObject]).sort(obj("agentReference" -> -1)).one[AgentReference]
       regDetails = {
         val nextAgentRef = oAgentRef match {
           case Some(ref) => ref.newReference
@@ -81,7 +81,7 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
     )
     val ascending = Json.obj("agentReference" -> 1)
 
-    collection.find(query)
+    collection.find(query, Option.empty[JsObject])
       .sort(ascending)
       .batchSize(count)
       .cursor[AgentReference]()
