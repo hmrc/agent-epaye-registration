@@ -1,25 +1,24 @@
 import sbt.Tests.{Group, SubProcess}
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
+import uk.gov.hmrc.ForkedJvmPerTestSettings
 
 lazy val compileDeps = Seq(
   "uk.gov.hmrc" %% "bootstrap-play-26" % "1.3.0",
-  "uk.gov.hmrc" %% "auth-client" % "2.31.0-play-26",
-  "de.threedimensions" %% "metrics-play" % "2.5.13",
-  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.21.0-play-26",
+  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.23.0-play-26",
   "org.typelevel" %% "cats" % "0.9.0",
-  "uk.gov.hmrc" %% "agent-kenshoo-monitoring" % "3.8.0",
-  "uk.gov.hmrc" %% "mongo-lock" % "6.15.0-play-26",
-  "uk.gov.hmrc" %% "emailaddress" % "3.3.0",
-  "com.typesafe.play" %% "play-json" % "2.7.1"
+  "uk.gov.hmrc" %% "agent-kenshoo-monitoring" % "4.0.0",
+  "uk.gov.hmrc" %% "mongo-lock" % "6.18.0-play-26",
+  "uk.gov.hmrc" %% "emailaddress" % "3.4.0",
+  "com.typesafe.play" %% "play-json" % "2.8.1"
 )
 
 def testDeps(scope: String) = Seq(
-  "org.scalatest" %% "scalatest" % "3.0.5" % scope,
-  "org.mockito" % "mockito-core" % "3.1.0" % scope,
+  "org.scalatest" %% "scalatest" % "3.0.8" % scope,
+  "org.mockito" % "mockito-core" % "3.2.4" % scope,
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % scope,
   "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-26" % scope,
-  "com.github.tomakehurst" % "wiremock" % "2.25.1" % scope,
-  "uk.gov.hmrc" %% "reactivemongo-test" % "4.15.0-play-26" % scope
+  "com.github.tomakehurst" % "wiremock" % "2.26.0" % scope,
+  "uk.gov.hmrc" %% "reactivemongo-test" % "4.16.0-play-26" % scope
 )
 
 lazy val scoverageSettings = {
@@ -38,7 +37,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "agent-epaye-registration",
     organization := "uk.gov.hmrc",
-    scalaVersion := "2.11.12",
+    scalaVersion := "2.12.10",
     PlayKeys.playDefaultPort := 9445,
     resolvers := Seq(
       Resolver.bintrayRepo("hmrc", "releases"),
@@ -47,8 +46,9 @@ lazy val root = (project in file("."))
       Resolver.jcenterRepo
     ),
     libraryDependencies ++= compileDeps ++ testDeps("test") ++ testDeps("it"),
-    dependencyOverrides ++= Set(
+    dependencyOverrides ++= Seq(
       "org.eclipse.jetty" % "jetty-server" % jettyVersion % "it",
+      "commons-codec" % "commons-codec" % "1.12",
       "org.eclipse.jetty" % "jetty-servlet" % jettyVersion % "it",
       "org.eclipse.jetty" % "jetty-security" % jettyVersion % "it",
       "org.eclipse.jetty" % "jetty-servlets" % jettyVersion % "it",
@@ -78,8 +78,4 @@ lazy val root = (project in file("."))
   .enablePlugins(Seq(play.sbt.PlayScala, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin, SbtArtifactory) : _*)
   .settings(majorVersion := 0)
 
-def oneForkedJvmPerTest(tests: Seq[TestDefinition]) = {
-  tests.map { test =>
-    new Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions = Seq(s"-Dtest.name=${test.name}"))))
-  }
-}
+def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] = ForkedJvmPerTestSettings.oneForkedJvmPerTest(tests)
