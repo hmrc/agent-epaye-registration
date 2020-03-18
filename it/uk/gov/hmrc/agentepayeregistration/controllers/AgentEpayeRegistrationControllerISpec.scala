@@ -1,10 +1,8 @@
 package uk.gov.hmrc.agentepayeregistration.controllers
 
-import org.joda.time._
 import play.api.libs.json._
 import uk.gov.hmrc.agentepayeregistration.audit.AgentEpayeRegistrationEvent
-import uk.gov.hmrc.agentepayeregistration.models.{Address, AgentReference, RegistrationRequest}
-import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
+import uk.gov.hmrc.agentepayeregistration.models.AgentReference
 import uk.gov.hmrc.agentepayeregistration.stubs.{AuthStub, DataStreamStub}
 import uk.gov.hmrc.agentepayeregistration.support.RegistrationActions
 

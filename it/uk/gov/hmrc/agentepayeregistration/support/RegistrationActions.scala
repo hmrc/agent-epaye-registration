@@ -3,7 +3,7 @@ package uk.gov.hmrc.agentepayeregistration.support
 import org.scalatest.Suite
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.ServerProvider
-import play.api.libs.json.{JsValue}
+import play.api.libs.json.JsValue
 import play.api.libs.ws.{WSClient, WSResponse}
 import uk.gov.hmrc.http.HeaderNames
 
@@ -22,7 +22,7 @@ trait RegistrationActions extends ScalaFutures {
 
   def getRegistrations(urlEncodedDateFrom: String, urlEncodedDateTo: String): WSResponse = {
     wsClient.url(s"$url/registrations?dateFrom=$urlEncodedDateFrom&dateTo=$urlEncodedDateTo")
-      .withHeaders(HeaderNames.authorisation -> "Bearer XYZ")
+      .withHttpHeaders(HeaderNames.authorisation -> "Bearer XYZ")
       .get()
       .futureValue
   }

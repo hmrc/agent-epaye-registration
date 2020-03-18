@@ -16,11 +16,8 @@
 
 package uk.gov.hmrc.agentepayeregistration.repository
 
-import org.joda.time.format.ISODateTimeFormat
-import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
-import play.api.libs.iteratee.{Enumerator, Iteratee}
-import uk.gov.hmrc.agentepayeregistration.models.{Address, AgentReference, RegistrationDetails, RegistrationRequest}
+import uk.gov.hmrc.agentepayeregistration.models.{Address, AgentReference, RegistrationRequest}
 import uk.gov.hmrc.mongo.MongoSpecSupport
 
 import scala.collection.immutable.List
@@ -47,8 +44,6 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Mon
     super.beforeEach()
     await(repo.ensureIndexes)
   }
-
-  private def consumeToList[Item](e: Enumerator[Item]): List[Item] = await(e.run(Iteratee.getChunks[Item]))
 
   "AgentEpayeRegistrationRepository" should {
     "create a AgentReference record" in {
