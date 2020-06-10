@@ -3,13 +3,13 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import uk.gov.hmrc.ForkedJvmPerTestSettings
 
 lazy val compileDeps = Seq(
-  "uk.gov.hmrc" %% "bootstrap-play-26" % "1.5.0",
-  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.23.0-play-26",
+  "uk.gov.hmrc" %% "bootstrap-play-26" % "1.8.0",
+  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.27.0-play-26",
   "org.typelevel" %% "cats" % "0.9.0",
   "uk.gov.hmrc" %% "agent-kenshoo-monitoring" % "4.0.0",
-  "uk.gov.hmrc" %% "mongo-lock" % "6.18.0-play-26",
+  "uk.gov.hmrc" %% "mongo-lock" % "6.21.0-play-26",
   "uk.gov.hmrc" %% "emailaddress" % "3.4.0",
-  "com.typesafe.play" %% "play-json" % "2.8.1"
+  "com.typesafe.play" %% "play-json" % "2.9.0"
 )
 
 def testDeps(scope: String) = Seq(
