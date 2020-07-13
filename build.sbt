@@ -3,22 +3,22 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import uk.gov.hmrc.ForkedJvmPerTestSettings
 
 lazy val compileDeps = Seq(
-  "uk.gov.hmrc" %% "bootstrap-play-26" % "1.8.0",
-  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.27.0-play-26",
+  "uk.gov.hmrc" %% "bootstrap-play-26" % "1.13.0",
+  "uk.gov.hmrc" %% "simple-reactivemongo" % "7.30.0-play-26",
   "org.typelevel" %% "cats" % "0.9.0",
-  "uk.gov.hmrc" %% "agent-kenshoo-monitoring" % "4.0.0",
-  "uk.gov.hmrc" %% "mongo-lock" % "6.21.0-play-26",
+  "uk.gov.hmrc" %% "agent-kenshoo-monitoring" % "4.4.0",
+  "uk.gov.hmrc" %% "mongo-lock" % "6.23.0-play-26",
   "uk.gov.hmrc" %% "emailaddress" % "3.4.0",
   "com.typesafe.play" %% "play-json" % "2.9.0"
 )
 
 def testDeps(scope: String) = Seq(
   "org.scalatest" %% "scalatest" % "3.0.8" % scope,
-  "org.mockito" % "mockito-core" % "3.3.3" % scope,
+  "org.mockito" % "mockito-core" % "3.4.0" % scope,
   "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % scope,
   "uk.gov.hmrc" %% "hmrctest" % "3.9.0-play-26" % scope,
-  "com.github.tomakehurst" % "wiremock" % "2.26.3" % scope,
-  "uk.gov.hmrc" %% "reactivemongo-test" % "4.16.0-play-26" % scope
+  "com.github.tomakehurst" % "wiremock" % "2.27.1" % scope,
+  "uk.gov.hmrc" %% "reactivemongo-test" % "4.21.0-play-26" % scope
 )
 
 lazy val scoverageSettings = {
@@ -68,8 +68,8 @@ lazy val root = (project in file("."))
     scoverageSettings,
     scalacOptions += "-P:silencer:pathFilters=routes",
     libraryDependencies ++= Seq(
-      compilerPlugin("com.github.ghik" % "silencer-plugin" % "1.6.0" cross CrossVersion.full),
-      "com.github.ghik" % "silencer-lib" % "1.6.0" % Provided cross CrossVersion.full
+      compilerPlugin("com.github.ghik" % "silencer-plugin" % "1.7.0" cross CrossVersion.full),
+      "com.github.ghik" % "silencer-lib" % "1.7.0" % Provided cross CrossVersion.full
     ),
   )
   .configs(IntegrationTest)
