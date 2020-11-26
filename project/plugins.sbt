@@ -4,7 +4,7 @@ resolvers ++= Seq(
   "HMRC Releases" at "https://dl.bintray.com/hmrc/releases"
 )
 
-addSbtPlugin("uk.gov.hmrc" % "sbt-auto-build" % "2.9.0")
+addSbtPlugin("uk.gov.hmrc" % "sbt-auto-build" % "2.10.0")
 
 addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.25")
 
@@ -14,4 +14,4 @@ addSbtPlugin("uk.gov.hmrc" % "sbt-git-versioning" % "2.1.0")
 
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.6.1")
 
-addSbtPlugin("uk.gov.hmrc" % "sbt-artifactory" % "1.3.0")
+addSbtPlugin("uk.gov.hmrc" % "sbt-artifactory" % "1.8.0")
