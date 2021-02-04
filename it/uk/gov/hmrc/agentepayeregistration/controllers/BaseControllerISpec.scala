@@ -2,15 +2,14 @@ package uk.gov.hmrc.agentepayeregistration.controllers
 
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Seconds, Span}
-import org.scalatest.{Matchers, WordSpecLike}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.agentepayeregistration.stubs.DesStub
 import uk.gov.hmrc.agentepayeregistration.support.{MongoApp, WireMockSupport}
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatestplus.play.PlaySpec
 
-abstract class BaseControllerISpec extends WordSpecLike with UnitSpec with Matchers with Eventually with GuiceOneServerPerSuite with MongoApp with WireMockSupport with DesStub {
+abstract class BaseControllerISpec extends PlaySpec with Eventually with GuiceOneServerPerSuite with MongoApp with WireMockSupport with DesStub {
 
   def additionalTestConfiguration: Seq[(String, Any)] = Seq.empty
 

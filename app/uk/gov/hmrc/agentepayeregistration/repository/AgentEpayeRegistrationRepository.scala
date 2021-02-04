@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package uk.gov.hmrc.agentepayeregistration.repository
 
 import javax.inject.{Inject, Singleton}
 import org.joda.time.{DateTime, DateTimeZone}
-import play.api.Logger
 import play.api.libs.json.Json.{obj, toJsFieldJsValueWrapper}
 import play.api.libs.json._
 import play.modules.reactivemongo.ReactiveMongoComponent
@@ -77,7 +76,7 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
     ))
 
     val logOnError = Cursor.ContOnError[List[AgentReference]]((_, ex) =>
-      Logger.error(s"[removeStaleDocuments] Mongo failed, problem occurred in collect - ex: ${ex.getMessage}")
+      logger.error(s"[removeStaleDocuments] Mongo failed, problem occurred in collect - ex: ${ex.getMessage}")
     )
     val ascending = Json.obj("agentReference" -> 1)
 

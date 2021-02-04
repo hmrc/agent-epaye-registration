@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package uk.gov.hmrc.agentepayeregistration.model
 
 import uk.gov.hmrc.agentepayeregistration.models.Address
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatestplus.play.PlaySpec
 
-class AddressSpec extends UnitSpec {
+class AddressSpec extends PlaySpec {
 
   val testAddress: Address = new Address(
     "addressLine1",
@@ -52,7 +52,7 @@ class AddressSpec extends UnitSpec {
 
       val expectedAddressString: String = "addressLine1 addressLine2 addressLine3 addressLine4 postCode"
 
-      actualAddress shouldBe expectedAddressString
+      actualAddress mustBe expectedAddressString
     }
 
     "return Address with empty optional fields as String" in {
@@ -60,7 +60,7 @@ class AddressSpec extends UnitSpec {
 
       val expectedAddressString: String = "addressLine1 addressLine2 postCode"
 
-      actualAddress shouldBe expectedAddressString
+      actualAddress mustBe expectedAddressString
     }
 
     "return empty Address with empty optional fields as String" in {
@@ -68,7 +68,7 @@ class AddressSpec extends UnitSpec {
 
       val expectedAddressString: String = ""
 
-      actualAddress shouldBe expectedAddressString
+      actualAddress mustBe expectedAddressString
     }
   }
 }

@@ -17,6 +17,7 @@
 package uk.gov.hmrc.agentepayeregistration.repository
 
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.agentepayeregistration.models.{Address, AgentReference, RegistrationRequest}
 import uk.gov.hmrc.mongo.MongoSpecSupport
 
@@ -47,21 +48,21 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Mon
 
   "AgentEpayeRegistrationRepository" should {
     "create a AgentReference record" in {
-      await(repo.find("agentReference" -> "HX2000")) shouldBe List.empty
+      await(repo.find("agentReference" -> "HX2000")) mustBe List.empty
       await(repo.create(regRequest))
 
-      await(repo.find("agentReference" -> "HX2000")).head shouldBe AgentReference("HX2000")
+      await(repo.find("agentReference" -> "HX2000")).head mustBe AgentReference("HX2000")
     }
 
     "create new records and generate a new unique Agent PAYE Reference code" in {
       await(repo.create(regRequest))
-      await(repo.find("agentReference" -> "HX2000")).head shouldBe AgentReference("HX2000")
+      await(repo.find("agentReference" -> "HX2000")).head mustBe AgentReference("HX2000")
 
       await(repo.create(regRequest))
-      await(repo.find("agentReference" -> "HX2001")).head shouldBe AgentReference("HX2001")
+      await(repo.find("agentReference" -> "HX2001")).head mustBe AgentReference("HX2001")
 
       await(repo.create(regRequest))
-      await(repo.find("agentReference" -> "HX2002")).head shouldBe AgentReference("HX2002")
+      await(repo.find("agentReference" -> "HX2002")).head mustBe AgentReference("HX2002")
 
     }
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,14 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.agentepayeregistration.models.{Address, AgentReference, RegistrationRequest}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatestplus.play.PlaySpec
+import play.api.test.Helpers.{await, defaultAwaitTimeout}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.http.logging.{Authorization, RequestId, SessionId}
-import scala.concurrent.ExecutionContext.Implicits.global
 
-class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
+class AuditServiceSpec extends PlaySpec with MockitoSugar with Eventually {
 
   override implicit val patienceConfig = PatienceConfig(
     timeout = scaled(Span(500, Millis)),
@@ -73,26 +73,26 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
         verify(mockConnector).sendEvent(captor.capture())(any[HeaderCarrier], any[ExecutionContext])
         val sentEvent = captor.getValue.asInstanceOf[DataEvent]
 
-        sentEvent.auditType shouldBe "AgentEpayeRegistrationRecordCreated"
-        sentEvent.auditSource shouldBe "agent-epaye-registration"
-        sentEvent.detail("payeAgentRef") shouldBe "HX2345"
-        sentEvent.detail("agentName") shouldBe "John Smith"
-        sentEvent.detail("contactName") shouldBe "John Anderson Smith"
-        sentEvent.detail("telephoneNumber") shouldBe "12313"
-        sentEvent.detail("faxNumber") shouldBe "1234567"
-        sentEvent.detail("emailAddress") shouldBe "john.smith@email.com"
-        sentEvent.detail("addressLine1") shouldBe "addressLine1"
-        sentEvent.detail("addressLine2") shouldBe "addressLine2"
-        sentEvent.detail("addressLine3") shouldBe "addressLine3"
-        sentEvent.detail("addressLine4") shouldBe "addressLine4"
-        sentEvent.detail("postcode") shouldBe "postCode"
+        sentEvent.auditType mustBe "AgentEpayeRegistrationRecordCreated"
+        sentEvent.auditSource mustBe "agent-epaye-registration"
+        sentEvent.detail("payeAgentRef") mustBe "HX2345"
+        sentEvent.detail("agentName") mustBe "John Smith"
+        sentEvent.detail("contactName") mustBe "John Anderson Smith"
+        sentEvent.detail("telephoneNumber") mustBe "12313"
+        sentEvent.detail("faxNumber") mustBe "1234567"
+        sentEvent.detail("emailAddress") mustBe "john.smith@email.com"
+        sentEvent.detail("addressLine1") mustBe "addressLine1"
+        sentEvent.detail("addressLine2") mustBe "addressLine2"
+        sentEvent.detail("addressLine3") mustBe "addressLine3"
+        sentEvent.detail("addressLine4") mustBe "addressLine4"
+        sentEvent.detail("postcode") mustBe "postCode"
 
-        sentEvent.tags.contains("Authorization") shouldBe false
+        sentEvent.tags.contains("Authorization") mustBe false
 
-        sentEvent.tags("transactionName") shouldBe "Agent ePAYE registration created"
-        sentEvent.tags("path") shouldBe "/path"
-        sentEvent.tags("X-Session-ID") shouldBe "dummy session id"
-        sentEvent.tags("X-Request-ID") shouldBe "dummy request id"
+        sentEvent.tags("transactionName") mustBe "Agent ePAYE registration created"
+        sentEvent.tags("path") mustBe "/path"
+        sentEvent.tags("X-Session-ID") mustBe "dummy session id"
+        sentEvent.tags("X-Request-ID") mustBe "dummy request id"
       }
     }
 
@@ -129,21 +129,21 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
         verify(mockConnector).sendEvent(captor.capture())(any[HeaderCarrier], any[ExecutionContext])
         val sentEvent = captor.getValue.asInstanceOf[DataEvent]
 
-        sentEvent.auditType shouldBe "AgentEpayeRegistrationRecordCreated"
-        sentEvent.auditSource shouldBe "agent-epaye-registration"
-        sentEvent.detail("payeAgentRef") shouldBe "HX2345"
-        sentEvent.detail("agentName") shouldBe "John Smith"
-        sentEvent.detail("contactName") shouldBe "John Anderson Smith"
-        sentEvent.detail("addressLine1") shouldBe "addressLine1"
-        sentEvent.detail("addressLine2") shouldBe "addressLine2"
-        sentEvent.detail("postcode") shouldBe "postCode"
+        sentEvent.auditType mustBe "AgentEpayeRegistrationRecordCreated"
+        sentEvent.auditSource mustBe "agent-epaye-registration"
+        sentEvent.detail("payeAgentRef") mustBe "HX2345"
+        sentEvent.detail("agentName") mustBe "John Smith"
+        sentEvent.detail("contactName") mustBe "John Anderson Smith"
+        sentEvent.detail("addressLine1") mustBe "addressLine1"
+        sentEvent.detail("addressLine2") mustBe "addressLine2"
+        sentEvent.detail("postcode") mustBe "postCode"
 
-        sentEvent.tags.contains("Authorization") shouldBe false
+        sentEvent.tags.contains("Authorization") mustBe false
 
-        sentEvent.tags("transactionName") shouldBe "Agent ePAYE registration created"
-        sentEvent.tags("path") shouldBe "/path"
-        sentEvent.tags("X-Session-ID") shouldBe "dummy session id"
-        sentEvent.tags("X-Request-ID") shouldBe "dummy request id"
+        sentEvent.tags("transactionName") mustBe "Agent ePAYE registration created"
+        sentEvent.tags("path") mustBe "/path"
+        sentEvent.tags("X-Session-ID") mustBe "dummy session id"
+        sentEvent.tags("X-Request-ID") mustBe "dummy request id"
       }
     }
 
@@ -159,7 +159,7 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
       )
 
       await(service.sendAgentEpayeRegistrationExtract(
-        "userId", "extractDate", "dateFrom", "dateTo", Future(2))(
+        "userId", "extractDate", "dateFrom", "dateTo", 2)(
         hc,
         FakeRequest("GET", "/path")
       ))
@@ -169,20 +169,20 @@ class AuditServiceSpec extends UnitSpec with MockitoSugar with Eventually {
         verify(mockConnector).sendEvent(captor.capture())(any[HeaderCarrier], any[ExecutionContext])
         val sentEvent = captor.getValue.asInstanceOf[DataEvent]
 
-        sentEvent.auditType shouldBe "AgentEpayeRegistrationExtract"
-        sentEvent.auditSource shouldBe "agent-epaye-registration"
-        sentEvent.detail("strideUserId") shouldBe "userId"
-        sentEvent.detail("extractDate") shouldBe "extractDate"
-        sentEvent.detail("dateFrom") shouldBe "dateFrom"
-        sentEvent.detail("dateTo") shouldBe "dateTo"
-        sentEvent.detail("recordCount") shouldBe "2"
+        sentEvent.auditType mustBe "AgentEpayeRegistrationExtract"
+        sentEvent.auditSource mustBe "agent-epaye-registration"
+        sentEvent.detail("strideUserId") mustBe "userId"
+        sentEvent.detail("extractDate") mustBe "extractDate"
+        sentEvent.detail("dateFrom") mustBe "dateFrom"
+        sentEvent.detail("dateTo") mustBe "dateTo"
+        sentEvent.detail("recordCount") mustBe "2"
 
-        sentEvent.tags.contains("Authorization") shouldBe false
+        sentEvent.tags.contains("Authorization") mustBe false
 
-        sentEvent.tags("transactionName") shouldBe "agent-epaye-registration-extract"
-        sentEvent.tags("path") shouldBe "/path"
-        sentEvent.tags("X-Session-ID") shouldBe "dummy session id"
-        sentEvent.tags("X-Request-ID") shouldBe "dummy request id"
+        sentEvent.tags("transactionName") mustBe "agent-epaye-registration-extract"
+        sentEvent.tags("path") mustBe "/path"
+        sentEvent.tags("X-Session-ID") mustBe "dummy session id"
+        sentEvent.tags("X-Request-ID") mustBe "dummy request id"
       }
     }
   }
