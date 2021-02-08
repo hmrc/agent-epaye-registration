@@ -50,9 +50,9 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
         val result = postRegistration(validPostDataComplete)
         val requestPath: String = s"/agent-epaye-registration/registrations"
 
-        result.status shouldBe 200
+        result.status mustBe 200
 
-        result.json shouldBe Json.obj("payeAgentReference" -> "HX2000")
+        result.json mustBe Json.obj("payeAgentReference" -> "HX2000")
 
         verifyAuditRequestSent(1,
           event = AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated,
@@ -83,8 +83,8 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
         val result = postRegistration(validPostData)
         val requestPath: String = s"/agent-epaye-registration/registrations"
 
-        result.status shouldBe 200
-        result.json shouldBe Json.obj("payeAgentReference" -> "HX2000")
+        result.status mustBe 200
+        result.json mustBe Json.obj("payeAgentReference" -> "HX2000")
 
         verifyAuditRequestSent(1,
           event = AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated,
@@ -107,7 +107,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
     "POST /registrations returns error message if DES is unavailable" in {
       createAgentKnownFactsFailsWithStatus(AgentReference("HX2000"), 500)
       val result = postRegistration(validPostDataComplete)
-      result.status shouldBe 502
+      result.status mustBe 502
     }
 
     "POST /registrations with invalid details" should {
@@ -116,7 +116,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
         "no details are given" in {
           givenAuditConnector()
           val result = postRegistration(Json.obj())
-          result.status shouldBe 400
+          result.status mustBe 400
 
           verifyAuditRequestNotSent(event = AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated)
         }
@@ -127,7 +127,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
 
           val result = postRegistration(postDataMissingField)
 
-          result.status shouldBe 400
+          result.status mustBe 400
 
           verifyAuditRequestNotSent(event = AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated)
         }
@@ -138,7 +138,7 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
 
           val result = postRegistration(postDataInvalidField)
 
-          result.status shouldBe 400
+          result.status mustBe 400
 
           verifyAuditRequestNotSent(event = AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated)
         }

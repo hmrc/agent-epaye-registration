@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ object AgentEpayeRegistrationEvent extends Enumeration {
 @Singleton
 class AuditService @Inject()(val auditConnector: AuditConnector) {
 
-  def sendAgentEpayeRegistrationRecordCreated(registrationRequest: RegistrationRequest, agentReference: AgentReference)(implicit hc: HeaderCarrier, request: Request[Any]): Unit = {
+  def sendAgentEpayeRegistrationRecordCreated(registrationRequest: RegistrationRequest, agentReference: AgentReference)(implicit hc: HeaderCarrier, request: Request[Any]): Future[Unit] = {
 
     auditEvent(AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated, "Agent ePAYE registration created",
       Seq("payeAgentRef" -> agentReference.value,
@@ -57,7 +57,7 @@ class AuditService @Inject()(val auditConnector: AuditConnector) {
         "postcode" -> s"${registrationRequest.address.postCode}").filter(_._2 != ""))
   }
 
-  def sendAgentKnownFactsCreated(registrationDetails: RegistrationDetails)(implicit hc: HeaderCarrier, request: Request[Any]): Unit = {
+  def sendAgentKnownFactsCreated(registrationDetails: RegistrationDetails)(implicit hc: HeaderCarrier, request: Request[Any]): Future[Unit] = {
 
     auditEvent(AgentEpayeRegistrationEvent.AgentKnownFactsRecordCreated, "Send agent known facts to API1337",
       Seq("agentReference" -> registrationDetails.agentReference.value,
@@ -73,7 +73,7 @@ class AuditService @Inject()(val auditConnector: AuditConnector) {
         "postcode" -> s"${registrationDetails.registration.address.postCode}").filter(_._2 != ""))
   }
 
-  def sendAgentEpayeRegistrationExtract(userId: String, extractDate: String, dataFrom: String, dateTo: String, count: Int)(implicit hc: HeaderCarrier, request: Request[Any]): Unit  = {
+  def sendAgentEpayeRegistrationExtract(userId: String, extractDate: String, dataFrom: String, dateTo: String, count: Int)(implicit hc: HeaderCarrier, request: Request[Any]): Future[Unit]  = {
 
       auditEvent(AgentEpayeRegistrationEvent.AgentEpayeRegistrationExtract, "agent-epaye-registration-extract",
         Seq(

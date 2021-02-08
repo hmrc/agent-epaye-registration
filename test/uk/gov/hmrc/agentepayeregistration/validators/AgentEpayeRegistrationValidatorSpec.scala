@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ import cats.data.Validated.{Invalid, Valid}
 import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.{DateTimeZone, Days, LocalDate}
 import uk.gov.hmrc.agentepayeregistration.models.{Address, Failure, RegistrationRequest, ValidationError}
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatestplus.play.PlaySpec
 import uk.gov.hmrc.agentepayeregistration.validators.AgentEpayeRegistrationValidator._
 
-class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
+class AgentEpayeRegistrationValidatorSpec extends PlaySpec {
   private val address = Address("29 Acacia Road", "Nuttytown", Some("Bannastate"), Some("Country"), "AA11AA")
   private val regRequest = RegistrationRequest("Dave Agent",
     "John Contact",
@@ -39,178 +39,178 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
   "nonEmpty validator" should {
     "not allow just whitespace" in {
       val expected = Invalid(Failure("MISSING_FIELD", s"The sample field is mandatory"))
-      AgentEpayeRegistrationValidator.nonEmpty("")("sample") shouldBe expected
-      AgentEpayeRegistrationValidator.nonEmpty(" ")("sample") shouldBe expected
-      AgentEpayeRegistrationValidator.nonEmpty("\t")("sample") shouldBe expected
-      AgentEpayeRegistrationValidator.nonEmpty("   \n")("sample") shouldBe expected
+      AgentEpayeRegistrationValidator.nonEmpty("")("sample") mustBe expected
+      AgentEpayeRegistrationValidator.nonEmpty(" ")("sample") mustBe expected
+      AgentEpayeRegistrationValidator.nonEmpty("\t")("sample") mustBe expected
+      AgentEpayeRegistrationValidator.nonEmpty("   \n")("sample") mustBe expected
     }
 
     "allow with non-whitespace" in {
-      AgentEpayeRegistrationValidator.nonEmpty("s")("sample") shouldBe Valid(())
-      AgentEpayeRegistrationValidator.nonEmpty(" s")("sample") shouldBe Valid(())
-      AgentEpayeRegistrationValidator.nonEmpty("s ")("sample") shouldBe Valid(())
-      AgentEpayeRegistrationValidator.nonEmpty("s\ts\n")("sample") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.nonEmpty("s")("sample") mustBe Valid(())
+      AgentEpayeRegistrationValidator.nonEmpty(" s")("sample") mustBe Valid(())
+      AgentEpayeRegistrationValidator.nonEmpty("s ")("sample") mustBe Valid(())
+      AgentEpayeRegistrationValidator.nonEmpty("s\ts\n")("sample") mustBe Valid(())
     }
   }
 
   "isValidCharacters validator" should {
     "disallow invalid characters" in {
       val expectedInvalid = Invalid(Failure("INVALID_FIELD", s"The sample field contains invalid characters"))
-      AgentEpayeRegistrationValidator.isValidCharacters("~")("sample") shouldBe expectedInvalid
-      AgentEpayeRegistrationValidator.isValidCharacters("[")("sample") shouldBe expectedInvalid
-      AgentEpayeRegistrationValidator.isValidCharacters("#")("sample") shouldBe expectedInvalid
-      AgentEpayeRegistrationValidator.isValidCharacters("&")("sample") shouldBe expectedInvalid
-      AgentEpayeRegistrationValidator.isValidCharacters("'")("sample") shouldBe expectedInvalid
-      AgentEpayeRegistrationValidator.isValidCharacters("\\")("sample") shouldBe expectedInvalid
-      AgentEpayeRegistrationValidator.isValidCharacters("/")("sample") shouldBe expectedInvalid
+      AgentEpayeRegistrationValidator.isValidCharacters("~")("sample") mustBe expectedInvalid
+      AgentEpayeRegistrationValidator.isValidCharacters("[")("sample") mustBe expectedInvalid
+      AgentEpayeRegistrationValidator.isValidCharacters("#")("sample") mustBe expectedInvalid
+      AgentEpayeRegistrationValidator.isValidCharacters("&")("sample") mustBe expectedInvalid
+      AgentEpayeRegistrationValidator.isValidCharacters("'")("sample") mustBe expectedInvalid
+      AgentEpayeRegistrationValidator.isValidCharacters("\\")("sample") mustBe expectedInvalid
+      AgentEpayeRegistrationValidator.isValidCharacters("/")("sample") mustBe expectedInvalid
     }
 
     "allow a-z" in {
-      AgentEpayeRegistrationValidator.nonEmpty("abcdefghijklmnopqrstuvwxyz")("sample") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.nonEmpty("abcdefghijklmnopqrstuvwxyz")("sample") mustBe Valid(())
     }
     "allow A-Z" in {
-      AgentEpayeRegistrationValidator.nonEmpty("ABCDEFGHIJKLMNOPQRSTUVWXYZ")("sample") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.nonEmpty("ABCDEFGHIJKLMNOPQRSTUVWXYZ")("sample") mustBe Valid(())
     }
     "allow 0-9" in {
-      AgentEpayeRegistrationValidator.nonEmpty("01234567890")("sample") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.nonEmpty("01234567890")("sample") mustBe Valid(())
     }
     "allow commas, periods, -, (, ), !, @ and space" in {
-      AgentEpayeRegistrationValidator.nonEmpty(",.-()!@ ")("sample") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.nonEmpty(",.-()!@ ")("sample") mustBe Valid(())
     }
   }
 
   "maxLength validator" should {
     "pass if the length is less than the maximum" in {
-      AgentEpayeRegistrationValidator.maxLength("1", 2)("x") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.maxLength("1", 2)("x") mustBe Valid(())
     }
     "pass if the length is equal to the maximum" in {
-      AgentEpayeRegistrationValidator.maxLength("22", 2)("x") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.maxLength("22", 2)("x") mustBe Valid(())
     }
     "fail if the length is greater than the maximum" in {
-      AgentEpayeRegistrationValidator.maxLength("333", 2)("x") shouldBe
+      AgentEpayeRegistrationValidator.maxLength("333", 2)("x") mustBe
         Invalid(Failure("INVALID_FIELD", "The x field exceeds 2 characters"))
     }
   }
 
   "isEmailAddress validator" should {
     "allow a simple email address" in {
-      AgentEpayeRegistrationValidator.isEmailAddress("a@b.com")("x") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a@b.com")("x") mustBe Valid(())
     }
 
     "allow email addresses with a hyphen, period, numbers, plus, underscore, exclamation, number sign or question mark" in {
-      AgentEpayeRegistrationValidator.isEmailAddress("a-b@b.com")("x") shouldBe Valid(())
-      AgentEpayeRegistrationValidator.isEmailAddress("a.b@b.com")("x") shouldBe Valid(())
-      AgentEpayeRegistrationValidator.isEmailAddress("1@b.com")("x") shouldBe Valid(())
-      AgentEpayeRegistrationValidator.isEmailAddress("a+b@b.com")("x") shouldBe Valid(())
-      AgentEpayeRegistrationValidator.isEmailAddress("a_b@b.com")("x") shouldBe Valid(())
-      AgentEpayeRegistrationValidator.isEmailAddress("a!b@b.com")("x") shouldBe Valid(())
-      AgentEpayeRegistrationValidator.isEmailAddress("a#b@b.com")("x") shouldBe Valid(())
-      AgentEpayeRegistrationValidator.isEmailAddress("a?b@b.com")("x") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a-b@b.com")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a.b@b.com")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("1@b.com")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a+b@b.com")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a_b@b.com")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a!b@b.com")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a#b@b.com")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a?b@b.com")("x") mustBe Valid(())
     }
 
     "not allow an email address with a comma, colon, semicolon, parenthesis, pound sign or backslash" in {
-      AgentEpayeRegistrationValidator.isEmailAddress("a,b@b.com")("x") shouldBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
-      AgentEpayeRegistrationValidator.isEmailAddress("a:b@b.com")("x") shouldBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
-      AgentEpayeRegistrationValidator.isEmailAddress("a;b@b.com")("x") shouldBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
-      AgentEpayeRegistrationValidator.isEmailAddress("a(b@b.com")("x") shouldBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
-      AgentEpayeRegistrationValidator.isEmailAddress("a)b@b.com")("x") shouldBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
-      AgentEpayeRegistrationValidator.isEmailAddress("a£b@b.com")("x") shouldBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
-      AgentEpayeRegistrationValidator.isEmailAddress("a\\b@b.com")("x") shouldBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
+      AgentEpayeRegistrationValidator.isEmailAddress("a,b@b.com")("x") mustBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
+      AgentEpayeRegistrationValidator.isEmailAddress("a:b@b.com")("x") mustBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
+      AgentEpayeRegistrationValidator.isEmailAddress("a;b@b.com")("x") mustBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
+      AgentEpayeRegistrationValidator.isEmailAddress("a(b@b.com")("x") mustBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
+      AgentEpayeRegistrationValidator.isEmailAddress("a)b@b.com")("x") mustBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
+      AgentEpayeRegistrationValidator.isEmailAddress("a£b@b.com")("x") mustBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
+      AgentEpayeRegistrationValidator.isEmailAddress("a\\b@b.com")("x") mustBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
     }
 
     "not allow an email address without an @ symbol" in {
-      AgentEpayeRegistrationValidator.isEmailAddress("a.com")("x") shouldBe
+      AgentEpayeRegistrationValidator.isEmailAddress("a.com")("x") mustBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
     }
 
     "not allow an email address with more than one @ symbol" in {
-      AgentEpayeRegistrationValidator.isEmailAddress("a@b@c.com")("x") shouldBe
+      AgentEpayeRegistrationValidator.isEmailAddress("a@b@c.com")("x") mustBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
     }
 
     "not allow an email address without a domain" in {
-      AgentEpayeRegistrationValidator.isEmailAddress("a@")("x") shouldBe
+      AgentEpayeRegistrationValidator.isEmailAddress("a@")("x") mustBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
     }
 
     "not allow an email address without a local-part" in {
-      AgentEpayeRegistrationValidator.isEmailAddress("@b.com")("x") shouldBe
+      AgentEpayeRegistrationValidator.isEmailAddress("@b.com")("x") mustBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
     }
   }
 
   "isPostcode validator" should {
     "pass the 6 main formats of postcodes" in {
-      AgentEpayeRegistrationValidator.isPostcode("AA9A9AA")("x") shouldBe Valid(())
-      AgentEpayeRegistrationValidator.isPostcode("A9A9AA")("x") shouldBe Valid(())
-      AgentEpayeRegistrationValidator.isPostcode("A99AA")("x") shouldBe Valid(())
-      AgentEpayeRegistrationValidator.isPostcode("A999AA")("x") shouldBe Valid(())
-      AgentEpayeRegistrationValidator.isPostcode("AA99AA")("x") shouldBe Valid(())
-      AgentEpayeRegistrationValidator.isPostcode("AA999AA")("x") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.isPostcode("AA9A9AA")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isPostcode("A9A9AA")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isPostcode("A99AA")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isPostcode("A999AA")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isPostcode("AA99AA")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isPostcode("AA999AA")("x") mustBe Valid(())
     }
 
     "pass BFPO codes" in {
-      AgentEpayeRegistrationValidator.isPostcode("BFPO1")("x") shouldBe Valid(())
-      AgentEpayeRegistrationValidator.isPostcode("BFPO1234")("x") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.isPostcode("BFPO1")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isPostcode("BFPO1234")("x") mustBe Valid(())
     }
     "fail BFPO codes with spaces" in {
-      AgentEpayeRegistrationValidator.isPostcode("BFPO 1")("x") shouldBe
+      AgentEpayeRegistrationValidator.isPostcode("BFPO 1")("x") mustBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid postcode"))
     }
 
     "fail a valid postcode with lowercase characters" in {
-      AgentEpayeRegistrationValidator.isPostcode("aa999aa")("x") shouldBe
+      AgentEpayeRegistrationValidator.isPostcode("aa999aa")("x") mustBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid postcode"))
     }
 
     "fail any code that isn't one of the 6 main formats of postcodes" in {
-      AgentEpayeRegistrationValidator.isPostcode("A99999A")("x") shouldBe
+      AgentEpayeRegistrationValidator.isPostcode("A99999A")("x") mustBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid postcode"))
     }
 
     "fail a code that is longer than 8 characters" in {
-      AgentEpayeRegistrationValidator.isPostcode("AA9A9AAAA")("x") shouldBe
+      AgentEpayeRegistrationValidator.isPostcode("AA9A9AAAA")("x") mustBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid postcode"))
     }
 
     "fail a code with spaces" in {
-      AgentEpayeRegistrationValidator.isPostcode("AA99 9AA")("x") shouldBe
+      AgentEpayeRegistrationValidator.isPostcode("AA99 9AA")("x") mustBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid postcode"))
     }
   }
 
   "isPhoneNumber validator" should {
     "pass just numbers" in {
-      AgentEpayeRegistrationValidator.isPhoneNumber("01234567890")("x") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.isPhoneNumber("01234567890")("x") mustBe Valid(())
     }
     "pass numbers separated by a space" in {
-      AgentEpayeRegistrationValidator.isPhoneNumber("01234 567890")("x") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.isPhoneNumber("01234 567890")("x") mustBe Valid(())
     }
     "fail numbers with hash" in {
-      AgentEpayeRegistrationValidator.isPhoneNumber("#01234 567890")("x") shouldBe
+      AgentEpayeRegistrationValidator.isPhoneNumber("#01234 567890")("x") mustBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid phone number"))
     }
     "pass numbers with an x" in {
-      AgentEpayeRegistrationValidator.isPhoneNumber("01234 567890x2")("x") shouldBe
+      AgentEpayeRegistrationValidator.isPhoneNumber("01234 567890x2")("x") mustBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid phone number"))
     }
     "pass with a country code prefix" in {
-      AgentEpayeRegistrationValidator.isPhoneNumber("00441234 567890")("x") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.isPhoneNumber("00441234 567890")("x") mustBe Valid(())
     }
     "fail with a plus" in {
-      AgentEpayeRegistrationValidator.isPhoneNumber("+441234 567890")("x") shouldBe
+      AgentEpayeRegistrationValidator.isPhoneNumber("+441234 567890")("x") mustBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid phone number"))
     }
     "fail with hyphens" in {
-      AgentEpayeRegistrationValidator.isPhoneNumber("44-1234-567890")("x") shouldBe
+      AgentEpayeRegistrationValidator.isPhoneNumber("44-1234-567890")("x") mustBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid phone number"))
     }
     "fail with letters" in {
-      AgentEpayeRegistrationValidator.isPhoneNumber("44 1234 ACME12")("x") shouldBe
+      AgentEpayeRegistrationValidator.isPhoneNumber("44 1234 ACME12")("x") mustBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid phone number"))
     }
     "fail with brackets" in {
-      AgentEpayeRegistrationValidator.isPhoneNumber("(44) 123 345 567")("x") shouldBe
+      AgentEpayeRegistrationValidator.isPhoneNumber("(44) 123 345 567")("x") mustBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid phone number"))
     }
   }
@@ -218,16 +218,16 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
   "isInPast" should {
     "pass a date in the past" in {
       val dateYesterday = LocalDate.now(DateTimeZone.UTC).minusDays(1)
-      AgentEpayeRegistrationValidator.isInPast(dateYesterday)("x") shouldBe Valid(())
+      AgentEpayeRegistrationValidator.isInPast(dateYesterday)("x") mustBe Valid(())
     }
     "fail a date in the present" in {
       val dateToday = LocalDate.now(DateTimeZone.UTC)
-      AgentEpayeRegistrationValidator.isInPast(dateToday)("x") shouldBe
+      AgentEpayeRegistrationValidator.isInPast(dateToday)("x") mustBe
         Invalid(Failure("INVALID_DATE_RANGE", "'x' date must be in the past"))
     }
     "fail a date in the future" in {
       val dateTomorrow = LocalDate.now(DateTimeZone.UTC).plusDays(1)
-      AgentEpayeRegistrationValidator.isInPast(dateTomorrow)("x") shouldBe
+      AgentEpayeRegistrationValidator.isInPast(dateTomorrow)("x") mustBe
         Invalid(Failure("INVALID_DATE_RANGE", "'x' date must be in the past"))
     }
   }
@@ -235,24 +235,24 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
   "isValidDateRange" should {
     "pass a valid date range" in {
       val dateYesterday = LocalDate.now(DateTimeZone.UTC).minusDays(1)
-      AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday, dateYesterday) shouldBe Valid(())
-      AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday.minusDays(1), dateYesterday) shouldBe Valid(())
+      AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday, dateYesterday) mustBe Valid(())
+      AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday.minusDays(1), dateYesterday) mustBe Valid(())
     }
     "fail if the from date occurs after the to date" in {
       val dateYesterday = LocalDate.now(DateTimeZone.UTC).minusDays(1)
-      AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday, dateYesterday.minusDays(1)) shouldBe
+      AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday, dateYesterday.minusDays(1)) mustBe
         anError("INVALID_DATE_RANGE", "'To' date must be after 'From' date")
     }
     "fail if the date range spans more than a year" in {
       val someYear = LocalDate.parse("2015-03-01", ISODateTimeFormat.date())
-      AgentEpayeRegistrationValidator.isValidDateRange(someYear, someYear.plusYears(1).plusDays(1)) shouldBe
+      AgentEpayeRegistrationValidator.isValidDateRange(someYear, someYear.plusYears(1).plusDays(1)) mustBe
         anError("INVALID_DATE_RANGE", "Date range must be 1 year or less")
     }
     "pass if the date range spans exactly 366 days of a leap year" in {
       val yearBeforeFeb29 = LocalDate.parse("2015-03-01", ISODateTimeFormat.date())
       val yearAfterFeb29 = LocalDate.parse("2016-03-01", ISODateTimeFormat.date())
-      Days.daysBetween(yearBeforeFeb29, yearAfterFeb29).getDays shouldBe 366
-      AgentEpayeRegistrationValidator.isValidDateRange(yearBeforeFeb29, yearAfterFeb29) shouldBe Valid(())
+      Days.daysBetween(yearBeforeFeb29, yearAfterFeb29).getDays mustBe 366
+      AgentEpayeRegistrationValidator.isValidDateRange(yearBeforeFeb29, yearAfterFeb29) mustBe Valid(())
     }
   }
 
@@ -260,113 +260,113 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
     val present = LocalDate.now(DateTimeZone.UTC)
     val past = present.minusDays(1)
     "param is not in the past" in {
-      validateDateRange(present, past) shouldBe anError("INVALID_DATE_RANGE", "'From' date must be in the past")
-      validateDateRange(past, present) shouldBe anError("INVALID_DATE_RANGE", "'To' date must be in the past")
+      validateDateRange(present, past) mustBe anError("INVALID_DATE_RANGE", "'From' date must be in the past")
+      validateDateRange(past, present) mustBe anError("INVALID_DATE_RANGE", "'To' date must be in the past")
     }
     "from param is not after to param" in {
-      validateDateRange(past, past.minusDays(1)) shouldBe anError("INVALID_DATE_RANGE", "'To' date must be after 'From' date")
+      validateDateRange(past, past.minusDays(1)) mustBe anError("INVALID_DATE_RANGE", "'To' date must be after 'From' date")
     }
     "date range is less than or equal to a year" in {
-      validateDateRange(past.minusYears(1).minusDays(1), past) shouldBe anError("INVALID_DATE_RANGE", "Date range must be 1 year or less")
+      validateDateRange(past.minusYears(1).minusDays(1), past) mustBe anError("INVALID_DATE_RANGE", "Date range must be 1 year or less")
     }
   }
 
   "validateRegistrationRequest should check all mandatory fields are present" when {
     "an agent name is not given" in {
-      validateRegistrationRequest(regRequest.copy(agentName = " ")) shouldBe
+      validateRegistrationRequest(regRequest.copy(agentName = " ")) mustBe
         anError("MISSING_FIELD", "The agent name field is mandatory")
     }
     "a contact name is not given" in {
-      validateRegistrationRequest(regRequest.copy(contactName = " ")) shouldBe
+      validateRegistrationRequest(regRequest.copy(contactName = " ")) mustBe
         anError("MISSING_FIELD", "The contact name field is mandatory")
     }
     "the first address line is not given" in {
-      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine1 = " "))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine1 = " "))) mustBe
         anError("MISSING_FIELD", "The address line 1 field is mandatory")
     }
     "the second address line is not given" in {
-      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine2 = " "))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine2 = " "))) mustBe
         anError("MISSING_FIELD", "The address line 2 field is mandatory")
     }
     "the postcode is not given" in {
-      validateRegistrationRequest(regRequest.copy(address = address.copy(postCode = " "))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(postCode = " "))) mustBe
         anError("MISSING_FIELD", "The postcode field is mandatory")
     }
   }
 
   "validateRegistrationRequest should pass if an optional field is missing" when {
     "the optional telephone number is not given" in {
-      validateRegistrationRequest(regRequest.copy(telephoneNumber = None)) shouldBe Valid(())
+      validateRegistrationRequest(regRequest.copy(telephoneNumber = None)) mustBe Valid(())
     }
     "the optional fax number is not given" in {
-      validateRegistrationRequest(regRequest.copy(faxNumber = None)) shouldBe Valid(())
+      validateRegistrationRequest(regRequest.copy(faxNumber = None)) mustBe Valid(())
     }
     "the optional third address line is not given" in {
-      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine3 = None))) shouldBe Valid(())
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine3 = None))) mustBe Valid(())
     }
     "the optional fourth address line is not given" in {
-      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine4 = None))) shouldBe Valid(())
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine4 = None))) mustBe Valid(())
     }
   }
 
   "validateRegistrationRequest checks the email address field really is an email address" when {
     "an invalid email address is given" in {
-      validateRegistrationRequest(regRequest.copy(emailAddress = Some("a.c.com"))) shouldBe
+      validateRegistrationRequest(regRequest.copy(emailAddress = Some("a.c.com"))) mustBe
         Invalid(Failure("INVALID_FIELD", "The email address field is not a valid email"))
     }
   }
 
   "validateRegistrationRequest checks alphanumeric fields contain acceptable characters" when {
     "an invalid agent name is given" in {
-      validateRegistrationRequest(regRequest.copy(agentName = """Jonny "John" Jones""")) shouldBe
+      validateRegistrationRequest(regRequest.copy(agentName = """Jonny "John" Jones""")) mustBe
         Invalid(Failure("INVALID_FIELD", "The agent name field contains invalid characters"))
     }
     "an invalid contact name is given" in {
-      validateRegistrationRequest(regRequest.copy(contactName = """Jonny "John" Jones""")) shouldBe
+      validateRegistrationRequest(regRequest.copy(contactName = """Jonny "John" Jones""")) mustBe
         Invalid(Failure("INVALID_FIELD", "The contact name field contains invalid characters"))
     }
     "an invalid first address is given" in {
-      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine1 = "~"))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine1 = "~"))) mustBe
         anError("INVALID_FIELD", "The address line 1 field contains invalid characters")
     }
     "an invalid second address is given" in {
-      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine2 = "~"))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine2 = "~"))) mustBe
         anError("INVALID_FIELD", "The address line 2 field contains invalid characters")
     }
     "an invalid third address is given" in {
-      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine3 = Some("~")))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine3 = Some("~")))) mustBe
         anError("INVALID_FIELD", "The address line 3 field contains invalid characters")
     }
     "an invalid fourth address is given" in {
-      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine4 = Some("~")))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine4 = Some("~")))) mustBe
         anError("INVALID_FIELD", "The address line 4 field contains invalid characters")
     }
   }
 
   "validateRegistrationRequest checks the phone numbers are in an acceptable format" when {
     "an invalid telephone number is given" in {
-      validateRegistrationRequest(regRequest.copy(telephoneNumber = Some("~"))) shouldBe
+      validateRegistrationRequest(regRequest.copy(telephoneNumber = Some("~"))) mustBe
         anError("INVALID_FIELD", "The telephone number field is not a valid phone number")
     }
     "an invalid fax number is given" in {
-      validateRegistrationRequest(regRequest.copy(faxNumber = Some("~"))) shouldBe
+      validateRegistrationRequest(regRequest.copy(faxNumber = Some("~"))) mustBe
         anError("INVALID_FIELD", "The fax number field is not a valid phone number")
     }
   }
 
   "validateRegistrationRequest checks the postcode really is a postcode" when {
     "an invalid postcode is given" in {
-      validateRegistrationRequest(regRequest.copy(address = address.copy(postCode = "~"))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(postCode = "~"))) mustBe
         anError("INVALID_FIELD", "The postcode field is not a valid postcode")
     }
   }
 
   "validateRegistrationRequest should pass when all values are valid" in {
-    validateRegistrationRequest(regRequest) shouldBe Valid(())
+    validateRegistrationRequest(regRequest) mustBe Valid(())
   }
 
   "validateRegistrationRequest reports all errors if multiple fields are invalid" in {
-    validateRegistrationRequest(regRequest.copy(agentName = " ", contactName = " ")) shouldBe
+    validateRegistrationRequest(regRequest.copy(agentName = " ", contactName = " ")) mustBe
       Invalid(Failure(Set(
         ValidationError("MISSING_FIELD", "The agent name field is mandatory"),
         ValidationError("MISSING_FIELD", "The contact name field is mandatory")
@@ -375,39 +375,39 @@ class AgentEpayeRegistrationValidatorSpec extends UnitSpec {
 
   "validateRegistrationRequest fails if a field's maximum length is exceeded" when {
     "the agent name is longer than 56 characters" in {
-      validateRegistrationRequest(regRequest.copy(agentName = padField(57))) shouldBe
+      validateRegistrationRequest(regRequest.copy(agentName = padField(57))) mustBe
         anError("INVALID_FIELD", "The agent name field exceeds 56 characters")
     }
     "the contact name is longer than 56 characters" in {
-      validateRegistrationRequest(regRequest.copy(contactName = padField(57))) shouldBe
+      validateRegistrationRequest(regRequest.copy(contactName = padField(57))) mustBe
         anError("INVALID_FIELD", "The contact name field exceeds 56 characters")
     }
     "the telephone number is longer than 35 characters" in {
-      validateRegistrationRequest(regRequest.copy(telephoneNumber = Some(padField(36)))) shouldBe
+      validateRegistrationRequest(regRequest.copy(telephoneNumber = Some(padField(36)))) mustBe
         anError("INVALID_FIELD", "The telephone number field exceeds 35 characters")
     }
     "the fax number is longer than 35 characters" in {
-      validateRegistrationRequest(regRequest.copy(faxNumber = Some(padField(36)))) shouldBe
+      validateRegistrationRequest(regRequest.copy(faxNumber = Some(padField(36)))) mustBe
         anError("INVALID_FIELD", "The fax number field exceeds 35 characters")
     }
     "the email address is longer than 129 characters" in {
-      validateRegistrationRequest(regRequest.copy(emailAddress = Some(s"${padField(130)}@example.org"))) shouldBe
+      validateRegistrationRequest(regRequest.copy(emailAddress = Some(s"${padField(130)}@example.org"))) mustBe
         anError("INVALID_FIELD", "The email address field exceeds 129 characters")
     }
     "the address line 1 is longer than 35 characters" in {
-      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine1 = padField(36)))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine1 = padField(36)))) mustBe
         anError("INVALID_FIELD", "The address line 1 field exceeds 35 characters")
     }
     "the address line 2 is longer than 35 characters" in {
-      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine2 = padField(36)))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine2 = padField(36)))) mustBe
         anError("INVALID_FIELD", "The address line 2 field exceeds 35 characters")
     }
     "the address line 3 is longer than 35 characters" in {
-      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine3 = Some(padField(36))))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine3 = Some(padField(36))))) mustBe
         anError("INVALID_FIELD", "The address line 3 field exceeds 35 characters")
     }
     "the address line 4 is longer than 35 characters" in {
-      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine4 = Some(padField(36))))) shouldBe
+      validateRegistrationRequest(regRequest.copy(address = address.copy(addressLine4 = Some(padField(36))))) mustBe
         anError("INVALID_FIELD", "The address line 4 field exceeds 35 characters")
     }
   }

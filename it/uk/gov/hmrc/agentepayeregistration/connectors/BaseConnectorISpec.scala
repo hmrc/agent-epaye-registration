@@ -5,9 +5,9 @@ import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.agentepayeregistration.stubs.DesStub
 import uk.gov.hmrc.agentepayeregistration.support.WireMockSupport
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatestplus.play.PlaySpec
 
-class BaseConnectorISpec extends UnitSpec with GuiceOneServerPerSuite with WireMockSupport with DesStub  {
+class BaseConnectorISpec extends PlaySpec with GuiceOneServerPerSuite with WireMockSupport with DesStub  {
 
   def additionalTestConfiguration: Seq[(String, Any)] = Seq.empty
 

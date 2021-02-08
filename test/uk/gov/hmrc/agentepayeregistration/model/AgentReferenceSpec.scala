@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@
 package uk.gov.hmrc.agentepayeregistration.model
 
 import uk.gov.hmrc.agentepayeregistration.models.AgentReference
-import uk.gov.hmrc.play.test.UnitSpec
+import org.scalatestplus.play.PlaySpec
 
-class AgentReferenceSpec extends UnitSpec {
+class AgentReferenceSpec extends PlaySpec {
   "Validation on construction of an agent reference" should {
     "disallow an empty string" in {
       assertThrows[IllegalArgumentException] {
@@ -55,13 +55,13 @@ class AgentReferenceSpec extends UnitSpec {
 
   "generating the next code" should {
     "increment just the numeric portion if it has not reached 9999" in {
-      AgentReference("HX2345").newReference shouldBe AgentReference("HX2346")
+      AgentReference("HX2345").newReference mustBe AgentReference("HX2346")
     }
 
     "increment the alpha portion if the numeric portion has reached 9999" in {
-      AgentReference("HX9999").newReference shouldBe AgentReference("HY0001")
+      AgentReference("HX9999").newReference mustBe AgentReference("HY0001")
 
-      AgentReference("HZ9999").newReference shouldBe AgentReference("IA0001")
+      AgentReference("HZ9999").newReference mustBe AgentReference("IA0001")
     }
   }
 }

@@ -1,7 +1,8 @@
 package uk.gov.hmrc.agentepayeregistration.connectors
 
 import uk.gov.hmrc.agentepayeregistration.models._
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, Upstream5xxResponse}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, UpstreamErrorResponse}
+import play.api.test.Helpers.{await, defaultAwaitTimeout}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -23,7 +24,7 @@ class DesConnectorISpec extends BaseConnectorISpec {
   "createAgentKnownFacts" should {
     "return 204" in {
       createAgentKnownFactsValid(AgentReference("HX2001"))
-      await(connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("HX2001"))).status shouldBe 204
+      await(connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("HX2001"))).status mustBe 204
     }
 
     "return 400 when AgentId is invalid" in {
@@ -56,7 +57,7 @@ class DesConnectorISpec extends BaseConnectorISpec {
 
     "return 500 when DES is failing" in {
       createAgentKnownFactsFailsWithStatus(AgentReference("HX2001"), 503)
-      an[Upstream5xxResponse] should be thrownBy {
+      an[UpstreamErrorResponse] should be thrownBy {
         await(connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("HX2001")))
       }
     }
