@@ -16,40 +16,41 @@
 
 package uk.gov.hmrc.agentepayeregistration.services
 
-import javax.inject.{Inject, Singleton}
-
-import cats.data.Validated.{Invalid, Valid}
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
+import play.api.Logging
+import play.api.mvc.Request
 import uk.gov.hmrc.agentepayeregistration.audit.AuditService
 import uk.gov.hmrc.agentepayeregistration.connectors.DesConnector
 import uk.gov.hmrc.agentepayeregistration.models._
 import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
-import uk.gov.hmrc.agentepayeregistration.validators.AgentEpayeRegistrationValidator._
 import uk.gov.hmrc.http.HeaderCarrier
-import play.api.mvc.Request
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 
 @Singleton
 class AgentEpayeRegistrationService @Inject()(repository: AgentEpayeRegistrationRepository,
                                               desConnector: DesConnector,
-                                              auditService : AuditService) {
+                                              auditService: AuditService) extends Logging {
 
   def register(regRequest: RegistrationRequest)
-              (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[Any]): Future[Either[Failure, AgentReference]] = {
-      validateRegistrationRequest(regRequest) match {
-        case Valid(_) =>
-          for {
-            regDetails <- repository.create(regRequest)
-            currentDate = DateTimeFormat.forPattern("yyyy-MM-dd").print(DateTime.now)
-            _ <- desConnector.createAgentKnownFacts(CreateKnownFactsRequest(regRequest, currentDate), regDetails.agentReference).andThen {
-              case Success(_) => auditService.sendAgentKnownFactsCreated(regDetails)
-            }
-          } yield Right(regDetails.agentReference)
-
-        case Invalid(failure) => Future.successful(Left(failure))
+              (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[Any]): Future[Either[String, AgentReference]] = {
+    for {
+      regDetails <- repository.create(regRequest)
+      currentDate = DateTimeFormat.forPattern("yyyy-MM-dd").print(DateTime.now)
+      knownFactsCreated <- desConnector.createAgentKnownFacts(CreateKnownFactsRequest(regRequest, currentDate), regDetails.agentReference).andThen {
+        case Success(response) if response.isRight =>
+          auditService.sendAgentKnownFactsCreated(regDetails)
+        case _ =>
       }
+    } yield {
+      knownFactsCreated match {
+        case Right(()) => Right(regDetails.agentReference)
+        case Left(error) => Left(error)
+      }
+
     }
+  }
 }

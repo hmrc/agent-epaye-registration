@@ -30,8 +30,7 @@ import org.scalatestplus.play.PlaySpec
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 
 import scala.concurrent.ExecutionContext
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.http.logging.{Authorization, RequestId, SessionId}
+import uk.gov.hmrc.http.{Authorization, HeaderCarrier, RequestId, SessionId}
 
 class AuditServiceSpec extends PlaySpec with MockitoSugar with Eventually {
 
