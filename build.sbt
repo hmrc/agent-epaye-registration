@@ -36,7 +36,7 @@ lazy val root = (project in file("."))
   .settings(
     name := "agent-epaye-registration",
     organization := "uk.gov.hmrc",
-    scalaVersion := "2.12.13",
+    scalaVersion := "2.12.12",
     majorVersion := 0,
     isPublicArtefact := true,
     PlayKeys.playDefaultPort := 9445,
