@@ -1,8 +1,8 @@
 package uk.gov.hmrc.agentepayeregistration.connectors
 
-import uk.gov.hmrc.agentepayeregistration.models._
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, UpstreamErrorResponse}
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
+import uk.gov.hmrc.agentepayeregistration.models._
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -22,44 +22,34 @@ class DesConnectorISpec extends BaseConnectorISpec {
   val createInvalidKnownFactsRequest = CreateKnownFactsRequest(invalidRegRequest, "2000-01-01")
 
   "createAgentKnownFacts" should {
-    "return 204" in {
+    "return Right(()))" in {
       createAgentKnownFactsValid(AgentReference("HX2001"))
-      await(connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("HX2001"))).status mustBe 204
+      await(connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("HX2001"))) mustBe Right(())
     }
 
-    "return 400 when AgentId is invalid" in {
+    "return Left when AgentId is invalid" in {
       createAgentKnownFactsInvalidAgentId(AgentReference("ZZ0000"))
-      an[BadRequestException] should be thrownBy {
-        await(connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("ZZ0000")))
-      }
+      await(connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("ZZ0000"))).isLeft mustBe true
     }
 
-    "return 400 when regime is not PAYE" in {
+    "return Left when regime is not PAYE" in {
       createAgentKnownFactsInvalidRegime(AgentReference("HX2001"))
-      an[BadRequestException] should be thrownBy {
-        await(connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("HX2001"), "AAA"))
-      }
+      await(connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("HX2001"), "AAA")).isLeft mustBe true
     }
 
-    "return 400 when AgentId is invalid and the regime is not PAYE" in {
+    "return Left when AgentId is invalid and the regime is not PAYE" in {
       createAgentKnownFactsInvalidBoth
-      an[BadRequestException] should be thrownBy {
-        await(connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("ZZ0000"), "AAA"))
-      }
+      await(connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("ZZ0000"), "AAA")).isLeft mustBe true
     }
 
-    "return 400 when payload is invalid" in {
+    "return Left when payload is invalid" in {
       createAgentKnownFactsInvalidPayload(AgentReference("HX2001"))
-      an[BadRequestException] should be thrownBy {
-        await(connector.createAgentKnownFacts(createInvalidKnownFactsRequest, AgentReference("HX2001")))
-      }
+      await(connector.createAgentKnownFacts(createInvalidKnownFactsRequest, AgentReference("HX2001"))).isLeft mustBe true
     }
 
-    "return 500 when DES is failing" in {
+    "return Left when DES is failing" in {
       createAgentKnownFactsFailsWithStatus(AgentReference("HX2001"), 503)
-      an[UpstreamErrorResponse] should be thrownBy {
-        await(connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("HX2001")))
-      }
+      await(connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("HX2001"))).isLeft mustBe true
     }
   }
 }
