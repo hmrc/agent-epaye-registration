@@ -18,9 +18,11 @@ package uk.gov.hmrc.agentepayeregistration.controllers
 
 import org.joda.time.LocalDate
 import org.joda.time.format.ISODateTimeFormat
-import org.scalatest.{EitherValues, MustMatchers, WordSpecLike}
+import org.scalatest.matchers.must.Matchers
+import org.scalatest.wordspec.AnyWordSpecLike
+import org.scalatest.EitherValues
 
-class UrlBindersSpec extends WordSpecLike with MustMatchers with EitherValues {
+class UrlBindersSpec extends AnyWordSpecLike with Matchers with EitherValues {
   "LocalDate binder" should {
     "bind perfectly valid dates" in {
       UrlBinders.localDateQueryBinder.bind("dateFrom", Map("dateFrom" -> Seq("2010-01-01"))) mustBe

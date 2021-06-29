@@ -3,21 +3,25 @@ import uk.gov.hmrc.ForkedJvmPerTestSettings
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
 lazy val compileDeps = Seq(
-  "uk.gov.hmrc"       %% "bootstrap-backend-play-27"  % "5.2.0",
-  "uk.gov.hmrc"       %% "simple-reactivemongo"       % "8.0.0-play-27",
+  "uk.gov.hmrc"       %% "bootstrap-backend-play-28"  % "5.4.0",
+  "uk.gov.hmrc"       %% "simple-reactivemongo"       % "8.0.0-play-28",
   "org.typelevel"     %% "cats"                       % "0.9.0",
-  "uk.gov.hmrc"       %% "agent-kenshoo-monitoring"   % "4.4.0",
-  "uk.gov.hmrc"       %% "mongo-lock"                 % "7.0.0-play-27",
+  "uk.gov.hmrc"       %% "agent-kenshoo-monitoring"   % "4.6.0-play-27",
+  "uk.gov.hmrc"       %% "mongo-lock"                 % "7.0.0-play-28",
   "uk.gov.hmrc"       %% "emailaddress"               % "3.5.0",
-  "com.typesafe.play" %% "play-json"                  % "2.9.1"
+  "com.typesafe.play" %% "play-json"                  % "2.9.2",
+  "com.typesafe.akka" %% "akka-protobuf"              % "2.6.14"
 )
 
 def testDeps(scope: String) = Seq(
-  "org.mockito"              % "mockito-core"         % "3.6.28"          % scope,
-  "org.scalatestplus.play"  %% "scalatestplus-play"   % "4.0.3"           % scope,
-  "com.github.tomakehurst"   % "wiremock-standalone"  % "2.26.3"          % scope,
-  "uk.gov.hmrc"             %% "reactivemongo-test"   % "5.0.0-play-27"   % scope,
-  "org.pegdown"              %  "pegdown"             % "1.6.0"           % scope
+  "org.mockito"              % "mockito-core"               % "3.6.28"          % scope,
+  "org.scalatestplus.play"  %% "scalatestplus-play"         % "5.1.0"           % scope,
+  "org.scalatestplus"       %%  "scalatestplus-mockito"     % "1.0.0-M2"        % scope,
+  "com.vladsch.flexmark"     %   "flexmark-all"             % "0.35.10"         % scope,
+  "com.github.tomakehurst"   % "wiremock-standalone"        % "2.27.2"          % scope,
+  "uk.gov.hmrc"             %% "reactivemongo-test"         % "5.0.0-play-28"   % scope,
+  "org.pegdown"              %  "pegdown"                   % "1.6.0"           % scope
+
 )
 
 lazy val scoverageSettings = {
