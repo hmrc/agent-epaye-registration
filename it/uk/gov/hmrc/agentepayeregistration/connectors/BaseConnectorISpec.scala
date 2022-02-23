@@ -1,5 +1,6 @@
 package uk.gov.hmrc.agentepayeregistration.connectors
 
+import config.AppConfig
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -12,6 +13,8 @@ class BaseConnectorISpec extends PlaySpec with GuiceOneServerPerSuite with WireM
   def additionalTestConfiguration: Seq[(String, Any)] = Seq.empty
 
   override implicit lazy val app: Application = appBuilder.build()
+
+  val config: AppConfig = app.injector.instanceOf[AppConfig]
 
   protected def appBuilder: GuiceApplicationBuilder = {
     new GuiceApplicationBuilder()

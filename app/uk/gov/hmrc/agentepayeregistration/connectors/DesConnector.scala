@@ -40,7 +40,7 @@ class DesConnector @Inject()(config: AppConfig,
   def createAgentKnownFacts(knownFactDetails: CreateKnownFactsRequest, agentRef: AgentReference, regime: String="PAYE")(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[String, Unit]] = {
     postWithDesHeaders[CreateKnownFactsRequest, HttpResponse](
       "createAgentKnownFactsAPI1337",
-      new URL(s"${config.desURL}/agents/regime/$regime/agentid/${agentRef.value}/known-facts"),
+      new URL(config.desBaseURL + config.desEndpoint(agentRef.value)),
       knownFactDetails
     ) map {
       response =>
