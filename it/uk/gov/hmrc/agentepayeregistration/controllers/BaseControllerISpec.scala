@@ -1,5 +1,6 @@
 package uk.gov.hmrc.agentepayeregistration.controllers
 
+import config.AppConfig
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.{Seconds, Span}
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
@@ -16,6 +17,8 @@ abstract class BaseControllerISpec extends PlaySpec with Eventually with GuiceOn
   implicit override val patienceConfig: PatienceConfig = PatienceConfig(timeout = Span(4, Seconds), interval = Span(1, Seconds))
 
   override implicit lazy val app: Application = appBuilder.build()
+
+  val config: AppConfig = app.injector.instanceOf[AppConfig]
 
   protected def appBuilder: GuiceApplicationBuilder = {
     new GuiceApplicationBuilder()

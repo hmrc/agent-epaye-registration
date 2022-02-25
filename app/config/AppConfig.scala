@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,11 @@ class AppConfig @Inject()(config: ServicesConfig) {
   lazy val authEnrolment: String = config.getString("extract.auth.stride.enrolment")
   lazy val authURL: String       = config.baseUrl("auth")
 
-  lazy val desURL: String    = config.baseUrl("des")
+  def desEndpoint(agentId: String, regime: String = "PAYE"): String =
+    if(desEnv == "live") s"/agents/regime/$regime/agentid/$agentId/known-facts"
+    else s"/agents-external-stubs/known-facts/regime/$regime/$agentId"
+  
+  lazy val desBaseURL: String = config.baseUrl("des")
   lazy val desEnv: String    = config.getString("microservice.services.des.environment")
   lazy val desToken: String  = config.getString("microservice.services.des.authorization-token")
 

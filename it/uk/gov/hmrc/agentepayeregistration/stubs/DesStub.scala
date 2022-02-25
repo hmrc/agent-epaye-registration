@@ -4,11 +4,13 @@ import uk.gov.hmrc.agentepayeregistration.models.AgentReference
 import uk.gov.hmrc.agentepayeregistration.support.WireMockSupport
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlEqualTo}
 import com.github.tomakehurst.wiremock.client.WireMock._
+import config.AppConfig
 
 trait DesStub {
   me: WireMockSupport =>
+  val config: AppConfig
   def createAgentKnownFactsValid(agentRef: AgentReference): Unit = {
-    stubFor(post(urlEqualTo(s"/agents/regime/PAYE/agentid/${agentRef.value}/known-facts"))
+    stubFor(post(urlEqualTo(config.desEndpoint(agentRef.value)))
       .withHeader("Content-Type", equalTo("application/json"))
             .withRequestBody(equalToJson(s"""{
                                   |  "agentName": "Alex P",
@@ -25,7 +27,7 @@ trait DesStub {
   }
 
   def createAgentKnownFactsInvalidAgentId(agentRef: AgentReference) = {
-    stubFor(post(urlPathEqualTo(s"/agents/regime/PAYE/agentid/${agentRef.value}/known-facts"))
+    stubFor(post(urlPathEqualTo(config.desEndpoint(agentRef.value)))
       .withHeader("Content-Type", containing("application/json"))
       .withRequestBody(equalToJson(s"""{
                                   |  "agentName": "Alex P",
@@ -42,7 +44,7 @@ trait DesStub {
   }
 
   def createAgentKnownFactsInvalidRegime(agentRef: AgentReference) = {
-    stubFor(post(urlPathEqualTo(s"/agents/regime/AAA/agentid/${agentRef.value}/known-facts"))
+    stubFor(post(urlPathEqualTo(config.desEndpoint(agentRef.value, "AAA")))
       .withHeader("Content-Type", containing("application/json"))
       .withRequestBody(equalToJson(s"""{
                                   |  "agentName": "Alex P",
@@ -59,7 +61,7 @@ trait DesStub {
   }
 
   def createAgentKnownFactsInvalidBoth = {
-    stubFor(post(urlPathEqualTo("/agents/regime/AAA/agentid/ZZ0000/known-facts"))
+    stubFor(post(urlPathEqualTo(config.desEndpoint("ZZ0000", "AAA")))
       .withHeader("Content-Type", containing("application/json"))
       .withRequestBody(equalToJson(s"""{
                                   |  "agentName": "Alex P",
@@ -76,7 +78,7 @@ trait DesStub {
   }
 
   def createAgentKnownFactsInvalidPayload(agentRef: AgentReference) = {
-    stubFor(post(urlPathEqualTo(s"/agents/regime/PAYE/agentid/${agentRef.value}/known-facts"))
+    stubFor(post(urlPathEqualTo(config.desEndpoint(agentRef.value)))
       .withHeader("Content-Type", containing("application/json"))
       .withRequestBody(equalToJson(s"""{
                                   |  "agentName": "'INVALID PAYLOAD'",
@@ -93,12 +95,12 @@ trait DesStub {
   }
 
   def createAgentKnownFactsFailsWithStatus(agentRef: AgentReference, status: Int) = {
-    stubFor(post(urlPathEqualTo(s"/agents/regime/PAYE/agentid/${agentRef.value}/known-facts"))
+    stubFor(post(urlPathEqualTo(config.desEndpoint(agentRef.value)))
       .willReturn(aResponse().withStatus(status)))
   }
 
   def givenAgentKnownFactsComplete(agentRef: AgentReference): Unit = {
-    stubFor(post(urlEqualTo(s"/agents/regime/PAYE/agentid/${agentRef.value}/known-facts"))
+    stubFor(post(urlEqualTo(config.desEndpoint(agentRef.value)))
       .withHeader("Content-Type", equalTo("application/json"))
       .withRequestBody(equalToJson(
         s"""{
@@ -117,7 +119,7 @@ trait DesStub {
   }
 
   def givenAgentKnownFactsIncomplete(agentRef: AgentReference): Unit = {
-    stubFor(post(urlEqualTo(s"/agents/regime/PAYE/agentid/${agentRef.value}/known-facts"))
+    stubFor(post(urlEqualTo(config.desEndpoint(agentRef.value)))
       .withHeader("Content-Type", equalTo("application/json"))
       .withRequestBody(equalToJson(
         s"""{

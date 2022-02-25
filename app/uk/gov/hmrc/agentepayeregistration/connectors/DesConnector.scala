@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ class DesConnector @Inject()(config: AppConfig,
   def createAgentKnownFacts(knownFactDetails: CreateKnownFactsRequest, agentRef: AgentReference, regime: String="PAYE")(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[String, Unit]] = {
     postWithDesHeaders[CreateKnownFactsRequest, HttpResponse](
       "createAgentKnownFactsAPI1337",
-      new URL(s"${config.desURL}/agents/regime/$regime/agentid/${agentRef.value}/known-facts"),
+      new URL(config.desBaseURL + config.desEndpoint(agentRef.value)),
       knownFactDetails
     ) map {
       response =>
