@@ -3,24 +3,23 @@ import uk.gov.hmrc.ForkedJvmPerTestSettings
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
 lazy val compileDeps = Seq(
-  "uk.gov.hmrc"       %% "bootstrap-backend-play-28"  % "5.4.0",
-  "uk.gov.hmrc"       %% "simple-reactivemongo"       % "8.0.0-play-28",
+  "uk.gov.hmrc"       %% "bootstrap-backend-play-28"  % "5.24.0",
+  "uk.gov.hmrc"       %% "simple-reactivemongo"       % "8.1.0-play-28",
   "org.typelevel"     %% "cats"                       % "0.9.0",
-  "uk.gov.hmrc"       %% "agent-kenshoo-monitoring"   % "4.6.0-play-27",
-  "uk.gov.hmrc"       %% "mongo-lock"                 % "7.0.0-play-28",
-  "uk.gov.hmrc"       %% "emailaddress"               % "3.5.0",
+  "uk.gov.hmrc"       %% "agent-kenshoo-monitoring"   % "4.8.0-play-28",
+  "uk.gov.hmrc"       %% "mongo-lock"                 % "7.1.0-play-28",
+  "uk.gov.hmrc"       %% "emailaddress"               % "3.6.0",
   "com.typesafe.play" %% "play-json"                  % "2.9.2",
-  "com.typesafe.akka" %% "akka-protobuf"              % "2.6.14"
+  "com.typesafe.akka" %% "akka-protobuf"              % "2.6.19"
 )
 
 def testDeps(scope: String) = Seq(
-  "org.mockito"              % "mockito-core"               % "3.6.28"          % scope,
-  "org.scalatestplus.play"  %% "scalatestplus-play"         % "5.1.0"           % scope,
-  "org.scalatestplus"       %%  "scalatestplus-mockito"     % "1.0.0-M2"        % scope,
-  "com.vladsch.flexmark"     %   "flexmark-all"             % "0.35.10"         % scope,
+  "uk.gov.hmrc"             %% "bootstrap-test-play-28"     % "5.25.0"          % scope,
+  "org.mockito"              % "mockito-core"               % "4.6.1"          % scope,
+  "org.scalatestplus"       %% "scalatestplus-mockito"      % "1.0.0-M2"        % scope,
   "com.github.tomakehurst"   % "wiremock-standalone"        % "2.27.2"          % scope,
-  "uk.gov.hmrc"             %% "reactivemongo-test"         % "5.0.0-play-28"   % scope,
-  "org.pegdown"              %  "pegdown"                   % "1.6.0"           % scope
+  "uk.gov.hmrc"             %% "reactivemongo-test"         % "5.1.0-play-28"   % scope,
+  "org.pegdown"              % "pegdown"                    % "1.6.0"           % scope
 
 )
 
@@ -29,7 +28,7 @@ lazy val scoverageSettings = {
   Seq(
     // Semicolon-separated list of regexs matching classes to exclude
     ScoverageKeys.coverageExcludedPackages := """uk\.gov\.hmrc\.BuildInfo;.*\.Routes;.*\.RoutesPrefix;.*Filters?;MicroserviceAuditConnector;Module;GraphiteStartUp;ErrorHandler;.*\.Reverse[^.]*""",
-    ScoverageKeys.coverageMinimum := 80.00,
+    ScoverageKeys.coverageMinimumStmtTotal := 80.00,
     ScoverageKeys.coverageFailOnMinimum := false,
     ScoverageKeys.coverageHighlighting := true,
     parallelExecution in Test := false
