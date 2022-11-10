@@ -16,16 +16,17 @@
 
 package uk.gov.hmrc.agentepayeregistration.repository
 
+import org.mongodb.scala.model.Filters
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import play.api.Configuration
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.agentepayeregistration.models.{Address, AgentReference, RegistrationRequest}
-import uk.gov.hmrc.mongo.MongoSpecSupport
 
 import scala.collection.immutable.List
-import scala.concurrent.ExecutionContext.Implicits.global
 
-class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with MongoSpecSupport with BeforeAndAfterEach with BeforeAndAfterAll {
-  private lazy val repo = app.injector.instanceOf[AgentEpayeRegistrationRepository]
+class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with BeforeAndAfterEach with BeforeAndAfterAll {
+  private lazy val config = app.injector.instanceOf[Configuration]
+  override lazy val repository = new AgentEpayeRegistrationRepository(mongoComponent, config)
 
   val postcode = "AB11 AA11"
   val addressLine1 = "Address Line 1"
@@ -43,26 +44,26 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Mon
 
   override def beforeEach() {
     super.beforeEach()
-    await(repo.ensureIndexes)
+    await(repository.ensureIndexes)
   }
 
   "AgentEpayeRegistrationRepository" should {
     "create a AgentReference record" in {
-      await(repo.find("agentReference" -> "HX2000")) mustBe List.empty
-      await(repo.create(regRequest))
+      await(repository.collection.find(Filters.equal("agentReference", "HX2000")).toFuture()) mustBe List.empty
+      await(repository.create(regRequest))
 
-      await(repo.find("agentReference" -> "HX2000")).head mustBe AgentReference("HX2000")
+      await(repository.collection.find(Filters.equal("agentReference", "HX2000")).head()) mustBe AgentReference("HX2000")
     }
 
     "create new records and generate a new unique Agent PAYE Reference code" in {
-      await(repo.create(regRequest))
-      await(repo.find("agentReference" -> "HX2000")).head mustBe AgentReference("HX2000")
+      await(repository.create(regRequest))
+      await(repository.collection.find(Filters.equal("agentReference", "HX2000")).head()) mustBe AgentReference("HX2000")
 
-      await(repo.create(regRequest))
-      await(repo.find("agentReference" -> "HX2001")).head mustBe AgentReference("HX2001")
+      await(repository.create(regRequest))
+      await(repository.collection.find(Filters.equal("agentReference", "HX2001")).head()) mustBe AgentReference("HX2001")
 
-      await(repo.create(regRequest))
-      await(repo.find("agentReference" -> "HX2002")).head mustBe AgentReference("HX2002")
+      await(repository.create(regRequest))
+      await(repository.collection.find(Filters.equal("agentReference", "HX2002")).head()) mustBe AgentReference("HX2002")
 
     }
   }

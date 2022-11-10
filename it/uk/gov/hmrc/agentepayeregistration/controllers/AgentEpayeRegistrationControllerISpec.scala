@@ -1,12 +1,18 @@
 package uk.gov.hmrc.agentepayeregistration.controllers
 
+import play.api.Configuration
 import play.api.libs.json._
 import uk.gov.hmrc.agentepayeregistration.audit.AgentEpayeRegistrationEvent
 import uk.gov.hmrc.agentepayeregistration.models.AgentReference
+import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
 import uk.gov.hmrc.agentepayeregistration.stubs.{AuthStub, DataStreamStub}
 import uk.gov.hmrc.agentepayeregistration.support.RegistrationActions
+import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
-class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with AuthStub with RegistrationActions with DataStreamStub {
+class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with AuthStub with RegistrationActions with DataStreamStub with DefaultPlayMongoRepositorySupport[AgentReference] {
+
+  private lazy val configuration = app.injector.instanceOf[Configuration]
+  override lazy val repository = new AgentEpayeRegistrationRepository(mongoComponent, configuration)
 
   override def additionalTestConfiguration: Seq[(String, Any)] = Seq(
     "extract.auth.stride.enrolment" -> "ValidStrideEnrolment",

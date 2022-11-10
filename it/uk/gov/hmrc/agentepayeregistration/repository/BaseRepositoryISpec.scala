@@ -21,8 +21,10 @@ import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.agentepayeregistration.support.{MongoApp, WireMockSupport}
 import org.scalatestplus.play.PlaySpec
+import uk.gov.hmrc.agentepayeregistration.models.AgentReference
+import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
-abstract class BaseRepositoryISpec extends PlaySpec with GuiceOneAppPerSuite with MongoApp with WireMockSupport {
+abstract class BaseRepositoryISpec extends PlaySpec with GuiceOneAppPerSuite with MongoApp with WireMockSupport with DefaultPlayMongoRepositorySupport[AgentReference] {
 
   override implicit lazy val app: Application = appBuilder.build()
 

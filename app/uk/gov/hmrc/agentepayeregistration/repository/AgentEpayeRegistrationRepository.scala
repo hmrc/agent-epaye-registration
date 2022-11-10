@@ -18,39 +18,42 @@ package uk.gov.hmrc.agentepayeregistration.repository
 
 import javax.inject.{Inject, Singleton}
 import org.joda.time.{DateTime, DateTimeZone}
-import play.api.libs.json.Json.{obj, toJsFieldJsValueWrapper}
-import play.api.libs.json._
-import play.modules.reactivemongo.ReactiveMongoComponent
-import reactivemongo.api.Cursor
-import reactivemongo.api.indexes.{Index, IndexType}
-import reactivemongo.bson.{BSONDocument, BSONObjectID}
 import reactivemongo.core.errors.DatabaseException
-import reactivemongo.play.json.ImplicitBSONHandlers._
+import org.mongodb.scala.model.Filters.equal
 import uk.gov.hmrc.agentepayeregistration.models.{AgentReference, RegistrationDetails, RegistrationRequest}
-import uk.gov.hmrc.mongo.ReactiveRepository
-import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
+import uk.gov.hmrc.mongo.MongoComponent
+import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
+import org.mongodb.scala.model._
+import play.api.{Configuration, Logging}
 
-import scala.concurrent.{ExecutionContext, Future}
+import java.util.concurrent.TimeUnit
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-@Singleton
-class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
-  extends ReactiveRepository[AgentReference, BSONObjectID](
+@Singleton()
+class AgentEpayeRegistrationRepository @Inject()(mongo: MongoComponent, config: Configuration)
+  extends PlayMongoRepository[AgentReference](
+    mongoComponent = mongo,
     collectionName = "agent-epaye-registration-record",
-    mongo.mongoConnector.db,
-    AgentReference.mongoFormat,
-    ReactiveMongoFormats.objectIdFormats) {
-
-  override def indexes: Seq[Index] =
-    Seq(Index(key = Seq("agentReference" -> IndexType.Ascending), name = Some("agentRefIndex"), unique = true))
+    domainFormat = AgentReference.mongoFormat,
+    indexes = Seq(
+      IndexModel(
+        Indexes.ascending("agentReference"),
+        IndexOptions()
+          .name("agentRefIndex")
+          .expireAfter(config.get[Int]("mongodb.timeToLiveInSeconds"), TimeUnit.SECONDS)
+          .unique(true)
+      )
+    )
+  ) with Logging {
 
   val initialAgentReference: String = "HX2000"
 
-  def create(request: RegistrationRequest, createdDate: DateTime = DateTime.now(DateTimeZone.UTC))
-            (implicit ec: ExecutionContext): Future[RegistrationDetails] = {
+  def create(request: RegistrationRequest, createdDate: DateTime = DateTime.now(DateTimeZone.UTC)): Future[RegistrationDetails] = {
     val mongoCodeDuplicateKey: Int = 11000
 
     for {
-      oAgentRef <- collection.find(obj(), Option.empty[JsObject]).sort(obj("agentReference" -> -1)).one[AgentReference]
+      oAgentRef <- collection.find[AgentReference]().sort(equal("agentReference", -1)).headOption()
       regDetails = {
         val nextAgentRef = oAgentRef match {
           case Some(ref) => ref.newReference
@@ -58,33 +61,10 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: ReactiveMongoComponent)
         }
         RegistrationDetails(nextAgentRef, request, createdDate)
       }
-      _ <- insert(regDetails.agentReference) recover {
+      _ <- collection.insertOne(regDetails.agentReference).toFuture() recover {
         case error: DatabaseException if error.code.contains(mongoCodeDuplicateKey) => create(request)
       }
     } yield regDetails
-  }
-
-  def findStaleReferenceFields(count: Int)(implicit ec: ExecutionContext): Future[List[AgentReference]] = {
-
-    val query = BSONDocument("$or" -> Json.arr(
-      BSONDocument("agentName" -> Json.obj("$exists" -> true)),
-      BSONDocument("contactName" -> Json.obj("$exists" -> true)),
-      BSONDocument("telephoneNumber" -> Json.obj("$exists" -> true)),
-      BSONDocument("emailAddress" -> Json.obj("$exists" -> true)),
-      BSONDocument("address" -> Json.obj("$exists" -> true)),
-      BSONDocument("createdDateTime" -> Json.obj("$exists" -> true))
-    ))
-
-    val logOnError = Cursor.ContOnError[List[AgentReference]]((_, ex) =>
-      logger.error(s"[removeStaleDocuments] Mongo failed, problem occurred in collect - ex: ${ex.getMessage}")
-    )
-    val ascending = Json.obj("agentReference" -> 1)
-
-    collection.find(query, Option.empty[JsObject])
-      .sort(ascending)
-      .batchSize(count)
-      .cursor[AgentReference]()
-      .collect[List](count, logOnError)
   }
 
 }
