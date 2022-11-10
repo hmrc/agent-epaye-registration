@@ -6,6 +6,7 @@ lazy val compileDeps = Seq(
   "uk.gov.hmrc"       %% "bootstrap-backend-play-28"  % "5.24.0",
   "org.typelevel"     %% "cats"                       % "0.9.0",
   "uk.gov.hmrc"       %% "agent-kenshoo-monitoring"   % "4.8.0-play-28",
+  "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28"         % "0.73.0",
   "uk.gov.hmrc"       %% "mongo-lock"                 % "7.1.0-play-28",
   "uk.gov.hmrc"       %% "emailaddress"               % "3.6.0",
   "com.typesafe.play" %% "play-json"                  % "2.9.2",
@@ -14,7 +15,8 @@ lazy val compileDeps = Seq(
 
 def testDeps(scope: String) = Seq(
   "uk.gov.hmrc"             %% "bootstrap-test-play-28"     % "5.25.0"          % scope,
-  "org.mockito"              % "mockito-core"               % "4.6.1"          % scope,
+  "org.mockito"              % "mockito-core"               % "4.6.1"           % scope,
+  "uk.gov.hmrc.mongo"       %% "hmrc-mongo-test-play-28"    % "0.73.0"          % scope,
   "org.scalatestplus"       %% "scalatestplus-mockito"      % "1.0.0-M2"        % scope,
   "com.github.tomakehurst"   % "wiremock-standalone"        % "2.27.2"          % scope,
   "org.pegdown"              % "pegdown"                    % "1.6.0"           % scope
