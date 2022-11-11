@@ -26,7 +26,6 @@ import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import org.mongodb.scala.model._
 import play.api.{Configuration, Logging}
 
-import java.util.concurrent.TimeUnit
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -41,7 +40,6 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: MongoComponent, config: 
         Indexes.ascending("agentReference"),
         IndexOptions()
           .name("agentRefIndex")
-          .expireAfter(config.get[Int]("mongodb.timeToLiveInSeconds"), TimeUnit.SECONDS)
           .unique(true)
       )
     )
