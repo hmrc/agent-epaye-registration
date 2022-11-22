@@ -7,10 +7,10 @@ lazy val compileDeps = Seq(
   "org.typelevel"     %% "cats"                       % "0.9.0",
   "uk.gov.hmrc"       %% "agent-kenshoo-monitoring"   % "4.8.0-play-28",
   "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28"         % "0.73.0",
-  "uk.gov.hmrc"       %% "mongo-lock"                 % "7.1.0-play-28",
   "uk.gov.hmrc"       %% "emailaddress"               % "3.6.0",
   "com.typesafe.play" %% "play-json"                  % "2.9.2",
-  "com.typesafe.akka" %% "akka-protobuf"              % "2.6.19"
+  "com.typesafe.akka" %% "akka-protobuf"              % "2.6.19",
+  "joda-time"         % "joda-time"                   % "2.12.1"
 )
 
 def testDeps(scope: String) = Seq(
