@@ -18,7 +18,7 @@ package uk.gov.hmrc.agentepayeregistration.repository
 
 import javax.inject.{Inject, Singleton}
 import org.joda.time.{DateTime, DateTimeZone}
-import reactivemongo.core.errors.DatabaseException
+import org.mongodb.scala.MongoException
 import org.mongodb.scala.model.Filters.equal
 import uk.gov.hmrc.agentepayeregistration.models.{AgentReference, RegistrationDetails, RegistrationRequest}
 import uk.gov.hmrc.mongo.MongoComponent
@@ -60,7 +60,7 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: MongoComponent, config: 
         RegistrationDetails(nextAgentRef, request, createdDate)
       }
       _ <- collection.insertOne(regDetails.agentReference).toFuture() recover {
-        case error: DatabaseException if error.code.contains(mongoCodeDuplicateKey) => create(request)
+        case error: MongoException  if error.getCode == mongoCodeDuplicateKey => create(request)
       }
     } yield regDetails
   }
