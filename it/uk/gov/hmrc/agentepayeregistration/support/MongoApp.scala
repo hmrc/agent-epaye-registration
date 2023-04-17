@@ -3,9 +3,6 @@ package uk.gov.hmrc.agentepayeregistration.support
 import org.scalatest.{BeforeAndAfterEach, Suite}
 import uk.gov.hmrc.mongo.test.MongoSupport
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.ExecutionContext.global
-
 trait MongoApp extends MongoSupport with ResetMongoBeforeTest {
   me: Suite =>
 

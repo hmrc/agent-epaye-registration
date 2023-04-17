@@ -23,9 +23,12 @@ import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.agentepayeregistration.models.{Address, AgentReference, RegistrationRequest}
 
 import scala.collection.immutable.List
+import scala.concurrent.ExecutionContext
 
 class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with BeforeAndAfterEach with BeforeAndAfterAll {
   private lazy val config = app.injector.instanceOf[Configuration]
+  implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
+
   override lazy val repository = new AgentEpayeRegistrationRepository(mongoComponent, config)
 
   val postcode = "AB11 AA11"
@@ -42,7 +45,7 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Bef
   val emailAddress = Some("a@b.com")
   val regRequest = RegistrationRequest(agentName, contactName, telephoneNumber, faxNumber, emailAddress, regAddress)
 
-  override def beforeEach() {
+  override def beforeEach() = {
     super.beforeEach()
     await(repository.ensureIndexes)
   }

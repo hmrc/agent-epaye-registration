@@ -9,9 +9,12 @@ import uk.gov.hmrc.agentepayeregistration.stubs.{AuthStub, DataStreamStub}
 import uk.gov.hmrc.agentepayeregistration.support.RegistrationActions
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
+import scala.concurrent.ExecutionContext
+
 class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with AuthStub with RegistrationActions with DataStreamStub with DefaultPlayMongoRepositorySupport[AgentReference] {
 
   private lazy val configuration = app.injector.instanceOf[Configuration]
+  implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
   override lazy val repository = new AgentEpayeRegistrationRepository(mongoComponent, configuration)
 
   override def additionalTestConfiguration: Seq[(String, Any)] = Seq(

@@ -1,22 +1,20 @@
-import sbt.Tests.Group
-import uk.gov.hmrc.ForkedJvmPerTestSettings
-import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
+import uk.gov.hmrc.DefaultBuildSettings.oneForkedJvmPerTest
+
+val hmrcMongoVersion = "0.74.0"
 
 lazy val compileDeps = Seq(
-  "uk.gov.hmrc"       %% "bootstrap-backend-play-28"  % "5.24.0",
-  "org.typelevel"     %% "cats"                       % "0.9.0",
-  "uk.gov.hmrc"       %% "agent-kenshoo-monitoring"   % "4.8.0-play-28",
-  "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28"         % "0.73.0",
-  "uk.gov.hmrc"       %% "emailaddress"               % "3.6.0",
+  "org.typelevel"     %% "cats-core"                  % "2.9.0",
+  "uk.gov.hmrc"       %% "agent-kenshoo-monitoring"   % "5.3.0",
+  "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-28"         % hmrcMongoVersion,
+  "uk.gov.hmrc"       %% "emailaddress"               % "3.8.0",
   "com.typesafe.play" %% "play-json"                  % "2.9.2",
-  "com.typesafe.akka" %% "akka-protobuf"              % "2.6.19",
   "joda-time"         % "joda-time"                   % "2.12.1"
 )
 
 def testDeps(scope: String) = Seq(
-  "uk.gov.hmrc"             %% "bootstrap-test-play-28"     % "5.25.0"          % scope,
+  "uk.gov.hmrc"             %% "bootstrap-test-play-28"     % "7.15.0"          % scope,
   "org.mockito"              % "mockito-core"               % "4.6.1"           % scope,
-  "uk.gov.hmrc.mongo"       %% "hmrc-mongo-test-play-28"    % "0.73.0"          % scope,
+  "uk.gov.hmrc.mongo"       %% "hmrc-mongo-test-play-28"    % hmrcMongoVersion          % scope,
   "org.scalatestplus"       %% "scalatestplus-mockito"      % "1.0.0-M2"        % scope,
   "com.github.tomakehurst"   % "wiremock-standalone"        % "2.27.2"          % scope,
   "org.pegdown"              % "pegdown"                    % "1.6.0"           % scope
@@ -31,7 +29,7 @@ lazy val scoverageSettings = {
     ScoverageKeys.coverageMinimumStmtTotal := 80.00,
     ScoverageKeys.coverageFailOnMinimum := false,
     ScoverageKeys.coverageHighlighting := true,
-    parallelExecution in Test := false
+    Test / parallelExecution := false
   )
 }
 
@@ -39,28 +37,24 @@ lazy val root = (project in file("."))
   .settings(
     name := "agent-epaye-registration",
     organization := "uk.gov.hmrc",
-    scalaVersion := "2.12.12",
+    scalaVersion := "2.13.8",
     majorVersion := 0,
     isPublicArtefact := true,
     PlayKeys.playDefaultPort := 9445,
     libraryDependencies ++= compileDeps ++ testDeps("test") ++ testDeps("it"),
     routesImport += "uk.gov.hmrc.agentepayeregistration.controllers.UrlBinders._",
-    publishingSettings,
     scoverageSettings,
-    scalacOptions += "-P:silencer:pathFilters=routes",
-    libraryDependencies ++= Seq(
-      compilerPlugin("com.github.ghik" % "silencer-plugin" % "1.7.1" cross CrossVersion.full),
-      "com.github.ghik" % "silencer-lib" % "1.7.1" % Provided cross CrossVersion.full
+    scalacOptions ++= Seq(
+      "-feature",
+      "-Wconf:cat=unused&src=routes/.*:s",
+      "-Wconf:cat=unused&src=views/.*:s",
     ),
-    Keys.fork in IntegrationTest := false,
+    IntegrationTest / Keys.fork := false,
     Defaults.itSettings,
-    unmanagedSourceDirectories in IntegrationTest += baseDirectory(_ / "it").value,
-    parallelExecution in IntegrationTest := false,
-    testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value)
+    IntegrationTest / unmanagedSourceDirectories += baseDirectory(_ / "it").value,
+    IntegrationTest / parallelExecution := false,
+    IntegrationTest / testGrouping := oneForkedJvmPerTest((IntegrationTest / definedTests).value)
   )
   .configs(IntegrationTest)
   .enablePlugins(Seq(play.sbt.PlayScala, SbtDistributablesPlugin) : _*)
 
-
-
-def oneForkedJvmPerTest(tests: Seq[TestDefinition]): Seq[Group] = ForkedJvmPerTestSettings.oneForkedJvmPerTest(tests)

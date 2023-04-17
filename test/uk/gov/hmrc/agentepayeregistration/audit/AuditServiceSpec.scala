@@ -27,16 +27,19 @@ import uk.gov.hmrc.agentepayeregistration.models.{Address, AgentReference, Regis
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
 import org.scalatestplus.play.PlaySpec
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 
 import scala.concurrent.ExecutionContext
 import uk.gov.hmrc.http.{Authorization, HeaderCarrier, RequestId, SessionId}
 
-class AuditServiceSpec extends PlaySpec with MockitoSugar with Eventually {
+class AuditServiceSpec extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar with Eventually {
 
   override implicit val patienceConfig = PatienceConfig(
     timeout = scaled(Span(500, Millis)),
     interval = scaled(Span(200, Millis)))
+
+  implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
   "auditEvent" should {
     "send an AgentEpayeRegistrationRecordCreated event with the correct fields" in {
