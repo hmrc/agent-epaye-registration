@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,11 +26,10 @@ import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 import org.mongodb.scala.model._
 import play.api.{Configuration, Logging}
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
-class AgentEpayeRegistrationRepository @Inject()(mongo: MongoComponent, config: Configuration)
+class AgentEpayeRegistrationRepository @Inject()(mongo: MongoComponent, config: Configuration)(implicit ec: ExecutionContext)
   extends PlayMongoRepository[AgentReference](
     mongoComponent = mongo,
     collectionName = "agent-epaye-registration-record",

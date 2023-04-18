@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package uk.gov.hmrc.agentepayeregistration.audit
 
 import javax.inject.Inject
-
 import com.google.inject.Singleton
 import play.api.mvc.Request
 import uk.gov.hmrc.agentepayeregistration.audit.AgentEpayeRegistrationEvent.AgentEpayeRegistrationEvent
@@ -27,8 +26,7 @@ import uk.gov.hmrc.play.audit.AuditExtensions._
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 object AgentEpayeRegistrationEvent extends Enumeration {
@@ -39,7 +37,7 @@ object AgentEpayeRegistrationEvent extends Enumeration {
 }
 
 @Singleton
-class AuditService @Inject()(val auditConnector: AuditConnector) {
+class AuditService @Inject()(val auditConnector: AuditConnector)(implicit ec: ExecutionContext) {
 
   def sendAgentEpayeRegistrationRecordCreated(registrationRequest: RegistrationRequest, agentReference: AgentReference)(implicit hc: HeaderCarrier, request: Request[Any]): Future[Unit] = {
 
