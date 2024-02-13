@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,17 @@
 
 package uk.gov.hmrc.agentepayeregistration.controllers
 
-import org.joda.time.LocalDate
-import org.joda.time.format.ISODateTimeFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter.ISO_DATE
 import play.api.mvc.QueryStringBindable
 
 import scala.util.Try
 
 object UrlBinders {
-  implicit def localDateQueryBinder = new QueryStringBindable[LocalDate] {
+  implicit def localDateQueryBinder: QueryStringBindable[LocalDate] = new QueryStringBindable[LocalDate] {
     override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, LocalDate]] = {
       params.get(key).flatMap(_.headOption).map { dateTxt: String => (Try {
-        Right(LocalDate.parse(dateTxt, ISODateTimeFormat.date()))
+        Right(LocalDate.parse(dateTxt, ISO_DATE))
       } recover {
         case _: Exception => Left(s"'${key.replaceFirst("date", "")}' date must be in ISO format (yyyy-MM-dd)")
       }).get

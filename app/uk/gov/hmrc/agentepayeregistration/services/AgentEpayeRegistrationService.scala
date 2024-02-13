@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.agentepayeregistration.services
 
-import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
+import java.time.OffsetDateTime
 import play.api.Logging
 import play.api.mvc.Request
 import uk.gov.hmrc.agentepayeregistration.audit.AuditService
@@ -26,6 +25,7 @@ import uk.gov.hmrc.agentepayeregistration.models._
 import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
@@ -39,7 +39,7 @@ class AgentEpayeRegistrationService @Inject()(repository: AgentEpayeRegistration
               (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[Any]): Future[Either[String, AgentReference]] = {
     for {
       regDetails <- repository.create(regRequest)
-      currentDate = DateTimeFormat.forPattern("yyyy-MM-dd").print(DateTime.now)
+      currentDate = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(OffsetDateTime.now)
       knownFactsCreated <- desConnector.createAgentKnownFacts(CreateKnownFactsRequest(regRequest, currentDate), regDetails.agentReference).andThen {
         case Success(response) if response.isRight =>
           auditService.sendAgentKnownFactsCreated(regDetails)

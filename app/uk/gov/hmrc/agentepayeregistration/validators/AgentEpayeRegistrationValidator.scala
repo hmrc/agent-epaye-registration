@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +19,14 @@ package uk.gov.hmrc.agentepayeregistration.validators
 import cats.Semigroup
 import cats.data.Validated
 import cats.data.Validated.{Invalid, Valid}
-import org.joda.time.{DateTimeZone, Days, LocalDate}
 import uk.gov.hmrc.agentepayeregistration.models.{Failure, RegistrationRequest}
 import uk.gov.hmrc.emailaddress.EmailAddress.isValid
 
+import java.time.{LocalDate, ZoneOffset}
+import java.time.temporal.ChronoUnit
+
 object ValidatedSemigroup {
-  implicit def validatedSemigroup[A] = new Semigroup[Validated[Failure, Unit]] {
+  implicit def validatedSemigroup[A]: Semigroup[Validated[Failure, Unit]] = new Semigroup[Validated[Failure, Unit]] {
     def combine(x: Validated[Failure, Unit], y: Validated[Failure, Unit]): Validated[Failure, Unit] = (x, y) match {
       case (Valid(_), Valid(_)) => Valid(())
       case (Invalid(f1), Invalid(f2)) => Invalid(Failure(f1.errors ++ f2.errors))
@@ -129,7 +131,7 @@ object AgentEpayeRegistrationValidator {
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field is not a valid phone number"))
 
   private[validators] def isInPast(date: LocalDate)(paramName: String) = {
-    val today = LocalDate.now(DateTimeZone.UTC)
+    val today = LocalDate.now(ZoneOffset.UTC)
     if (today.isAfter(date))
       Valid(())
     else
@@ -139,7 +141,7 @@ object AgentEpayeRegistrationValidator {
   private[validators] def isValidDateRange(from: LocalDate, to: LocalDate) = {
     if(from.isAfter(to))
       Invalid(Failure("INVALID_DATE_RANGE", "'To' date must be after 'From' date"))
-    else if (!to.equals(from.plusYears(1)) && Days.daysBetween(from, to).getDays > 365)
+    else if (!to.equals(from.plusYears(1)) && from.until(to, ChronoUnit.DAYS) > 365)
       Invalid(Failure("INVALID_DATE_RANGE", "Date range must be 1 year or less"))
     else
       Valid(())

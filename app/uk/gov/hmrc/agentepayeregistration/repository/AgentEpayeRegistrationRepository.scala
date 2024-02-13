@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package uk.gov.hmrc.agentepayeregistration.repository
 
 import javax.inject.{Inject, Singleton}
-import org.joda.time.{DateTime, DateTimeZone}
+import java.time.OffsetDateTime
 import org.mongodb.scala.MongoException
 import org.mongodb.scala.model.Filters.equal
 import uk.gov.hmrc.agentepayeregistration.models.{AgentReference, RegistrationDetails, RegistrationRequest}
@@ -44,9 +44,12 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: MongoComponent, config: 
     )
   ) with Logging {
 
+  // Agent references persist indefinitely, so no TTL
+  override lazy val requiresTtlIndex: Boolean = false
+
   val initialAgentReference: String = "HX2000"
 
-  def create(request: RegistrationRequest, createdDate: DateTime = DateTime.now(DateTimeZone.UTC)): Future[RegistrationDetails] = {
+  def create(request: RegistrationRequest, createdDate: OffsetDateTime = OffsetDateTime.now()): Future[RegistrationDetails] = {
     val mongoCodeDuplicateKey: Int = 11000
 
     for {

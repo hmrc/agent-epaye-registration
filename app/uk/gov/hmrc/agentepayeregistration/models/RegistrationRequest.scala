@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.agentepayeregistration.models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class RegistrationRequest(agentName: String,
                                contactName: String,
@@ -26,5 +26,5 @@ case class RegistrationRequest(agentName: String,
                                address: Address)
 
 object RegistrationRequest {
-  implicit val registrationRequestFormat = Json.format[RegistrationRequest]
+  implicit val registrationRequestFormat: OFormat[RegistrationRequest] = Json.format[RegistrationRequest]
 }
