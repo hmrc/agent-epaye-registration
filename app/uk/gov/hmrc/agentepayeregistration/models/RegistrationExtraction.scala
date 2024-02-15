@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.agentepayeregistration.models
 
-import org.joda.time.DateTimeZone
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OWrites}
 
 case class RegistrationExtraction(agentReference: String,
                                   agentName: String,
@@ -48,8 +47,8 @@ object RegistrationExtraction {
       addressLine3,
       addressLine4,
       postCode,
-      createdDateTime.toDateTime(DateTimeZone.UTC).toString)
+      createdDateTime.toString)
   }
 
-  implicit val registrationExtractionWrites = Json.writes[RegistrationExtraction]
+  implicit val registrationExtractionWrites: OWrites[RegistrationExtraction] = Json.writes[RegistrationExtraction]
 }

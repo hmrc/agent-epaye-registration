@@ -14,20 +14,26 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.agentepayeregistration.models
+package uk.gov.hmrc.agentepayeregistration.support
 
-import play.api.libs.json.{Json, OFormat}
+import org.scalatest.{BeforeAndAfterEach, Suite}
+import uk.gov.hmrc.mongo.test.MongoSupport
 
-case class ValidationError(code: String, message: String)
+trait MongoApp extends MongoSupport with ResetMongoBeforeTest {
+  me: Suite =>
 
-object ValidationError {
-  implicit val validationErrorFormat: OFormat[ValidationError] = Json.format[ValidationError]
+  protected def mongoConfiguration = Map("mongodb.uri" -> mongoUri)
 }
 
-case class Failure(errors: Set[ValidationError])
+trait ResetMongoBeforeTest extends BeforeAndAfterEach {
+  me: Suite with MongoSupport =>
 
-object Failure {
-  implicit val failureFormat: OFormat[Failure] = Json.format[Failure]
+  override protected def beforeEach(): Unit = {
+    super.beforeEach()
+    dropMongoDb()
+  }
 
-  def apply(code: String, message: String): Failure = Failure(Set(ValidationError(code, message)))
+  def dropMongoDb(): Unit = {
+    mongoDatabase.drop()
+  }
 }

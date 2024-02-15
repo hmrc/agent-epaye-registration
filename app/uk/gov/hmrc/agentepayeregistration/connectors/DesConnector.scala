@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,9 @@
 
 package uk.gov.hmrc.agentepayeregistration.connectors
 
-import com.codahale.metrics.MetricRegistry
-import com.kenshoo.play.metrics.Metrics
 import config.AppConfig
 import play.api.Logging
 import play.api.libs.json._
-import uk.gov.hmrc.agent.kenshoo.monitoring.HttpAPIMonitor
 import uk.gov.hmrc.agentepayeregistration.models.{AgentReference, CreateKnownFactsRequest}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpReads, HttpResponse}
@@ -32,10 +29,7 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class DesConnector @Inject()(config: AppConfig,
-                             http: DefaultHttpClient,
-                             metrics: Metrics) extends HttpAPIMonitor with Logging with HttpErrorFunctions{
-
-  override val kenshooRegistry: MetricRegistry = metrics.defaultRegistry
+                             http: DefaultHttpClient) extends Logging with HttpErrorFunctions{
 
   def createAgentKnownFacts(knownFactDetails: CreateKnownFactsRequest, agentRef: AgentReference, regime: String="PAYE")(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[String, Unit]] = {
     postWithDesHeaders[CreateKnownFactsRequest, HttpResponse](
@@ -56,9 +50,6 @@ class DesConnector @Inject()(config: AppConfig,
       "Authorization" -> s"Bearer ${config.desToken}",
       "Environment" -> config.desEnv
     )
-
-    monitor(s"ConsumedAPI-DES-$apiName-POST") {
-      http.POST[A, B](url.toString, body, desHeaders)
-    }
+    http.POST[A, B](url.toString, body, desHeaders)
   }
 }

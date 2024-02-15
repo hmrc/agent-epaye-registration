@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import uk.gov.hmrc.http.{Authorization, HeaderCarrier, RequestId, SessionId}
 
 class AuditServiceSpec extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar with Eventually {
 
-  override implicit val patienceConfig = PatienceConfig(
+  override implicit val patienceConfig: PatienceConfig = PatienceConfig(
     timeout = scaled(Span(500, Millis)),
     interval = scaled(Span(200, Millis)))
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.agentepayeregistration.models
 
-import play.api.libs.json.Json
+import play.api.libs.json.{Json, OFormat}
 
 case class CreateKnownFactsRequest(agentName: Option[String],
                                    contactName: Option[String],
@@ -31,7 +31,7 @@ case class CreateKnownFactsRequest(agentName: Option[String],
                                    createdDate: String)
 
 object CreateKnownFactsRequest {
-  implicit val createKnownFactsRequestFormat = Json.format[CreateKnownFactsRequest]
+  implicit val createKnownFactsRequestFormat: OFormat[CreateKnownFactsRequest] = Json.format[CreateKnownFactsRequest]
 
   def apply(regRequest: RegistrationRequest, createdDate: String) : CreateKnownFactsRequest = {
     CreateKnownFactsRequest (

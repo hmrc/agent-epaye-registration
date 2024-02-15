@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,14 @@
 package uk.gov.hmrc.agentepayeregistration.validators
 
 import cats.data.Validated.{Invalid, Valid}
-import org.joda.time.format.ISODateTimeFormat
-import org.joda.time.{DateTimeZone, Days, LocalDate}
+
+import java.time.format.DateTimeFormatter.ISO_DATE
+import java.time.{LocalDate, ZoneId, ZoneOffset}
 import uk.gov.hmrc.agentepayeregistration.models.{Address, Failure, RegistrationRequest, ValidationError}
 import org.scalatestplus.play.PlaySpec
 import uk.gov.hmrc.agentepayeregistration.validators.AgentEpayeRegistrationValidator._
+
+import java.time.temporal.ChronoUnit
 
 class AgentEpayeRegistrationValidatorSpec extends PlaySpec {
   private val address = Address("29 Acacia Road", "Nuttytown", Some("Bannastate"), Some("Country"), "AA11AA")
@@ -217,16 +220,16 @@ class AgentEpayeRegistrationValidatorSpec extends PlaySpec {
 
   "isInPast" should {
     "pass a date in the past" in {
-      val dateYesterday = LocalDate.now(DateTimeZone.UTC).minusDays(1)
+      val dateYesterday = LocalDate.now(ZoneOffset.UTC).minusDays(1)
       AgentEpayeRegistrationValidator.isInPast(dateYesterday)("x") mustBe Valid(())
     }
     "fail a date in the present" in {
-      val dateToday = LocalDate.now(DateTimeZone.UTC)
+      val dateToday = LocalDate.now(ZoneOffset.UTC)
       AgentEpayeRegistrationValidator.isInPast(dateToday)("x") mustBe
         Invalid(Failure("INVALID_DATE_RANGE", "'x' date must be in the past"))
     }
     "fail a date in the future" in {
-      val dateTomorrow = LocalDate.now(DateTimeZone.UTC).plusDays(1)
+      val dateTomorrow = LocalDate.now(ZoneOffset.UTC).plusDays(1)
       AgentEpayeRegistrationValidator.isInPast(dateTomorrow)("x") mustBe
         Invalid(Failure("INVALID_DATE_RANGE", "'x' date must be in the past"))
     }
@@ -234,30 +237,30 @@ class AgentEpayeRegistrationValidatorSpec extends PlaySpec {
 
   "isValidDateRange" should {
     "pass a valid date range" in {
-      val dateYesterday = LocalDate.now(DateTimeZone.UTC).minusDays(1)
+      val dateYesterday = LocalDate.now(ZoneOffset.UTC).minusDays(1)
       AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday, dateYesterday) mustBe Valid(())
       AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday.minusDays(1), dateYesterday) mustBe Valid(())
     }
     "fail if the from date occurs after the to date" in {
-      val dateYesterday = LocalDate.now(DateTimeZone.UTC).minusDays(1)
+      val dateYesterday = LocalDate.now(ZoneOffset.UTC).minusDays(1)
       AgentEpayeRegistrationValidator.isValidDateRange(dateYesterday, dateYesterday.minusDays(1)) mustBe
         anError("INVALID_DATE_RANGE", "'To' date must be after 'From' date")
     }
     "fail if the date range spans more than a year" in {
-      val someYear = LocalDate.parse("2015-03-01", ISODateTimeFormat.date())
+      val someYear = LocalDate.parse("2015-03-01", ISO_DATE)
       AgentEpayeRegistrationValidator.isValidDateRange(someYear, someYear.plusYears(1).plusDays(1)) mustBe
         anError("INVALID_DATE_RANGE", "Date range must be 1 year or less")
     }
     "pass if the date range spans exactly 366 days of a leap year" in {
-      val yearBeforeFeb29 = LocalDate.parse("2015-03-01", ISODateTimeFormat.date())
-      val yearAfterFeb29 = LocalDate.parse("2016-03-01", ISODateTimeFormat.date())
-      Days.daysBetween(yearBeforeFeb29, yearAfterFeb29).getDays mustBe 366
+      val yearBeforeFeb29 = LocalDate.parse("2015-03-01", ISO_DATE)
+      val yearAfterFeb29 = LocalDate.parse("2016-03-01", ISO_DATE)
+      yearBeforeFeb29.until(yearAfterFeb29, ChronoUnit.DAYS) mustBe 366
       AgentEpayeRegistrationValidator.isValidDateRange(yearBeforeFeb29, yearAfterFeb29) mustBe Valid(())
     }
   }
 
   "validateDateRange captures all classes of date range validation errors" when {
-    val present = LocalDate.now(DateTimeZone.UTC)
+    val present = LocalDate.now(ZoneOffset.UTC)
     val past = present.minusDays(1)
     "param is not in the past" in {
       validateDateRange(present, past) mustBe anError("INVALID_DATE_RANGE", "'From' date must be in the past")

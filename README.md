@@ -13,7 +13,7 @@ The OPRA system provides a way for PAYE agents (not otherwise known to PAYE syst
 
 ## Running the tests
 
-    sbt test it:test
+    sbt test it/test
 
 
 ## Test Coverage
