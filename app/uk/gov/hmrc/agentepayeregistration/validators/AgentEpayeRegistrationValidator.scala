@@ -119,7 +119,7 @@ object AgentEpayeRegistrationValidator {
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field is not a valid email"))
 
   private[validators] def isPostcode(field: String)(propertyName: String) =
-    if (field.matches("^[A-Z]{1,2}[0-9][0-9A-Z]?[0-9][A-Z]{2}$|BFPO[0-9]{1,5}$"))
+    if (field.matches("^[A-Z]{1,2}[0-9][0-9A-Z]?\\s?[0-9][A-Z]{2}$|BFPO\\s?[0-9]{1,5}$"))
       Valid(())
     else
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field is not a valid postcode"))

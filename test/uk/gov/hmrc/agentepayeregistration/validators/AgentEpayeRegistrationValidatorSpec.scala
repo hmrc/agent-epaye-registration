@@ -156,10 +156,6 @@ class AgentEpayeRegistrationValidatorSpec extends PlaySpec {
       AgentEpayeRegistrationValidator.isPostcode("BFPO1")("x") mustBe Valid(())
       AgentEpayeRegistrationValidator.isPostcode("BFPO1234")("x") mustBe Valid(())
     }
-    "fail BFPO codes with spaces" in {
-      AgentEpayeRegistrationValidator.isPostcode("BFPO 1")("x") mustBe
-        Invalid(Failure("INVALID_FIELD", "The x field is not a valid postcode"))
-    }
 
     "fail a valid postcode with lowercase characters" in {
       AgentEpayeRegistrationValidator.isPostcode("aa999aa")("x") mustBe
@@ -173,11 +169,6 @@ class AgentEpayeRegistrationValidatorSpec extends PlaySpec {
 
     "fail a code that is longer than 8 characters" in {
       AgentEpayeRegistrationValidator.isPostcode("AA9A9AAAA")("x") mustBe
-        Invalid(Failure("INVALID_FIELD", "The x field is not a valid postcode"))
-    }
-
-    "fail a code with spaces" in {
-      AgentEpayeRegistrationValidator.isPostcode("AA99 9AA")("x") mustBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid postcode"))
     }
   }
