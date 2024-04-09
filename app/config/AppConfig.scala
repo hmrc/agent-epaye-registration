@@ -25,7 +25,7 @@ class AppConfig @Inject()(config: ServicesConfig) {
   lazy val authURL: String       = config.baseUrl("auth")
 
   def desEndpoint(agentId: String, regime: String = "PAYE"): String =
-    if(desEnv == "live") s"/agents/regime/$regime/agentid/$agentId/known-facts"
+    if (desEnv == "live" || desEnv == "ist0") s"/agents/regime/$regime/agentid/$agentId/known-facts"
     else s"/agents-external-stubs/known-facts/regime/$regime/$agentId"
   
   lazy val desBaseURL: String = config.baseUrl("des")
