@@ -21,15 +21,16 @@ import play.api.Logging
 import play.api.libs.json._
 import uk.gov.hmrc.agentepayeregistration.models.{AgentReference, CreateKnownFactsRequest}
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpReads, HttpResponse}
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
+import uk.gov.hmrc.http.HttpReadsInstances.readFromJson
+import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpReads, HttpResponse, StringContextOps}
+import uk.gov.hmrc.http.client.HttpClientV2
 
 import java.net.URL
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class DesConnector @Inject()(config: AppConfig,
-                             http: DefaultHttpClient) extends Logging with HttpErrorFunctions{
+                             http: HttpClientV2)  extends Logging with HttpErrorFunctions{
 
   def createAgentKnownFacts(knownFactDetails: CreateKnownFactsRequest, agentRef: AgentReference, regime: String="PAYE")(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[String, Unit]] = {
     postWithDesHeaders[CreateKnownFactsRequest, HttpResponse](
@@ -50,6 +51,8 @@ class DesConnector @Inject()(config: AppConfig,
       "Authorization" -> s"Bearer ${config.desToken}",
       "Environment" -> config.desEnv
     )
-    http.POST[A, B](url.toString, body, desHeaders)
+
+      //http.POST[A, B](url.toString, body, desHeaders)
+      http.post(url"$url").withBody(Json.toJson(body)).setHeader(desHeaders: _*).execute[B]
   }
 }
