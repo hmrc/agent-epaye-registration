@@ -2,13 +2,12 @@ import sbt.*
 
 
 object AppDependencies {
-  lazy val hmrcMongoVersion = "1.7.0"
-  lazy val bootstrapVersion = "9.0.0"
+  lazy val hmrcMongoVersion = "2.3.0"
+  lazy val bootstrapVersion = "9.6.0"
 
   lazy val compileDeps: Seq[ModuleID] = Seq(
     "org.typelevel"     %% "cats-core"                  % "2.9.0",
     "uk.gov.hmrc.mongo" %% "hmrc-mongo-play-30"         % hmrcMongoVersion,
-    "uk.gov.hmrc"       %% "emailaddress-play-30"       % "4.0.0",
     "com.typesafe.play" %% "play-json"                  % "2.9.2",
     "uk.gov.hmrc"       %% "bootstrap-backend-play-30"  % bootstrapVersion
   )
