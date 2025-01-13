@@ -20,7 +20,7 @@ import cats.Semigroup
 import cats.data.Validated
 import cats.data.Validated.{Invalid, Valid}
 import uk.gov.hmrc.agentepayeregistration.models.{Failure, RegistrationRequest}
-import uk.gov.hmrc.emailaddress.EmailAddress.isValid
+import uk.gov.hmrc.agentepayeregistration.utils.EmailAddress.isValid
 
 import java.time.{LocalDate, ZoneOffset}
 import java.time.temporal.ChronoUnit
