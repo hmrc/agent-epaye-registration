@@ -97,18 +97,18 @@ class AgentEpayeRegistrationValidatorSpec extends PlaySpec {
 
   "isEmailAddress validator" should {
     "allow a simple email address" in {
-      AgentEpayeRegistrationValidator.isEmailAddress("a@b.com")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a@domain.com")("x") mustBe Valid(())
     }
 
     "allow email addresses with a hyphen, period, numbers, plus, underscore, exclamation, number sign or question mark" in {
-      AgentEpayeRegistrationValidator.isEmailAddress("a-b@b.com")("x") mustBe Valid(())
-      AgentEpayeRegistrationValidator.isEmailAddress("a.b@b.com")("x") mustBe Valid(())
-      AgentEpayeRegistrationValidator.isEmailAddress("1@b.com")("x") mustBe Valid(())
-      AgentEpayeRegistrationValidator.isEmailAddress("a+b@b.com")("x") mustBe Valid(())
-      AgentEpayeRegistrationValidator.isEmailAddress("a_b@b.com")("x") mustBe Valid(())
-      AgentEpayeRegistrationValidator.isEmailAddress("a!b@b.com")("x") mustBe Valid(())
-      AgentEpayeRegistrationValidator.isEmailAddress("a#b@b.com")("x") mustBe Valid(())
-      AgentEpayeRegistrationValidator.isEmailAddress("a?b@b.com")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a-b@domain.com")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a.b@domain.com")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("1@domain.com")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a+b@domain.com")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a_b@domain.com")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a!b@domain.com")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a#b@domain.com")("x") mustBe Valid(())
+      AgentEpayeRegistrationValidator.isEmailAddress("a?b@domain.com")("x") mustBe Valid(())
     }
 
     "not allow an email address with a comma, colon, semicolon, parenthesis, pound sign or backslash" in {
