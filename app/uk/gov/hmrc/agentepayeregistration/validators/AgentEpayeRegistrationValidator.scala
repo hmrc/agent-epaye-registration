@@ -15,12 +15,12 @@
  */
 
 package uk.gov.hmrc.agentepayeregistration.validators
-
+import utils.EmailAddressValidation
 import cats.Semigroup
 import cats.data.Validated
 import cats.data.Validated.{Invalid, Valid}
 import uk.gov.hmrc.agentepayeregistration.models.{Failure, RegistrationRequest}
-import uk.gov.hmrc.agentepayeregistration.utils.EmailAddress.isValid
+
 
 import java.time.{LocalDate, ZoneOffset}
 import java.time.temporal.ChronoUnit
@@ -113,8 +113,8 @@ object AgentEpayeRegistrationValidator {
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field exceeds $maxLength characters"))
 
   private[validators] def isEmailAddress(field: String)(propertyName: String) =
-    if (isValid(field))
-      Valid(())
+  if (new EmailAddressValidation().isValid(field))
+    Valid(())
     else
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field is not a valid email"))
 

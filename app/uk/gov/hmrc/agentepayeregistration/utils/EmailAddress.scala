@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,37 +14,47 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.agentepayeregistration.utils
+package utils
+import utils.EmailAddressValidation.validEmail
+import javax.naming.Context.{INITIAL_CONTEXT_FACTORY => ICF}
+import javax.naming.directory.{Attribute, InitialDirContext}
+import scala.jdk.CollectionConverters._
+import scala.util.matching.Regex
+import scala.util.{Success, Try}
 
+class EmailAddressValidation {
 
-import uk.gov.hmrc.agentepayeregistration.utils.StringValue
+  def isValid(email: String): Boolean =
+    email match {
+      case validEmail(_, domain) => isHostMailServer(domain)
+      case _                     => false
+    }
 
+  private def isHostMailServer(domain: String): Boolean = {
+    val attributeMX = getAttributeValue(domain, "MX")
+    val attributeA = getAttributeValue(domain, "A")
 
-
-case class EmailAddress(value: String) extends StringValue {
-
-  val (mailbox, domain): (EmailAddress.Mailbox, EmailAddress.Domain) = value match {
-    case EmailAddress.validEmail(m, d) => (EmailAddress.Mailbox(m), EmailAddress.Domain(d))
-    case invalidEmail => throw new IllegalArgumentException(s"'$invalidEmail' is not a valid email address")
+    (attributeMX, attributeA) match {
+      case (Success(value), _) if value.nonEmpty => true
+      case (_, Success(value)) => value.nonEmpty
+      case _ => false
+    }
   }
 
-
+  private def getAttributeValue(domain: String, attribute: String): Try[List[Attribute]] =
+    Try {
+      EmailAddressValidation.ictx.getAttributes(domain, Array(attribute)).getAll.asScala.toList
+    }
 }
 
-object EmailAddress {
-  final private[EmailAddress] val validDomain = """^([a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*)$""".r
-  final private[EmailAddress] val validEmail = """^([a-zA-Z0-9.!#$%&’'*+/=?^_`{|}~-]+)@([a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*)$""".r
+object EmailAddressValidation {
+  private val validEmail: Regex = """^([a-zA-Z0-9.!#$%&’'*+/=?^_`{|}~-]+)@([a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*)$""".r
 
-  def isValid(email: String): Boolean = email match {
-    case validEmail(_,_) => true
-    case _               => false
-  }
+  private lazy val ictx = {
+    val DNS_CONTEXT_FACTORY = "com.sun.jndi.dns.DnsContextFactory"
+    val env = new java.util.Hashtable[String, String]()
+    env.put(ICF, DNS_CONTEXT_FACTORY)
 
-  case class Mailbox private[EmailAddress] (value: String) extends StringValue
-  case class Domain(value: String) extends StringValue {
-    value match {
-      case EmailAddress.validDomain(_) => //
-      case invalidDomain               => throw new IllegalArgumentException(s"'$invalidDomain' is not a valid email domain")
-    }
+    new InitialDirContext(env)
   }
 }
