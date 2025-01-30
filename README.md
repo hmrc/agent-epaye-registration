@@ -15,15 +15,19 @@ The OPRA system provides a way for PAYE agents (not otherwise known to PAYE syst
 
     sbt test it/test
 
-
 ## Test Coverage
 
     sbt clean coverage test coverageReport
 
 ## Running the app locally
 
-    sm2 -start AGENT_EPAYE_REG
-    sm2 -stop AGENT_EPAYE_REGISTRATION
+Start service dependencies with:
+
+    sm2 --start AGENT_EPAYE_REG_ALL
+    sm2 --stop AGENT_EPAYE_REGISTRATION
+
+And then run the service with:
+
     ./run-local
 
 It should then be listening on port 9445
