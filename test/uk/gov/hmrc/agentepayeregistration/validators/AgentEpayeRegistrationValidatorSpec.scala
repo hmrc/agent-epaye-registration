@@ -28,12 +28,15 @@ import java.time.temporal.ChronoUnit
 
 class AgentEpayeRegistrationValidatorSpec extends PlaySpec {
   private val address = Address("29 Acacia Road", "Nuttytown", Some("Bannastate"), Some("Country"), "AA11AA")
-  private val regRequest = RegistrationRequest("Dave Agent",
+
+  private val regRequest = RegistrationRequest(
+    "Dave Agent",
     "John Contact",
     Some("0123456789"),
     Some("0123456780"),
     Some("email@test.com"),
-    address)
+    address
+  )
 
   private def anError(errorCode: String, errorMsg: String) = Invalid(Failure(Set(ValidationError(errorCode, errorMsg))))
 
@@ -112,13 +115,27 @@ class AgentEpayeRegistrationValidatorSpec extends PlaySpec {
     }
 
     "not allow an email address with a comma, colon, semicolon, parenthesis, pound sign or backslash" in {
-      AgentEpayeRegistrationValidator.isEmailAddress("a,b@b.com")("x") mustBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
-      AgentEpayeRegistrationValidator.isEmailAddress("a:b@b.com")("x") mustBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
-      AgentEpayeRegistrationValidator.isEmailAddress("a;b@b.com")("x") mustBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
-      AgentEpayeRegistrationValidator.isEmailAddress("a(b@b.com")("x") mustBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
-      AgentEpayeRegistrationValidator.isEmailAddress("a)b@b.com")("x") mustBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
-      AgentEpayeRegistrationValidator.isEmailAddress("a£b@b.com")("x") mustBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
-      AgentEpayeRegistrationValidator.isEmailAddress("a\\b@b.com")("x") mustBe Invalid(Failure("INVALID_FIELD", "The x field is not a valid email"))
+      AgentEpayeRegistrationValidator.isEmailAddress("a,b@b.com")("x") mustBe Invalid(
+        Failure("INVALID_FIELD", "The x field is not a valid email")
+      )
+      AgentEpayeRegistrationValidator.isEmailAddress("a:b@b.com")("x") mustBe Invalid(
+        Failure("INVALID_FIELD", "The x field is not a valid email")
+      )
+      AgentEpayeRegistrationValidator.isEmailAddress("a;b@b.com")("x") mustBe Invalid(
+        Failure("INVALID_FIELD", "The x field is not a valid email")
+      )
+      AgentEpayeRegistrationValidator.isEmailAddress("a(b@b.com")("x") mustBe Invalid(
+        Failure("INVALID_FIELD", "The x field is not a valid email")
+      )
+      AgentEpayeRegistrationValidator.isEmailAddress("a)b@b.com")("x") mustBe Invalid(
+        Failure("INVALID_FIELD", "The x field is not a valid email")
+      )
+      AgentEpayeRegistrationValidator.isEmailAddress("a£b@b.com")("x") mustBe Invalid(
+        Failure("INVALID_FIELD", "The x field is not a valid email")
+      )
+      AgentEpayeRegistrationValidator.isEmailAddress("a\\b@b.com")("x") mustBe Invalid(
+        Failure("INVALID_FIELD", "The x field is not a valid email")
+      )
     }
 
     "not allow an email address without an @ symbol" in {
@@ -244,7 +261,7 @@ class AgentEpayeRegistrationValidatorSpec extends PlaySpec {
     }
     "pass if the date range spans exactly 366 days of a leap year" in {
       val yearBeforeFeb29 = LocalDate.parse("2015-03-01", ISO_DATE)
-      val yearAfterFeb29 = LocalDate.parse("2016-03-01", ISO_DATE)
+      val yearAfterFeb29  = LocalDate.parse("2016-03-01", ISO_DATE)
       yearBeforeFeb29.until(yearAfterFeb29, ChronoUnit.DAYS) mustBe 366
       AgentEpayeRegistrationValidator.isValidDateRange(yearBeforeFeb29, yearAfterFeb29) mustBe Valid(())
     }
@@ -252,16 +269,22 @@ class AgentEpayeRegistrationValidatorSpec extends PlaySpec {
 
   "validateDateRange captures all classes of date range validation errors" when {
     val present = LocalDate.now(ZoneOffset.UTC)
-    val past = present.minusDays(1)
+    val past    = present.minusDays(1)
     "param is not in the past" in {
       validateDateRange(present, past) mustBe anError("INVALID_DATE_RANGE", "'From' date must be in the past")
       validateDateRange(past, present) mustBe anError("INVALID_DATE_RANGE", "'To' date must be in the past")
     }
     "from param is not after to param" in {
-      validateDateRange(past, past.minusDays(1)) mustBe anError("INVALID_DATE_RANGE", "'To' date must be after 'From' date")
+      validateDateRange(past, past.minusDays(1)) mustBe anError(
+        "INVALID_DATE_RANGE",
+        "'To' date must be after 'From' date"
+      )
     }
     "date range is less than or equal to a year" in {
-      validateDateRange(past.minusYears(1).minusDays(1), past) mustBe anError("INVALID_DATE_RANGE", "Date range must be 1 year or less")
+      validateDateRange(past.minusYears(1).minusDays(1), past) mustBe anError(
+        "INVALID_DATE_RANGE",
+        "Date range must be 1 year or less"
+      )
     }
   }
 
@@ -361,10 +384,14 @@ class AgentEpayeRegistrationValidatorSpec extends PlaySpec {
 
   "validateRegistrationRequest reports all errors if multiple fields are invalid" in {
     validateRegistrationRequest(regRequest.copy(agentName = " ", contactName = " ")) mustBe
-      Invalid(Failure(Set(
-        ValidationError("MISSING_FIELD", "The agent name field is mandatory"),
-        ValidationError("MISSING_FIELD", "The contact name field is mandatory")
-      )))
+      Invalid(
+        Failure(
+          Set(
+            ValidationError("MISSING_FIELD", "The agent name field is mandatory"),
+            ValidationError("MISSING_FIELD", "The contact name field is mandatory")
+          )
+        )
+      )
   }
 
   "validateRegistrationRequest fails if a field's maximum length is exceeded" when {
@@ -405,4 +432,5 @@ class AgentEpayeRegistrationValidatorSpec extends PlaySpec {
         anError("INVALID_FIELD", "The address line 4 field exceeds 35 characters")
     }
   }
+
 }

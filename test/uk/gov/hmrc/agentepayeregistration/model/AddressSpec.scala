@@ -29,7 +29,6 @@ class AddressSpec extends PlaySpec {
     "postCode"
   )
 
-
   val testAddress2: Address = new Address(
     "addressLine1",
     "addressLine2",
@@ -71,4 +70,5 @@ class AddressSpec extends PlaySpec {
       actualAddress mustBe expectedAddressString
     }
   }
+
 }

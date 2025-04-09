@@ -30,30 +30,36 @@ import javax.inject._
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AgentEpayeRegistrationController @Inject()(registrationService: AgentEpayeRegistrationService, auditService: AuditService, cc: ControllerComponents) extends BackendController(cc) with Logging {
+class AgentEpayeRegistrationController @Inject() (
+    registrationService: AgentEpayeRegistrationService,
+    auditService: AuditService,
+    cc: ControllerComponents
+) extends BackendController(cc)
+    with Logging {
 
   implicit val ec: ExecutionContext = cc.executionContext
 
   val register: Action[JsValue] = Action.async(parse.json) { implicit request =>
+    request.body
+      .validate[RegistrationRequest]
+      .map { registrationRequest =>
+        validateRegistrationRequest(registrationRequest) match {
 
-    request.body.validate[RegistrationRequest].map { registrationRequest =>
-      validateRegistrationRequest(registrationRequest) match {
+          case Invalid(failure) =>
+            Future.successful(BadRequest(Json.toJson(failure)))
 
-        case Invalid(failure) =>
-          Future.successful(BadRequest(Json.toJson(failure)))
+          case Valid(_) =>
+            registrationService.register(registrationRequest).map {
+              case Right(agentReference) =>
+                auditService.sendAgentEpayeRegistrationRecordCreated(registrationRequest, agentReference)
+                Ok(Json.toJson(agentReference))
+              case Left(error) =>
+                BadGateway(Json.toJson(error))
+            }
 
-        case Valid(_) =>
-          registrationService.register(registrationRequest) map {
-            case Right(agentReference) =>
-              auditService.sendAgentEpayeRegistrationRecordCreated(registrationRequest, agentReference)
-              Ok(Json.toJson(agentReference))
-            case Left(error) =>
-              BadGateway(Json.toJson(error))
-          }
-
+        }
       }
-    }.recoverTotal(_ => Future.successful(BadRequest))
+      .recoverTotal(_ => Future.successful(BadRequest))
   }
-
 
 }

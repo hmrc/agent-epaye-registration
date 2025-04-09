@@ -36,10 +36,10 @@ object WireMockSupport {
 trait WireMockSupport extends BeforeAndAfterAll with BeforeAndAfterEach {
   me: Suite =>
 
-  val wireMockPort: Int = WireMockSupport.wireMockPort
-  val wireMockHost = "localhost"
-  val wireMockBaseUrlAsString = s"http://$wireMockHost:$wireMockPort"
-  val wireMockBaseUrl = new URL(wireMockBaseUrlAsString)
+  val wireMockPort: Int                          = WireMockSupport.wireMockPort
+  val wireMockHost                               = "localhost"
+  val wireMockBaseUrlAsString                    = s"http://$wireMockHost:$wireMockPort"
+  val wireMockBaseUrl                            = new URL(wireMockBaseUrlAsString)
   protected implicit val implicitWireMockBaseUrl = WireMockBaseUrl(wireMockBaseUrl)
 
   protected def basicWireMockConfig(): WireMockConfiguration = wireMockConfig()
@@ -61,4 +61,5 @@ trait WireMockSupport extends BeforeAndAfterAll with BeforeAndAfterEach {
     super.beforeEach()
     WireMock.reset()
   }
+
 }

@@ -15,25 +15,27 @@
  */
 
 package uk.gov.hmrc.agentepayeregistration.validators
+
 import utils.EmailAddressValidation
 import cats.Semigroup
 import cats.data.Validated
 import cats.data.Validated.{Invalid, Valid}
 import uk.gov.hmrc.agentepayeregistration.models.{Failure, RegistrationRequest}
 
-
 import java.time.{LocalDate, ZoneOffset}
 import java.time.temporal.ChronoUnit
 
 object ValidatedSemigroup {
+
   implicit def validatedSemigroup[A]: Semigroup[Validated[Failure, Unit]] = new Semigroup[Validated[Failure, Unit]] {
     def combine(x: Validated[Failure, Unit], y: Validated[Failure, Unit]): Validated[Failure, Unit] = (x, y) match {
-      case (Valid(_), Valid(_)) => Valid(())
+      case (Valid(_), Valid(_))       => Valid(())
       case (Invalid(f1), Invalid(f2)) => Invalid(Failure(f1.errors ++ f2.errors))
-      case (Valid(_), f@Invalid(_)) => f
-      case (f@Invalid(_), Valid(_)) => f
+      case (Valid(_), f @ Invalid(_)) => f
+      case (f @ Invalid(_), Valid(_)) => f
     }
   }
+
 }
 
 object AgentEpayeRegistrationValidator {
@@ -68,7 +70,6 @@ object AgentEpayeRegistrationValidator {
     def phoneValidatorWithLimit(field: String, propertyName: String, limit: Int) =
       isPhoneNumber(field)(propertyName).andThen(_ => maxLength(field, limit)(propertyName))
 
-
     val optionalFieldValidators = Seq(
       request.telephoneNumber.map(x => phoneValidatorWithLimit(x, "telephone number", 35)),
       request.faxNumber.map(x => phoneValidatorWithLimit(x, "fax number", 35)),
@@ -80,19 +81,19 @@ object AgentEpayeRegistrationValidator {
     validate(validators ++ optionalFieldValidators)
   }
 
-  def validateDateRange(dateFrom: LocalDate, dateTo: LocalDate): Validated[Failure, Unit] = {
-    validate(Seq(
-      isInPast(dateFrom)("From")
-        .andThen(_ => isInPast(dateTo)("To"))
-        .andThen(_ => isValidDateRange(dateFrom, dateTo))
-    ))
-  }
+  def validateDateRange(dateFrom: LocalDate, dateTo: LocalDate): Validated[Failure, Unit] =
+    validate(
+      Seq(
+        isInPast(dateFrom)("From")
+          .andThen(_ => isInPast(dateTo)("To"))
+          .andThen(_ => isValidDateRange(dateFrom, dateTo))
+      )
+    )
 
-  private def validate(validators: Seq[Validated[Failure, Unit]]): Validated[Failure, Unit] = {
+  private def validate(validators: Seq[Validated[Failure, Unit]]): Validated[Failure, Unit] =
     Semigroup[Validated[Failure, Unit]]
       .combineAllOption(validators)
       .getOrElse(Valid(()))
-  }
 
   private[validators] def nonEmpty(field: String)(propertyName: String) =
     if (field.trim.nonEmpty)
@@ -113,8 +114,8 @@ object AgentEpayeRegistrationValidator {
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field exceeds $maxLength characters"))
 
   private[validators] def isEmailAddress(field: String)(propertyName: String) =
-  if (new EmailAddressValidation().isValid(field))
-    Valid(())
+    if (new EmailAddressValidation().isValid(field))
+      Valid(())
     else
       Invalid(Failure("INVALID_FIELD", s"The $propertyName field is not a valid email"))
 
@@ -138,12 +139,12 @@ object AgentEpayeRegistrationValidator {
       Invalid(Failure("INVALID_DATE_RANGE", s"'$paramName' date must be in the past"))
   }
 
-  private[validators] def isValidDateRange(from: LocalDate, to: LocalDate) = {
-    if(from.isAfter(to))
+  private[validators] def isValidDateRange(from: LocalDate, to: LocalDate) =
+    if (from.isAfter(to))
       Invalid(Failure("INVALID_DATE_RANGE", "'To' date must be after 'From' date"))
     else if (!to.equals(from.plusYears(1)) && from.until(to, ChronoUnit.DAYS) > 365)
       Invalid(Failure("INVALID_DATE_RANGE", "Date range must be 1 year or less"))
     else
       Valid(())
-  }
+
 }

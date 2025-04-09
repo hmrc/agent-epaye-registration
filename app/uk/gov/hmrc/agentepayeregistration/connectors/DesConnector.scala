@@ -29,30 +29,35 @@ import java.net.URL
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class DesConnector @Inject()(config: AppConfig,
-                             http: HttpClientV2)  extends Logging with HttpErrorFunctions{
+class DesConnector @Inject() (config: AppConfig, http: HttpClientV2) extends Logging with HttpErrorFunctions {
 
-  def createAgentKnownFacts(knownFactDetails: CreateKnownFactsRequest, agentRef: AgentReference, regime: String="PAYE")(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[String, Unit]] = {
+  def createAgentKnownFacts(
+      knownFactDetails: CreateKnownFactsRequest,
+      agentRef: AgentReference,
+      regime: String = "PAYE"
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[String, Unit]] =
     postWithDesHeaders[CreateKnownFactsRequest, HttpResponse](
       "createAgentKnownFactsAPI1337",
       new URL(config.desBaseURL + config.desEndpoint(agentRef.value)),
       knownFactDetails
-    ) map {
-      response =>
-        response.status match {
-          case 204  => Right(())
-          case code => Left(s"Unexpected HTTP status code ($code) returned from API1337")
-        }
+    ).map { response =>
+      response.status match {
+        case 204  => Right(())
+        case code => Left(s"Unexpected HTTP status code ($code) returned from API1337")
+      }
     }
-  }
 
-  private def postWithDesHeaders[A: Writes, B: HttpReads](apiName: String, url: URL, body: A)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[B] = {
+  private def postWithDesHeaders[A: Writes, B: HttpReads](apiName: String, url: URL, body: A)(
+      implicit hc: HeaderCarrier,
+      ec: ExecutionContext
+  ): Future[B] = {
     val desHeaders = Seq[(String, String)](
       "Authorization" -> s"Bearer ${config.desToken}",
-      "Environment" -> config.desEnv
+      "Environment"   -> config.desEnv
     )
 
-      //http.POST[A, B](url.toString, body, desHeaders)
-      http.post(url"$url").withBody(Json.toJson(body)).setHeader(desHeaders: _*).execute[B]
+    // http.POST[A, B](url.toString, body, desHeaders)
+    http.post(url"$url").withBody(Json.toJson(body)).setHeader(desHeaders: _*).execute[B]
   }
+
 }

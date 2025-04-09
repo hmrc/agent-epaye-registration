@@ -15,6 +15,7 @@
  */
 
 package utils
+
 import utils.EmailAddressValidation.validEmail
 import javax.naming.Context.{INITIAL_CONTEXT_FACTORY => ICF}
 import javax.naming.directory.{Attribute, InitialDirContext}
@@ -32,12 +33,12 @@ class EmailAddressValidation {
 
   private def isHostMailServer(domain: String): Boolean = {
     val attributeMX = getAttributeValue(domain, "MX")
-    val attributeA = getAttributeValue(domain, "A")
+    val attributeA  = getAttributeValue(domain, "A")
 
     (attributeMX, attributeA) match {
       case (Success(value), _) if value.nonEmpty => true
-      case (_, Success(value)) => value.nonEmpty
-      case _ => false
+      case (_, Success(value))                   => value.nonEmpty
+      case _                                     => false
     }
   }
 
@@ -45,6 +46,7 @@ class EmailAddressValidation {
     Try {
       EmailAddressValidation.ictx.getAttributes(domain, Array(attribute)).getAll.asScala.toList
     }
+
 }
 
 object EmailAddressValidation {
@@ -52,9 +54,10 @@ object EmailAddressValidation {
 
   private lazy val ictx = {
     val DNS_CONTEXT_FACTORY = "com.sun.jndi.dns.DnsContextFactory"
-    val env = new java.util.Hashtable[String, String]()
+    val env                 = new java.util.Hashtable[String, String]()
     env.put(ICF, DNS_CONTEXT_FACTORY)
 
     new InitialDirContext(env)
   }
+
 }

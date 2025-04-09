@@ -26,28 +26,33 @@ import uk.gov.hmrc.agentepayeregistration.stubs.DesStub
 import uk.gov.hmrc.agentepayeregistration.support.{MongoApp, WireMockSupport}
 import org.scalatestplus.play.PlaySpec
 
-abstract class BaseControllerISpec extends PlaySpec with Eventually with GuiceOneServerPerSuite with MongoApp with WireMockSupport with DesStub {
+abstract class BaseControllerISpec
+    extends PlaySpec
+    with Eventually
+    with GuiceOneServerPerSuite
+    with MongoApp
+    with WireMockSupport
+    with DesStub {
 
   def additionalTestConfiguration: Seq[(String, Any)] = Seq.empty
 
-  implicit override val patienceConfig: PatienceConfig = PatienceConfig(timeout = Span(4, Seconds), interval = Span(1, Seconds))
+  override implicit val patienceConfig: PatienceConfig =
+    PatienceConfig(timeout = Span(4, Seconds), interval = Span(1, Seconds))
 
   override implicit lazy val app: Application = appBuilder.build()
 
   val config: AppConfig = app.injector.instanceOf[AppConfig]
 
-  protected def appBuilder: GuiceApplicationBuilder = {
+  protected def appBuilder: GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .configure(mongoConfiguration)
       .configure(
-        "microservice.services.auth.port" -> wireMockPort,
-        "microservice.services.des.host" -> wireMockHost,
-        "microservice.services.des.port" -> wireMockPort,
-        "microservice.services.des.environment" -> "",
+        "microservice.services.auth.port"               -> wireMockPort,
+        "microservice.services.des.host"                -> wireMockHost,
+        "microservice.services.des.port"                -> wireMockPort,
+        "microservice.services.des.environment"         -> "",
         "microservice.services.des.authorization-token" -> ""
       )
-      .configure(additionalTestConfiguration:_*)
-  }
+      .configure(additionalTestConfiguration: _*)
+
 }
-
-

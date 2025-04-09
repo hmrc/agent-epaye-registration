@@ -23,16 +23,19 @@ import play.api.mvc.QueryStringBindable
 import scala.util.Try
 
 object UrlBinders {
-  implicit def localDateQueryBinder: QueryStringBindable[LocalDate] = new QueryStringBindable[LocalDate] {
-    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, LocalDate]] = {
-      params.get(key).flatMap(_.headOption).map { dateTxt: String => (Try {
-        Right(LocalDate.parse(dateTxt, ISO_DATE))
-      } recover {
-        case _: Exception => Left(s"'${key.replaceFirst("date", "")}' date must be in ISO format (yyyy-MM-dd)")
-      }).get
-      }
-    }
 
-    override def unbind(key: String, value: LocalDate): String = QueryStringBindable.bindableString.unbind(s"date$key", value.toString)
+  implicit def localDateQueryBinder: QueryStringBindable[LocalDate] = new QueryStringBindable[LocalDate] {
+    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, LocalDate]] =
+      params.get(key).flatMap(_.headOption).map { dateTxt: String =>
+        Try {
+          Right(LocalDate.parse(dateTxt, ISO_DATE))
+        }.recover { case _: Exception =>
+          Left(s"'${key.replaceFirst("date", "")}' date must be in ISO format (yyyy-MM-dd)")
+        }.get
+      }
+
+    override def unbind(key: String, value: LocalDate): String =
+      QueryStringBindable.bindableString.unbind(s"date$key", value.toString)
   }
+
 }

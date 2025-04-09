@@ -24,12 +24,17 @@ import org.scalatestplus.play.PlaySpec
 import uk.gov.hmrc.agentepayeregistration.models.AgentReference
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
-abstract class BaseRepositoryISpec extends PlaySpec with GuiceOneAppPerSuite with MongoApp with WireMockSupport with DefaultPlayMongoRepositorySupport[AgentReference] {
+abstract class BaseRepositoryISpec
+    extends PlaySpec
+    with GuiceOneAppPerSuite
+    with MongoApp
+    with WireMockSupport
+    with DefaultPlayMongoRepositorySupport[AgentReference] {
 
   override implicit lazy val app: Application = appBuilder.build()
 
-  protected def appBuilder: GuiceApplicationBuilder = {
+  protected def appBuilder: GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .configure(mongoConfiguration)
-  }
+
 }

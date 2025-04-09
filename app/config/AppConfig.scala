@@ -19,7 +19,7 @@ package config
 import com.google.inject.Inject
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
-class AppConfig @Inject()(config: ServicesConfig) {
+class AppConfig @Inject() (config: ServicesConfig) {
 
   lazy val authEnrolment: String = config.getString("extract.auth.stride.enrolment")
   lazy val authURL: String       = config.baseUrl("auth")
@@ -27,9 +27,9 @@ class AppConfig @Inject()(config: ServicesConfig) {
   def desEndpoint(agentId: String, regime: String = "PAYE"): String =
     if (desEnv == "live" || desEnv == "ist0") s"/agents/regime/$regime/agentid/$agentId/known-facts"
     else s"/agents-external-stubs/known-facts/regime/$regime/$agentId"
-  
+
   lazy val desBaseURL: String = config.baseUrl("des")
-  lazy val desEnv: String    = config.getString("microservice.services.des.environment")
-  lazy val desToken: String  = config.getString("microservice.services.des.authorization-token")
+  lazy val desEnv: String     = config.getString("microservice.services.des.environment")
+  lazy val desToken: String   = config.getString("microservice.services.des.authorization-token")
 
 }

@@ -18,7 +18,8 @@ package uk.gov.hmrc.agentepayeregistration.models
 
 import java.time.OffsetDateTime
 
-case class RegistrationDetails(agentReference: AgentReference,
-                               registration: RegistrationRequest,
-                               createdDateTime: OffsetDateTime)
-
+case class RegistrationDetails(
+    agentReference: AgentReference,
+    registration: RegistrationRequest,
+    createdDateTime: OffsetDateTime
+)

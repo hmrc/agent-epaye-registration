@@ -27,41 +27,46 @@ import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import scala.concurrent.ExecutionContext
 
-class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with AuthStub with RegistrationActions with DataStreamStub with DefaultPlayMongoRepositorySupport[AgentReference] {
+class AgentEpayeRegistrationControllerISpec
+    extends BaseControllerISpec
+    with AuthStub
+    with RegistrationActions
+    with DataStreamStub
+    with DefaultPlayMongoRepositorySupport[AgentReference] {
 
-  private lazy val configuration = app.injector.instanceOf[Configuration]
+  private lazy val configuration    = app.injector.instanceOf[Configuration]
   implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
-  override lazy val repository = new AgentEpayeRegistrationRepository(mongoComponent, configuration)
+  override lazy val repository      = new AgentEpayeRegistrationRepository(mongoComponent, configuration)
 
   override def additionalTestConfiguration: Seq[(String, Any)] = Seq(
-    "extract.auth.stride.enrolment" -> "ValidStrideEnrolment",
-    "auditing.enabled" -> true,
+    "extract.auth.stride.enrolment"  -> "ValidStrideEnrolment",
+    "auditing.enabled"               -> true,
     "auditing.consumer.baseUri.host" -> wireMockHost,
     "auditing.consumer.baseUri.port" -> wireMockPort
   )
 
   val validPostData: JsObject = Json.obj(
-    "agentName" -> "Jim Jiminy",
+    "agentName"   -> "Jim Jiminy",
     "contactName" -> "John Johnson",
     "address" -> Json.obj(
       "addressLine1" -> "Line 1",
       "addressLine2" -> "Line 2",
-      "postCode" -> "AB111AA"
+      "postCode"     -> "AB111AA"
     )
   )
 
   val validPostDataComplete: JsObject = Json.obj(
-    "agentName" -> "Jim Jiminy",
-    "contactName" -> "John Johnson",
+    "agentName"       -> "Jim Jiminy",
+    "contactName"     -> "John Johnson",
     "telephoneNumber" -> "12345",
-    "faxNumber" -> "12345",
-    "emailAddress" -> "john.smith@email.com",
+    "faxNumber"       -> "12345",
+    "emailAddress"    -> "john.smith@email.com",
     "address" -> Json.obj(
       "addressLine1" -> "Line 1",
       "addressLine2" -> "Line 2",
       "addressLine3" -> "Line 3",
       "addressLine4" -> "Line 4",
-      "postCode" -> "AB111AA"
+      "postCode"     -> "AB111AA"
     )
   )
 
@@ -72,31 +77,32 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
         givenAuditConnector()
         givenAgentKnownFactsComplete(AgentReference("HX2000"))
 
-        val result = postRegistration(validPostDataComplete)
+        val result              = postRegistration(validPostDataComplete)
         val requestPath: String = s"/agent-epaye-registration/registrations"
 
         result.status mustBe 200
 
         result.json mustBe Json.obj("payeAgentReference" -> "HX2000")
 
-        verifyAuditRequestSent(1,
+        verifyAuditRequestSent(
+          1,
           event = AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated,
           detail = Map(
-            "payeAgentRef" -> "HX2000",
-            "agentName" -> "Jim Jiminy",
-            "contactName" -> "John Johnson",
+            "payeAgentRef"    -> "HX2000",
+            "agentName"       -> "Jim Jiminy",
+            "contactName"     -> "John Johnson",
             "telephoneNumber" -> "12345",
-            "faxNumber" -> "12345",
-            "emailAddress" -> "john.smith@email.com",
-            "addressLine1" -> "Line 1",
-            "addressLine2" -> "Line 2",
-            "addressLine3" -> "Line 3",
-            "addressLine4" -> "Line 4",
-            "postcode" -> "AB111AA"
+            "faxNumber"       -> "12345",
+            "emailAddress"    -> "john.smith@email.com",
+            "addressLine1"    -> "Line 1",
+            "addressLine2"    -> "Line 2",
+            "addressLine3"    -> "Line 3",
+            "addressLine4"    -> "Line 4",
+            "postcode"        -> "AB111AA"
           ),
           tags = Map(
             "transactionName" -> "Agent ePAYE registration created",
-            "path" -> requestPath
+            "path"            -> requestPath
           )
         )
       }
@@ -105,25 +111,26 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
         givenAuditConnector()
         givenAgentKnownFactsIncomplete(AgentReference("HX2000"))
 
-        val result = postRegistration(validPostData)
+        val result              = postRegistration(validPostData)
         val requestPath: String = s"/agent-epaye-registration/registrations"
 
         result.status mustBe 200
         result.json mustBe Json.obj("payeAgentReference" -> "HX2000")
 
-        verifyAuditRequestSent(1,
+        verifyAuditRequestSent(
+          1,
           event = AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated,
           detail = Map(
             "payeAgentRef" -> "HX2000",
-            "agentName" -> "Jim Jiminy",
-            "contactName" -> "John Johnson",
+            "agentName"    -> "Jim Jiminy",
+            "contactName"  -> "John Johnson",
             "addressLine1" -> "Line 1",
             "addressLine2" -> "Line 2",
-            "postcode" -> "AB111AA"
+            "postcode"     -> "AB111AA"
           ),
           tags = Map(
             "transactionName" -> "Agent ePAYE registration created",
-            "path" -> requestPath
+            "path"            -> requestPath
           )
         )
       }
@@ -170,4 +177,5 @@ class AgentEpayeRegistrationControllerISpec extends BaseControllerISpec with Aut
       }
     }
   }
+
 }

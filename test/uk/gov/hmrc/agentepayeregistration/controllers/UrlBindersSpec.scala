@@ -23,6 +23,7 @@ import org.scalatest.wordspec.AnyWordSpecLike
 import org.scalatest.EitherValues
 
 class UrlBindersSpec extends AnyWordSpecLike with Matchers with EitherValues {
+
   "LocalDate binder" should {
     "bind perfectly valid dates" in {
       UrlBinders.localDateQueryBinder.bind("dateFrom", Map("dateFrom" -> Seq("2010-01-01"))) mustBe
@@ -33,7 +34,10 @@ class UrlBindersSpec extends AnyWordSpecLike with Matchers with EitherValues {
       UrlBinders.localDateQueryBinder.bind("dateFrom", Map("dateFrom" -> Seq("yyyy-MM-dd"))) mustBe expectedFailure
       UrlBinders.localDateQueryBinder.bind("dateFrom", Map("dateFrom" -> Seq("01-01-2017"))) mustBe expectedFailure
       UrlBinders.localDateQueryBinder.bind("dateFrom", Map("dateFrom" -> Seq("2017 01 01"))) mustBe expectedFailure
-      UrlBinders.localDateQueryBinder.bind("dateFrom", Map("dateFrom" -> Seq("2017-01-01 19:16:39+01:00"))) mustBe expectedFailure
+      UrlBinders.localDateQueryBinder.bind(
+        "dateFrom",
+        Map("dateFrom" -> Seq("2017-01-01 19:16:39+01:00"))
+      ) mustBe expectedFailure
       UrlBinders.localDateQueryBinder.bind("dateFrom", Map("dateFrom" -> Seq(""))) mustBe expectedFailure
     }
     "fail to bind  a string in the format yyyy-MM-dd but not a valid date" in {
@@ -49,4 +53,5 @@ class UrlBindersSpec extends AnyWordSpecLike with Matchers with EitherValues {
         "dateKey=2010-01-01"
     }
   }
+
 }
