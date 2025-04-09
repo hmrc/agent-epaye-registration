@@ -31,82 +31,99 @@ import scala.util.Try
 
 object AgentEpayeRegistrationEvent extends Enumeration {
   val AgentEpayeRegistrationRecordCreated = Value
-  val AgentKnownFactsRecordCreated = Value
-  val AgentEpayeRegistrationExtract = Value
+  val AgentKnownFactsRecordCreated        = Value
+  val AgentEpayeRegistrationExtract       = Value
   type AgentEpayeRegistrationEvent = Value
 }
 
 @Singleton
-class AuditService @Inject()(val auditConnector: AuditConnector)(implicit ec: ExecutionContext) {
+class AuditService @Inject() (val auditConnector: AuditConnector)(implicit ec: ExecutionContext) {
 
-  def sendAgentEpayeRegistrationRecordCreated(registrationRequest: RegistrationRequest, agentReference: AgentReference)(implicit hc: HeaderCarrier, request: Request[Any]): Future[Unit] = {
+  def sendAgentEpayeRegistrationRecordCreated(registrationRequest: RegistrationRequest, agentReference: AgentReference)(
+      implicit hc: HeaderCarrier,
+      request: Request[Any]
+  ): Future[Unit] =
 
-    auditEvent(AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated, "Agent ePAYE registration created",
-      Seq("payeAgentRef" -> agentReference.value,
-        "agentName" -> registrationRequest.agentName,
-        "contactName" -> registrationRequest.contactName,
+    auditEvent(
+      AgentEpayeRegistrationEvent.AgentEpayeRegistrationRecordCreated,
+      "Agent ePAYE registration created",
+      Seq(
+        "payeAgentRef"    -> agentReference.value,
+        "agentName"       -> registrationRequest.agentName,
+        "contactName"     -> registrationRequest.contactName,
         "telephoneNumber" -> registrationRequest.telephoneNumber.getOrElse(""),
-        "faxNumber" -> registrationRequest.faxNumber.getOrElse(""),
-        "emailAddress" -> registrationRequest.emailAddress.getOrElse(""),
-        "addressLine1" -> s"${registrationRequest.address.addressLine1}",
-        "addressLine2" -> s"${registrationRequest.address.addressLine2}",
-        "addressLine3" -> s"${registrationRequest.address.addressLine3.getOrElse("")}",
-        "addressLine4" -> s"${registrationRequest.address.addressLine4.getOrElse("")}",
-        "postcode" -> s"${registrationRequest.address.postCode}").filter(_._2 != ""))
-  }
+        "faxNumber"       -> registrationRequest.faxNumber.getOrElse(""),
+        "emailAddress"    -> registrationRequest.emailAddress.getOrElse(""),
+        "addressLine1"    -> s"${registrationRequest.address.addressLine1}",
+        "addressLine2"    -> s"${registrationRequest.address.addressLine2}",
+        "addressLine3"    -> s"${registrationRequest.address.addressLine3.getOrElse("")}",
+        "addressLine4"    -> s"${registrationRequest.address.addressLine4.getOrElse("")}",
+        "postcode"        -> s"${registrationRequest.address.postCode}"
+      ).filter(_._2 != "")
+    )
 
-  def sendAgentKnownFactsCreated(registrationDetails: RegistrationDetails)(implicit hc: HeaderCarrier, request: Request[Any]): Future[Unit] = {
+  def sendAgentKnownFactsCreated(
+      registrationDetails: RegistrationDetails
+  )(implicit hc: HeaderCarrier, request: Request[Any]): Future[Unit] =
 
-    auditEvent(AgentEpayeRegistrationEvent.AgentKnownFactsRecordCreated, "Send agent known facts to API1337",
-      Seq("agentReference" -> registrationDetails.agentReference.value,
-        "agentName" -> registrationDetails.registration.agentName,
-        "contactName" -> registrationDetails.registration.contactName,
+    auditEvent(
+      AgentEpayeRegistrationEvent.AgentKnownFactsRecordCreated,
+      "Send agent known facts to API1337",
+      Seq(
+        "agentReference"  -> registrationDetails.agentReference.value,
+        "agentName"       -> registrationDetails.registration.agentName,
+        "contactName"     -> registrationDetails.registration.contactName,
         "telephoneNumber" -> registrationDetails.registration.telephoneNumber.getOrElse(""),
-        "faxNumber" -> registrationDetails.registration.faxNumber.getOrElse(""),
-        "emailAddress" -> registrationDetails.registration.emailAddress.getOrElse(""),
-        "addressLine1" -> s"${registrationDetails.registration.address.addressLine1}",
-        "addressLine2" -> s"${registrationDetails.registration.address.addressLine2}",
-        "addressLine3" -> s"${registrationDetails.registration.address.addressLine3.getOrElse("")}",
-        "addressLine4" -> s"${registrationDetails.registration.address.addressLine4.getOrElse("")}",
-        "postcode" -> s"${registrationDetails.registration.address.postCode}").filter(_._2 != ""))
-  }
+        "faxNumber"       -> registrationDetails.registration.faxNumber.getOrElse(""),
+        "emailAddress"    -> registrationDetails.registration.emailAddress.getOrElse(""),
+        "addressLine1"    -> s"${registrationDetails.registration.address.addressLine1}",
+        "addressLine2"    -> s"${registrationDetails.registration.address.addressLine2}",
+        "addressLine3"    -> s"${registrationDetails.registration.address.addressLine3.getOrElse("")}",
+        "addressLine4"    -> s"${registrationDetails.registration.address.addressLine4.getOrElse("")}",
+        "postcode"        -> s"${registrationDetails.registration.address.postCode}"
+      ).filter(_._2 != "")
+    )
 
-  def sendAgentEpayeRegistrationExtract(userId: String, extractDate: String, dataFrom: String, dateTo: String, count: Int)(implicit hc: HeaderCarrier, request: Request[Any]): Future[Unit]  = {
+  def sendAgentEpayeRegistrationExtract(
+      userId: String,
+      extractDate: String,
+      dataFrom: String,
+      dateTo: String,
+      count: Int
+  )(implicit hc: HeaderCarrier, request: Request[Any]): Future[Unit] =
 
-      auditEvent(AgentEpayeRegistrationEvent.AgentEpayeRegistrationExtract, "agent-epaye-registration-extract",
-        Seq(
-          "strideUserId" -> userId,
-          "extractDate" -> extractDate,
-          "dateFrom" -> dataFrom,
-          "dateTo" -> dateTo,
-          "recordCount" -> count
-        )
+    auditEvent(
+      AgentEpayeRegistrationEvent.AgentEpayeRegistrationExtract,
+      "agent-epaye-registration-extract",
+      Seq(
+        "strideUserId" -> userId,
+        "extractDate"  -> extractDate,
+        "dateFrom"     -> dataFrom,
+        "dateTo"       -> dateTo,
+        "recordCount"  -> count
       )
-  }
+    )
 
-  private[audit] def auditEvent(event: AgentEpayeRegistrationEvent, transactionName: String, details: Seq[(String, Any)] = Seq.empty)
-                               (implicit hc: HeaderCarrier, request: Request[Any]): Future[Unit] = {
+  private[audit] def auditEvent(
+      event: AgentEpayeRegistrationEvent,
+      transactionName: String,
+      details: Seq[(String, Any)] = Seq.empty
+  )(implicit hc: HeaderCarrier, request: Request[Any]): Future[Unit] =
     send(createEvent(event, transactionName, details: _*))
-  }
 
-  private def createEvent(event: AgentEpayeRegistrationEvent, transactionName: String, details: (String, Any)*)
-                         (implicit hc: HeaderCarrier, request: Request[Any]): DataEvent = {
+  private def createEvent(event: AgentEpayeRegistrationEvent, transactionName: String, details: (String, Any)*)(
+      implicit hc: HeaderCarrier,
+      request: Request[Any]
+  ): DataEvent = {
 
     val detail = hc.toAuditDetails(details.map(pair => pair._1 -> pair._2.toString): _*)
-    val tags = hc.toAuditTags(transactionName, request.path)
-    DataEvent(auditSource = "agent-epaye-registration",
-      auditType = event.toString,
-      tags = tags,
-      detail = detail
-    )
+    val tags   = hc.toAuditTags(transactionName, request.path)
+    DataEvent(auditSource = "agent-epaye-registration", auditType = event.toString, tags = tags, detail = detail)
   }
 
-  private def send(events: DataEvent*)(implicit hc: HeaderCarrier): Future[Unit] = {
+  private def send(events: DataEvent*)(implicit hc: HeaderCarrier): Future[Unit] =
     Future {
-      events.foreach { event =>
-        Try(auditConnector.sendEvent(event))
-      }
+      events.foreach(event => Try(auditConnector.sendEvent(event)))
     }
-  }
 
 }

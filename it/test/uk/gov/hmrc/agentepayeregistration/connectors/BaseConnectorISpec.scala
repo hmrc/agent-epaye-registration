@@ -24,7 +24,7 @@ import uk.gov.hmrc.agentepayeregistration.stubs.DesStub
 import uk.gov.hmrc.agentepayeregistration.support.WireMockSupport
 import org.scalatestplus.play.PlaySpec
 
-class BaseConnectorISpec extends PlaySpec with GuiceOneServerPerSuite with WireMockSupport with DesStub  {
+class BaseConnectorISpec extends PlaySpec with GuiceOneServerPerSuite with WireMockSupport with DesStub {
 
   def additionalTestConfiguration: Seq[(String, Any)] = Seq.empty
 
@@ -32,14 +32,14 @@ class BaseConnectorISpec extends PlaySpec with GuiceOneServerPerSuite with WireM
 
   val config: AppConfig = app.injector.instanceOf[AppConfig]
 
-  protected def appBuilder: GuiceApplicationBuilder = {
+  protected def appBuilder: GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .configure(
-        "microservice.services.des.host" -> wireMockHost,
-        "microservice.services.des.port" -> wireMockPort,
-        "microservice.services.des.environment" -> "",
+        "microservice.services.des.host"                -> wireMockHost,
+        "microservice.services.des.port"                -> wireMockPort,
+        "microservice.services.des.environment"         -> "",
         "microservice.services.des.authorization-token" -> ""
       )
-      .configure(additionalTestConfiguration:_*)
-  }
+      .configure(additionalTestConfiguration: _*)
+
 }

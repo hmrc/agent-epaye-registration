@@ -33,7 +33,7 @@ trait ResetMongoBeforeTest extends BeforeAndAfterEach {
     dropMongoDb()
   }
 
-  def dropMongoDb(): Unit = {
+  def dropMongoDb(): Unit =
     mongoDatabase.drop()
-  }
+
 }

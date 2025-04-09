@@ -18,23 +18,25 @@ package uk.gov.hmrc.agentepayeregistration.models
 
 import play.api.libs.json.{Json, OFormat}
 
-case class CreateKnownFactsRequest(agentName: Option[String],
-                                   contactName: Option[String],
-                                   addressLine1: String,
-                                   addressLine2: String,
-                                   addressLine3: Option[String],
-                                   addressLine4: Option[String],
-                                   postCode: String,
-                                   phoneNo: Option[String],
-                                   faxNumber: Option[String],
-                                   email: Option[String],
-                                   createdDate: String)
+case class CreateKnownFactsRequest(
+    agentName: Option[String],
+    contactName: Option[String],
+    addressLine1: String,
+    addressLine2: String,
+    addressLine3: Option[String],
+    addressLine4: Option[String],
+    postCode: String,
+    phoneNo: Option[String],
+    faxNumber: Option[String],
+    email: Option[String],
+    createdDate: String
+)
 
 object CreateKnownFactsRequest {
   implicit val createKnownFactsRequestFormat: OFormat[CreateKnownFactsRequest] = Json.format[CreateKnownFactsRequest]
 
-  def apply(regRequest: RegistrationRequest, createdDate: String) : CreateKnownFactsRequest = {
-    CreateKnownFactsRequest (
+  def apply(regRequest: RegistrationRequest, createdDate: String): CreateKnownFactsRequest =
+    CreateKnownFactsRequest(
       Some(regRequest.agentName),
       Some(regRequest.contactName),
       regRequest.address.addressLine1,
@@ -47,5 +49,5 @@ object CreateKnownFactsRequest {
       regRequest.emailAddress,
       createdDate
     )
-  }
+
 }

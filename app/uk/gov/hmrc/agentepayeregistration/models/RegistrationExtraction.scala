@@ -18,25 +18,29 @@ package uk.gov.hmrc.agentepayeregistration.models
 
 import play.api.libs.json.{Json, OWrites}
 
-case class RegistrationExtraction(agentReference: String,
-                                  agentName: String,
-                                  contactName: String,
-                                  telephoneNumber: Option[String],
-                                  faxNumber: Option[String],
-                                  emailAddress: Option[String],
-                                  addressLine1: String,
-                                  addressLine2: String,
-                                  addressLine3: Option[String],
-                                  addressLine4: Option[String],
-                                  postCode: String,
-                                  createdDateTime: String)
+case class RegistrationExtraction(
+    agentReference: String,
+    agentName: String,
+    contactName: String,
+    telephoneNumber: Option[String],
+    faxNumber: Option[String],
+    emailAddress: Option[String],
+    addressLine1: String,
+    addressLine2: String,
+    addressLine3: Option[String],
+    addressLine4: Option[String],
+    postCode: String,
+    createdDateTime: String
+)
 
 object RegistrationExtraction {
+
   def apply(details: RegistrationDetails): RegistrationExtraction = {
     import details._
     import details.registration._
     import details.registration.address._
-    RegistrationExtraction(agentReference.value,
+    RegistrationExtraction(
+      agentReference.value,
       agentName,
       contactName,
       telephoneNumber,
@@ -47,7 +51,8 @@ object RegistrationExtraction {
       addressLine3,
       addressLine4,
       postCode,
-      createdDateTime.toString)
+      createdDateTime.toString
+    )
   }
 
   implicit val registrationExtractionWrites: OWrites[RegistrationExtraction] = Json.writes[RegistrationExtraction]

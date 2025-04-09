@@ -32,14 +32,16 @@ trait RegistrationActions extends ScalaFutures {
   val wsClient = app.injector.instanceOf[WSClient]
 
   def postRegistration(registrationRequest: JsValue): WSResponse =
-    wsClient.url(s"$url/registrations")
+    wsClient
+      .url(s"$url/registrations")
       .post(registrationRequest)
       .futureValue
 
-  def getRegistrations(urlEncodedDateFrom: String, urlEncodedDateTo: String): WSResponse = {
-    wsClient.url(s"$url/registrations?dateFrom=$urlEncodedDateFrom&dateTo=$urlEncodedDateTo")
+  def getRegistrations(urlEncodedDateFrom: String, urlEncodedDateTo: String): WSResponse =
+    wsClient
+      .url(s"$url/registrations?dateFrom=$urlEncodedDateFrom&dateTo=$urlEncodedDateTo")
       .withHttpHeaders(HeaderNames.authorisation -> "Bearer XYZ")
       .get()
       .futureValue
-  }
+
 }

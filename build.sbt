@@ -9,17 +9,17 @@ lazy val scoverageSettings = {
     // Semicolon-separated list of regexs matching classes to exclude
     ScoverageKeys.coverageExcludedPackages := """uk\.gov\.hmrc\.BuildInfo;.*\.Routes;.*\.RoutesPrefix;.*Filters?;MicroserviceAuditConnector;Module;GraphiteStartUp;ErrorHandler;.*\.Reverse[^.]*""",
     ScoverageKeys.coverageMinimumStmtTotal := 80.00,
-    ScoverageKeys.coverageFailOnMinimum := false,
-    ScoverageKeys.coverageHighlighting := true,
-    Test / parallelExecution := false
+    ScoverageKeys.coverageFailOnMinimum    := false,
+    ScoverageKeys.coverageHighlighting     := true,
+    Test / parallelExecution               := false
   )
 }
 
 lazy val root = (project in file("."))
   .settings(
-    name := "agent-epaye-registration",
-    organization := "uk.gov.hmrc",
-    isPublicArtefact := true,
+    name                     := "agent-epaye-registration",
+    organization             := "uk.gov.hmrc",
+    isPublicArtefact         := true,
     PlayKeys.playDefaultPort := 9445,
     libraryDependencies ++= AppDependencies(),
     routesImport += "uk.gov.hmrc.agentepayeregistration.controllers.UrlBinders._",
@@ -27,13 +27,12 @@ lazy val root = (project in file("."))
     scalacOptions ++= Seq(
       "-feature",
       "-Wconf:cat=unused&src=routes/.*:s",
-      "-Wconf:cat=unused&src=views/.*:s",
+      "-Wconf:cat=unused&src=views/.*:s"
     )
   )
-  .enablePlugins(Seq(play.sbt.PlayScala, SbtDistributablesPlugin) : _*)
+  .enablePlugins(Seq(play.sbt.PlayScala, SbtDistributablesPlugin): _*)
 
 lazy val it = project
   .enablePlugins(PlayScala)
   .dependsOn(root % "test->test")
-  .settings(itSettings():_*)
-
+  .settings(itSettings(): _*)

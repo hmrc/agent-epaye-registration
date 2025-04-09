@@ -31,26 +31,28 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Success
 
 @Singleton
-class AgentEpayeRegistrationService @Inject()(repository: AgentEpayeRegistrationRepository,
-                                              desConnector: DesConnector,
-                                              auditService: AuditService) extends Logging {
+class AgentEpayeRegistrationService @Inject() (
+    repository: AgentEpayeRegistrationRepository,
+    desConnector: DesConnector,
+    auditService: AuditService
+) extends Logging {
 
-  def register(regRequest: RegistrationRequest)
-              (implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[Any]): Future[Either[String, AgentReference]] = {
+  def register(
+      regRequest: RegistrationRequest
+  )(implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[Any]): Future[Either[String, AgentReference]] =
     for {
       regDetails <- repository.create(regRequest)
       currentDate = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(OffsetDateTime.now)
-      knownFactsCreated <- desConnector.createAgentKnownFacts(CreateKnownFactsRequest(regRequest, currentDate), regDetails.agentReference).andThen {
-        case Success(response) if response.isRight =>
-          auditService.sendAgentKnownFactsCreated(regDetails)
-        case _ =>
-      }
-    } yield {
-      knownFactsCreated match {
-        case Right(()) => Right(regDetails.agentReference)
-        case Left(error) => Left(error)
-      }
-
+      knownFactsCreated <- desConnector
+        .createAgentKnownFacts(CreateKnownFactsRequest(regRequest, currentDate), regDetails.agentReference)
+        .andThen {
+          case Success(response) if response.isRight =>
+            auditService.sendAgentKnownFactsCreated(regDetails)
+          case _ =>
+        }
+    } yield knownFactsCreated match {
+      case Right(())   => Right(regDetails.agentReference)
+      case Left(error) => Left(error)
     }
-  }
+
 }

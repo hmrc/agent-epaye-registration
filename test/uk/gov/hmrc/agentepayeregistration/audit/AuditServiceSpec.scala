@@ -35,17 +35,15 @@ import uk.gov.hmrc.http.{Authorization, HeaderCarrier, RequestId, SessionId}
 
 class AuditServiceSpec extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar with Eventually {
 
-  override implicit val patienceConfig: PatienceConfig = PatienceConfig(
-    timeout = scaled(Span(500, Millis)),
-    interval = scaled(Span(200, Millis)))
+  override implicit val patienceConfig: PatienceConfig =
+    PatienceConfig(timeout = scaled(Span(500, Millis)), interval = scaled(Span(200, Millis)))
 
   implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
   "auditEvent" should {
     "send an AgentEpayeRegistrationRecordCreated event with the correct fields" in {
       val mockConnector = mock[AuditConnector]
-      val service = new AuditService(mockConnector)
-
+      val service       = new AuditService(mockConnector)
 
       val hc = HeaderCarrier(
         authorization = Some(Authorization("dummy bearer token")),
@@ -63,12 +61,12 @@ class AuditServiceSpec extends PlaySpec with GuiceOneAppPerSuite with MockitoSug
         address = Address("addressLine1", "addressLine2", Some("addressLine3"), Some("addressLine4"), "postCode")
       )
 
-      await(service.sendAgentEpayeRegistrationRecordCreated(
-        registrationRequest,
-        agentReference)(
-        hc,
-        FakeRequest("GET", "/path")
-      ))
+      await(
+        service.sendAgentEpayeRegistrationRecordCreated(registrationRequest, agentReference)(
+          hc,
+          FakeRequest("GET", "/path")
+        )
+      )
 
       eventually {
         val captor = ArgumentCaptor.forClass(classOf[DataEvent])
@@ -100,8 +98,7 @@ class AuditServiceSpec extends PlaySpec with GuiceOneAppPerSuite with MockitoSug
 
     "send an AgentEpayeRegistrationRecordCreated event with the correct and without optional fields" in {
       val mockConnector = mock[AuditConnector]
-      val service = new AuditService(mockConnector)
-
+      val service       = new AuditService(mockConnector)
 
       val hc = HeaderCarrier(
         authorization = Some(Authorization("dummy bearer token")),
@@ -119,12 +116,12 @@ class AuditServiceSpec extends PlaySpec with GuiceOneAppPerSuite with MockitoSug
         address = Address("addressLine1", "addressLine2", None, None, "postCode")
       )
 
-      await(service.sendAgentEpayeRegistrationRecordCreated(
-        registrationRequest,
-        agentReference)(
-        hc,
-        FakeRequest("GET", "/path")
-      ))
+      await(
+        service.sendAgentEpayeRegistrationRecordCreated(registrationRequest, agentReference)(
+          hc,
+          FakeRequest("GET", "/path")
+        )
+      )
 
       eventually {
         val captor = ArgumentCaptor.forClass(classOf[DataEvent])
@@ -151,8 +148,7 @@ class AuditServiceSpec extends PlaySpec with GuiceOneAppPerSuite with MockitoSug
 
     "send an AgentEpayeRegistrationRecordExtract event with the correct fields" in {
       val mockConnector = mock[AuditConnector]
-      val service = new AuditService(mockConnector)
-
+      val service       = new AuditService(mockConnector)
 
       val hc = HeaderCarrier(
         authorization = Some(Authorization("dummy bearer token")),
@@ -160,11 +156,12 @@ class AuditServiceSpec extends PlaySpec with GuiceOneAppPerSuite with MockitoSug
         requestId = Some(RequestId("dummy request id"))
       )
 
-      await(service.sendAgentEpayeRegistrationExtract(
-        "userId", "extractDate", "dateFrom", "dateTo", 2)(
-        hc,
-        FakeRequest("GET", "/path")
-      ))
+      await(
+        service.sendAgentEpayeRegistrationExtract("userId", "extractDate", "dateFrom", "dateTo", 2)(
+          hc,
+          FakeRequest("GET", "/path")
+        )
+      )
 
       eventually {
         val captor = ArgumentCaptor.forClass(classOf[DataEvent])
@@ -188,4 +185,5 @@ class AuditServiceSpec extends PlaySpec with GuiceOneAppPerSuite with MockitoSug
       }
     }
   }
+
 }

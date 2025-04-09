@@ -40,14 +40,15 @@ case class AgentReference(value: String) {
     validateNumericCode(code)
   }
 
-  private def validateAlphaCode(alphaCode: String): Unit = {
-    require(alphaCode.length == 2 &&
-      alphaCode.charAt(0) >= 'H' &&
-      alphaCode.charAt(0) <= 'Z' &&
-      alphaCode.charAt(1) >= 'A' &&
-      alphaCode.charAt(1) <= 'Z',
-      "agent PAYE reference has an invalid alpha code portion")
-  }
+  private def validateAlphaCode(alphaCode: String): Unit =
+    require(
+      alphaCode.length == 2 &&
+        alphaCode.charAt(0) >= 'H' &&
+        alphaCode.charAt(0) <= 'Z' &&
+        alphaCode.charAt(1) >= 'A' &&
+        alphaCode.charAt(1) <= 'Z',
+      "agent PAYE reference has an invalid alpha code portion"
+    )
 
   private def validateNumericCode(numericCode: String): Unit = {
     require(numericCode.length == 4, "agent PAYE reference does not have a 4 digit numeric portion")
@@ -65,9 +66,11 @@ case class AgentReference(value: String) {
     else
       s"$c1${(c2.toUpper + 1).toChar}"
   }
+
 }
 
 object AgentReference {
+
   implicit val agentReferenceWrites: Writes[AgentReference] =
     (__ \ "payeAgentReference").write[String].contramap(_.value)
 

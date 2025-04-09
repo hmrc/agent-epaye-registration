@@ -29,27 +29,32 @@ import play.api.{Configuration, Logging}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
-class AgentEpayeRegistrationRepository @Inject()(mongo: MongoComponent, config: Configuration)(implicit ec: ExecutionContext)
-  extends PlayMongoRepository[AgentReference](
-    mongoComponent = mongo,
-    collectionName = "agent-epaye-registration-record",
-    domainFormat = AgentReference.mongoFormat,
-    indexes = Seq(
-      IndexModel(
-        Indexes.ascending("agentReference"),
-        IndexOptions()
-          .name("agentRefIndex")
-          .unique(true)
+class AgentEpayeRegistrationRepository @Inject() (mongo: MongoComponent, config: Configuration)(
+    implicit ec: ExecutionContext
+) extends PlayMongoRepository[AgentReference](
+      mongoComponent = mongo,
+      collectionName = "agent-epaye-registration-record",
+      domainFormat = AgentReference.mongoFormat,
+      indexes = Seq(
+        IndexModel(
+          Indexes.ascending("agentReference"),
+          IndexOptions()
+            .name("agentRefIndex")
+            .unique(true)
+        )
       )
     )
-  ) with Logging {
+    with Logging {
 
   // Agent references persist indefinitely, so no TTL
   override lazy val requiresTtlIndex: Boolean = false
 
   val initialAgentReference: String = "HX2000"
 
-  def create(request: RegistrationRequest, createdDate: OffsetDateTime = OffsetDateTime.now()): Future[RegistrationDetails] = {
+  def create(
+      request: RegistrationRequest,
+      createdDate: OffsetDateTime = OffsetDateTime.now()
+  ): Future[RegistrationDetails] = {
     val mongoCodeDuplicateKey: Int = 11000
 
     for {
@@ -57,12 +62,12 @@ class AgentEpayeRegistrationRepository @Inject()(mongo: MongoComponent, config: 
       regDetails = {
         val nextAgentRef = oAgentRef match {
           case Some(ref) => ref.newReference
-          case None => AgentReference(initialAgentReference)
+          case None      => AgentReference(initialAgentReference)
         }
         RegistrationDetails(nextAgentRef, request, createdDate)
       }
-      _ <- collection.insertOne(regDetails.agentReference).toFuture() recover {
-        case error: MongoException  if error.getCode == mongoCodeDuplicateKey => create(request)
+      _ <- collection.insertOne(regDetails.agentReference).toFuture().recover {
+        case error: MongoException if error.getCode == mongoCodeDuplicateKey => create(request)
       }
     } yield regDetails
   }

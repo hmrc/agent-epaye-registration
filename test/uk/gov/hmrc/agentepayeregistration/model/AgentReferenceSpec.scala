@@ -20,12 +20,12 @@ import uk.gov.hmrc.agentepayeregistration.models.AgentReference
 import org.scalatestplus.play.PlaySpec
 
 class AgentReferenceSpec extends PlaySpec {
+
   "Validation on construction of an agent reference" should {
-    "disallow an empty string" in {
+    "disallow an empty string" in
       assertThrows[IllegalArgumentException] {
         AgentReference("")
       }
-    }
 
     "disallow string of length other than 6" in {
       assertThrows[IllegalArgumentException] {
@@ -46,11 +46,10 @@ class AgentReferenceSpec extends PlaySpec {
       }
     }
 
-    "disallow references whose last four characters are not numeric" in {
+    "disallow references whose last four characters are not numeric" in
       assertThrows[IllegalArgumentException] {
         AgentReference("HX2OO1")
       }
-    }
   }
 
   "generating the next code" should {
@@ -64,4 +63,5 @@ class AgentReferenceSpec extends PlaySpec {
       AgentReference("HZ9999").newReference mustBe AgentReference("IA0001")
     }
   }
+
 }
