@@ -160,18 +160,39 @@ class AgentEpayeRegistrationValidatorSpec extends PlaySpec {
   }
 
   "isPostcode validator" should {
-    "pass the 6 main formats of postcodes" in {
-      AgentEpayeRegistrationValidator.isPostcode("AA9A9AA")("x") mustBe Valid(())
-      AgentEpayeRegistrationValidator.isPostcode("A9A9AA")("x") mustBe Valid(())
-      AgentEpayeRegistrationValidator.isPostcode("A99AA")("x") mustBe Valid(())
-      AgentEpayeRegistrationValidator.isPostcode("A999AA")("x") mustBe Valid(())
-      AgentEpayeRegistrationValidator.isPostcode("AA99AA")("x") mustBe Valid(())
-      AgentEpayeRegistrationValidator.isPostcode("AA999AA")("x") mustBe Valid(())
+
+    "pass the 6 main formats of postcodes" when {
+
+      "postcodes contain NO spaces" in {
+        AgentEpayeRegistrationValidator.isPostcode("AA9A9AA")("x") mustBe Valid(())
+        AgentEpayeRegistrationValidator.isPostcode("A9A9AA")("x") mustBe Valid(())
+        AgentEpayeRegistrationValidator.isPostcode("A99AA")("x") mustBe Valid(())
+        AgentEpayeRegistrationValidator.isPostcode("A999AA")("x") mustBe Valid(())
+        AgentEpayeRegistrationValidator.isPostcode("AA99AA")("x") mustBe Valid(())
+        AgentEpayeRegistrationValidator.isPostcode("AA999AA")("x") mustBe Valid(())
+      }
+
+      "postcodes contain allowed space" in {
+        AgentEpayeRegistrationValidator.isPostcode("AA9A 9AA")("x") mustBe Valid(())
+        AgentEpayeRegistrationValidator.isPostcode("A9A 9AA")("x") mustBe Valid(())
+        AgentEpayeRegistrationValidator.isPostcode("A9 9AA")("x") mustBe Valid(())
+        AgentEpayeRegistrationValidator.isPostcode("A99 9AA")("x") mustBe Valid(())
+        AgentEpayeRegistrationValidator.isPostcode("AA9 9AA")("x") mustBe Valid(())
+        AgentEpayeRegistrationValidator.isPostcode("AA99 9AA")("x") mustBe Valid(())
+      }
     }
 
-    "pass BFPO codes" in {
-      AgentEpayeRegistrationValidator.isPostcode("BFPO1")("x") mustBe Valid(())
-      AgentEpayeRegistrationValidator.isPostcode("BFPO1234")("x") mustBe Valid(())
+    "pass BFPO codes" when {
+
+      "postcodes contain NO spaces" in {
+        AgentEpayeRegistrationValidator.isPostcode("BFPO1")("x") mustBe Valid(())
+        AgentEpayeRegistrationValidator.isPostcode("BFPO123")("x") mustBe Valid(())
+      }
+
+      "postcodes contain allowed spaces" in {
+        AgentEpayeRegistrationValidator.isPostcode("BFPO 1")("x") mustBe Valid(())
+        AgentEpayeRegistrationValidator.isPostcode("BFPO 123")("x") mustBe Valid(())
+      }
     }
 
     "fail a valid postcode with lowercase characters" in {
@@ -186,6 +207,26 @@ class AgentEpayeRegistrationValidatorSpec extends PlaySpec {
 
     "fail a code that is longer than 8 characters" in {
       AgentEpayeRegistrationValidator.isPostcode("AA9A9AAAA")("x") mustBe
+        Invalid(Failure("INVALID_FIELD", "The x field is not a valid postcode"))
+    }
+
+    "fail a code containing spaces in incorrect place" in {
+      AgentEpayeRegistrationValidator.isPostcode("A A9A9AA")("x") mustBe
+        Invalid(Failure("INVALID_FIELD", "The x field is not a valid postcode"))
+      AgentEpayeRegistrationValidator.isPostcode("AA 9A9AA")("x") mustBe
+        Invalid(Failure("INVALID_FIELD", "The x field is not a valid postcode"))
+      AgentEpayeRegistrationValidator.isPostcode("AA9 A9AA")("x") mustBe
+        Invalid(Failure("INVALID_FIELD", "The x field is not a valid postcode"))
+      AgentEpayeRegistrationValidator.isPostcode("AA9A9 AA")("x") mustBe
+        Invalid(Failure("INVALID_FIELD", "The x field is not a valid postcode"))
+      AgentEpayeRegistrationValidator.isPostcode("AA9A9A A")("x") mustBe
+        Invalid(Failure("INVALID_FIELD", "The x field is not a valid postcode"))
+    }
+
+    "fail a BFPO code which contains more than 3 numeric characters" in {
+      AgentEpayeRegistrationValidator.isPostcode("BFPO1234")("x") mustBe
+        Invalid(Failure("INVALID_FIELD", "The x field is not a valid postcode"))
+      AgentEpayeRegistrationValidator.isPostcode("BFPO 1234")("x") mustBe
         Invalid(Failure("INVALID_FIELD", "The x field is not a valid postcode"))
     }
   }
