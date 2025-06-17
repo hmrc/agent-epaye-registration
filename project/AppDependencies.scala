@@ -12,10 +12,10 @@ object AppDependencies {
   )
 
   def testDeps: Seq[ModuleID] = Seq(
-    "uk.gov.hmrc"       %% "bootstrap-test-play-30"  % bootstrapVersion,
-    "uk.gov.hmrc.mongo" %% "hmrc-mongo-test-play-30" % hmrcMongoVersion,
-    "org.scalatestplus" %% "scalatestplus-mockito"   % "1.0.0-M2",
-    "org.pegdown"        % "pegdown"                 % "1.6.0"
+    "uk.gov.hmrc"         %% "bootstrap-test-play-30"  % bootstrapVersion,
+    "uk.gov.hmrc.mongo"   %% "hmrc-mongo-test-play-30" % hmrcMongoVersion,
+    "org.scalatestplus"   %% "scalatestplus-mockito"   % "1.0.0-M2",
+    "com.vladsch.flexmark" % "flexmark-all"            % "0.64.8"
   ).map(_ % Test)
 
   def apply(): Seq[ModuleID] = compileDeps ++ testDeps
