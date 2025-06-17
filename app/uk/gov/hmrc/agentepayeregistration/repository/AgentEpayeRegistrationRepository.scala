@@ -55,21 +55,24 @@ class AgentEpayeRegistrationRepository @Inject() (mongo: MongoComponent, config:
       request: RegistrationRequest,
       createdDate: OffsetDateTime = OffsetDateTime.now()
   ): Future[RegistrationDetails] = {
-    val mongoCodeDuplicateKey: Int = 11000
+    val mongoCodeDuplicateKey = 11000
 
-    for {
-      oAgentRef <- collection.find[AgentReference]().sort(equal("agentReference", -1)).headOption()
-      regDetails = {
-        val nextAgentRef = oAgentRef match {
-          case Some(ref) => ref.newReference
-          case None      => AgentReference(initialAgentReference)
-        }
-        RegistrationDetails(nextAgentRef, request, createdDate)
-      }
-      _ <- collection.insertOne(regDetails.agentReference).toFuture().recover {
-        case error: MongoException if error.getCode == mongoCodeDuplicateKey => create(request)
-      }
-    } yield regDetails
+    def buildRegistrationDetails(oAgentRef: Option[AgentReference]): RegistrationDetails = {
+      val nextAgentRef = oAgentRef.map(_.newReference).getOrElse(AgentReference(initialAgentReference))
+      RegistrationDetails(nextAgentRef, request, createdDate)
+    }
+
+    def tryCreate: Future[RegistrationDetails] =
+      for {
+        oAgentRef <- collection.find[AgentReference]().sort(equal("agentReference", -1)).headOption()
+        regDetails = buildRegistrationDetails(oAgentRef)
+        _ <- collection.insertOne(regDetails.agentReference).toFuture()
+      } yield regDetails
+
+    tryCreate.recoverWith {
+      case error: MongoException if error.getCode == mongoCodeDuplicateKey =>
+        create(request, createdDate) // recursion is now top-level and type-safe
+    }
   }
 
 }

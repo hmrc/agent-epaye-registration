@@ -45,7 +45,7 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Bef
   val emailAddress    = Some("a@b.com")
   val regRequest = RegistrationRequest(agentName, contactName, telephoneNumber, faxNumber, emailAddress, regAddress)
 
-  override def beforeEach() = {
+  override def beforeEach = {
     super.beforeEach()
     await(repository.ensureIndexes)
   }

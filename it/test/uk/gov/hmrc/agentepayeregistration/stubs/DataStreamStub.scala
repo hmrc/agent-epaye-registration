@@ -24,7 +24,7 @@ import uk.gov.hmrc.agentepayeregistration.audit.AgentEpayeRegistrationEvent.Agen
 
 trait DataStreamStub extends Eventually {
 
-  override implicit val patienceConfig = PatienceConfig(scaled(Span(5, Seconds)), scaled(Span(500, Millis)))
+  override implicit val patienceConfig: PatienceConfig = PatienceConfig(scaled(Span(5, Seconds)), scaled(Span(500, Millis)))
 
   def verifyAuditRequestSent(
       count: Int,

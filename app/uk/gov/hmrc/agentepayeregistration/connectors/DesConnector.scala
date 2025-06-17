@@ -21,7 +21,6 @@ import play.api.Logging
 import play.api.libs.json._
 import uk.gov.hmrc.agentepayeregistration.models.{AgentReference, CreateKnownFactsRequest}
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.HttpReadsInstances.readFromJson
 import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpReads, HttpResponse, StringContextOps}
 import uk.gov.hmrc.http.client.HttpClientV2
 
