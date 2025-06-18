@@ -71,7 +71,7 @@ class AgentEpayeRegistrationRepository @Inject() (mongo: MongoComponent, config:
 
     tryCreate.recoverWith {
       case error: MongoException if error.getCode == mongoCodeDuplicateKey =>
-        create(request, createdDate) // recursion is now top-level and type-safe
+        create(request, createdDate)
     }
   }
 
