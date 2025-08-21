@@ -2,7 +2,7 @@ import sbt.*
 
 object AppDependencies {
   lazy val hmrcMongoVersion = "2.6.0"
-  lazy val bootstrapVersion = "9.13.0"
+  lazy val bootstrapVersion = "10.1.0"
 
   lazy val compileDeps: Seq[ModuleID] = Seq(
     "org.typelevel"     %% "cats-core"                 % "2.9.0",
