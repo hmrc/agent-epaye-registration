@@ -62,18 +62,18 @@ POST /agent-epaye-registration/registrations
 
 Unless otherwise specified, all fields allow uppercase/lowercase letters, numbers, spaces, and `.,()!@` punctuation.
 
-| **Field**              | **Required?** | **Max Length** | **Constraints**                                                     |
-|------------------------|---------------|----------------|---------------------------------------------------------------------|
-| `agentName`            | Required      | 56             |                                                                     |
-| `contactName`          | Required      | 56             |                                                                     |
-| `telephoneNumber`      | Optional      | 35             | Numbers and spaces only                                             |
-| `faxNumber`            | Optional      | 35             | Numbers and spaces only                                             |
-| `emailAddress`         | Optional      | 129            | Must be a valid email address                                       |
-| `address.addressLine1` | Required      | 35             |                                                                     |
-| `address.addressLine2` | Required      | 35             |                                                                     |
-| `address.addressLine3` | Optional      | 35             |                                                                     |
-| `address.addressLine4` | Optional      | 35             |                                                                     |
-| `address.postCode`     | Required      | 8              | Must be a valid UK postcode (with or without space); BFPO supported |
+| **Field**              | **Required?** | Type   | **Max Length** | **Constraints**                                                     |
+|------------------------|---------------|--------|----------------|---------------------------------------------------------------------|
+| `agentName`            | Required      | String | 56             |                                                                     |
+| `contactName`          | Required      | String | 56             |                                                                     |
+| `telephoneNumber`      | Optional      | String | 35             | Numbers and spaces only                                             |
+| `faxNumber`            | Optional      | String | 35             | Numbers and spaces only                                             |
+| `emailAddress`         | Optional      | String | 129            | Must be a valid email address                                       |
+| `address.addressLine1` | Required      | String | 35             |                                                                     |
+| `address.addressLine2` | Required      | String | 35             |                                                                     |
+| `address.addressLine3` | Optional      | String | 35             |                                                                     |
+| `address.addressLine4` | Optional      | String | 35             |                                                                     |
+| `address.postCode`     | Required      | String | 8              | Must be a valid UK postcode (with or without space); BFPO supported |
 
 #### OK
 ```json
