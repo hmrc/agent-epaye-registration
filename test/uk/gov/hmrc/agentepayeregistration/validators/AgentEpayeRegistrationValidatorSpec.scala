@@ -34,7 +34,7 @@ class AgentEpayeRegistrationValidatorSpec extends PlaySpec {
     "John Contact",
     Some("0123456789"),
     Some("0123456780"),
-    Some("email@test.com"),
+    Some("email@domain.com"),
     address
   )
 
