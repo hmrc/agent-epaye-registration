@@ -1,7 +1,7 @@
-import uk.gov.hmrc.DefaultBuildSettings.itSettings
+import uk.gov.hmrc.DefaultBuildSettings.{itSettings, targetJvm}
 
 ThisBuild / majorVersion := 0
-ThisBuild / scalaVersion := "2.13.18"
+ThisBuild / scalaVersion := "3.3.7"
 
 lazy val scoverageSettings = {
   import scoverage.ScoverageKeys

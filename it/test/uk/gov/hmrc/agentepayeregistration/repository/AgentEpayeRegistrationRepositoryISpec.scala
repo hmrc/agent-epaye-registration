@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.agentepayeregistration.repository
 
+import org.mongodb.scala.ObservableFuture
 import org.mongodb.scala.model.Filters
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import play.api.Configuration
@@ -29,7 +30,8 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Bef
   private lazy val config           = app.injector.instanceOf[Configuration]
   implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
-  override lazy val repository = new AgentEpayeRegistrationRepository(mongoComponent, config)
+  override val repository: AgentEpayeRegistrationRepository =
+    new AgentEpayeRegistrationRepository(mongoComponent, config)
 
   val postcode     = "AB11 AA11"
   val addressLine1 = "Address Line 1"
@@ -45,9 +47,9 @@ class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with Bef
   val emailAddress    = Some("a@b.com")
   val regRequest = RegistrationRequest(agentName, contactName, telephoneNumber, faxNumber, emailAddress, regAddress)
 
-  override def beforeEach = {
+  override def beforeEach(): Unit = {
     super.beforeEach()
-    await(repository.ensureIndexes)
+    await(repository.ensureIndexes())
   }
 
   "AgentEpayeRegistrationRepository" should {

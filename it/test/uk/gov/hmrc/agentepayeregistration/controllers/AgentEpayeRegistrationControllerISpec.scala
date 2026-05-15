@@ -36,7 +36,9 @@ class AgentEpayeRegistrationControllerISpec
 
   private lazy val configuration    = app.injector.instanceOf[Configuration]
   implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
-  override lazy val repository      = new AgentEpayeRegistrationRepository(mongoComponent, configuration)
+
+  override val repository: AgentEpayeRegistrationRepository =
+    new AgentEpayeRegistrationRepository(mongoComponent, configuration)
 
   override def additionalTestConfiguration: Seq[(String, Any)] = Seq(
     "extract.auth.stride.enrolment"  -> "ValidStrideEnrolment",
