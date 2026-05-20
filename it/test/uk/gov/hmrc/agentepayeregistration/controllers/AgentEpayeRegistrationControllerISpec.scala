@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.agentepayeregistration.controllers
 
+import org.scalatest.time.{Millis, Seconds, Span}
 import play.api.Configuration
-import play.api.libs.json._
+import play.api.libs.json.*
 import uk.gov.hmrc.agentepayeregistration.audit.AgentEpayeRegistrationEvent
 import uk.gov.hmrc.agentepayeregistration.models.AgentReference
 import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
@@ -34,8 +35,8 @@ class AgentEpayeRegistrationControllerISpec
     with DataStreamStub
     with DefaultPlayMongoRepositorySupport[AgentReference] {
 
-  private lazy val configuration    = app.injector.instanceOf[Configuration]
-  implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
+  private val configuration      = app.injector.instanceOf[Configuration]
+  private given ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
   override val repository: AgentEpayeRegistrationRepository =
     new AgentEpayeRegistrationRepository(mongoComponent, configuration)

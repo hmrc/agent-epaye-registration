@@ -33,7 +33,7 @@ case class CreateKnownFactsRequest(
 )
 
 object CreateKnownFactsRequest {
-  implicit val createKnownFactsRequestFormat: OFormat[CreateKnownFactsRequest] = Json.format[CreateKnownFactsRequest]
+  given createKnownFactsRequestFormat: OFormat[CreateKnownFactsRequest] = Json.format[CreateKnownFactsRequest]
 
   def apply(regRequest: RegistrationRequest, createdDate: String): CreateKnownFactsRequest =
     CreateKnownFactsRequest(

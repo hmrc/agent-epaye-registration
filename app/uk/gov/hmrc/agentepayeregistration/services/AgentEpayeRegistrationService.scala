@@ -16,15 +16,15 @@
 
 package uk.gov.hmrc.agentepayeregistration.services
 
-import java.time.OffsetDateTime
 import play.api.Logging
 import play.api.mvc.Request
 import uk.gov.hmrc.agentepayeregistration.audit.AuditService
 import uk.gov.hmrc.agentepayeregistration.connectors.DesConnector
-import uk.gov.hmrc.agentepayeregistration.models._
+import uk.gov.hmrc.agentepayeregistration.models.*
 import uk.gov.hmrc.agentepayeregistration.repository.AgentEpayeRegistrationRepository
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -39,7 +39,7 @@ class AgentEpayeRegistrationService @Inject() (
 
   def register(
       regRequest: RegistrationRequest
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext, request: Request[Any]): Future[Either[String, AgentReference]] =
+  )(using HeaderCarrier, ExecutionContext, Request[Any]): Future[Either[String, AgentReference]] =
     for {
       regDetails <- repository.create(regRequest)
       currentDate = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(OffsetDateTime.now)

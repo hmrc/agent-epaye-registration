@@ -35,7 +35,7 @@ class DesConnector @Inject() (config: AppConfig, http: HttpClientV2) extends Log
       knownFactDetails: CreateKnownFactsRequest,
       agentRef: AgentReference,
       regime: String = "PAYE"
-  )(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Either[String, Unit]] =
+  )(using HeaderCarrier, ExecutionContext): Future[Either[String, Unit]] =
     postWithDesHeaders[CreateKnownFactsRequest, HttpResponse](
       "createAgentKnownFactsAPI1337",
       new URL(config.desBaseURL + config.desEndpoint(agentRef.value)),
@@ -48,8 +48,8 @@ class DesConnector @Inject() (config: AppConfig, http: HttpClientV2) extends Log
     }
 
   private def postWithDesHeaders[A: Writes, B: HttpReads](apiName: String, url: URL, body: A)(
-      implicit hc: HeaderCarrier,
-      ec: ExecutionContext
+      using HeaderCarrier,
+      ExecutionContext
   ): Future[B] = {
     val desHeaders = Seq[(String, String)](
       "Authorization" -> s"Bearer ${config.desToken}",

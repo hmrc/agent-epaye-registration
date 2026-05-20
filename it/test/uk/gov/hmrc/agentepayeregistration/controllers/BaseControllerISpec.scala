@@ -36,10 +36,7 @@ abstract class BaseControllerISpec
 
   def additionalTestConfiguration: Seq[(String, Any)] = Seq.empty
 
-  override implicit val patienceConfig: PatienceConfig =
-    PatienceConfig(timeout = Span(4, Seconds), interval = Span(1, Seconds))
-
-  override implicit lazy val app: Application = appBuilder.build()
+  override given app: Application = appBuilder.build()
 
   val config: AppConfig = app.injector.instanceOf[AppConfig]
 

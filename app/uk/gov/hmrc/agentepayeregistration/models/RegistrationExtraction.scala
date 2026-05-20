@@ -39,6 +39,7 @@ object RegistrationExtraction {
     import details._
     import details.registration._
     import details.registration.address._
+
     RegistrationExtraction(
       agentReference.value,
       agentName,
@@ -55,5 +56,5 @@ object RegistrationExtraction {
     )
   }
 
-  implicit val registrationExtractionWrites: OWrites[RegistrationExtraction] = Json.writes[RegistrationExtraction]
+  given registrationExtractionWrites: OWrites[RegistrationExtraction] = Json.writes[RegistrationExtraction]
 }

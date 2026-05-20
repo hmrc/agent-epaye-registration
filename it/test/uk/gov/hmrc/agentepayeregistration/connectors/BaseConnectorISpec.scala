@@ -28,7 +28,7 @@ class BaseConnectorISpec extends PlaySpec with GuiceOneServerPerSuite with WireM
 
   def additionalTestConfiguration: Seq[(String, Any)] = Seq.empty
 
-  override implicit lazy val app: Application = appBuilder.build()
+  override given app: Application = appBuilder.build()
 
   val config: AppConfig = app.injector.instanceOf[AppConfig]
 

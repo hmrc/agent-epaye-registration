@@ -27,8 +27,9 @@ import scala.collection.immutable.List
 import scala.concurrent.ExecutionContext
 
 class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with BeforeAndAfterEach with BeforeAndAfterAll {
-  private lazy val config           = app.injector.instanceOf[Configuration]
-  implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
+  
+  private val config                 = app.injector.instanceOf[Configuration]
+  private given ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
   override val repository: AgentEpayeRegistrationRepository =
     new AgentEpayeRegistrationRepository(mongoComponent, config)

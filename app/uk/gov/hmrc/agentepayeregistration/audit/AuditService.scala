@@ -37,11 +37,11 @@ object AgentEpayeRegistrationEvent extends Enumeration {
 }
 
 @Singleton
-class AuditService @Inject() (val auditConnector: AuditConnector)(implicit ec: ExecutionContext) {
+class AuditService @Inject() (val auditConnector: AuditConnector)(using ExecutionContext) {
 
   def sendAgentEpayeRegistrationRecordCreated(registrationRequest: RegistrationRequest, agentReference: AgentReference)(
-      implicit hc: HeaderCarrier,
-      request: Request[Any]
+      using HeaderCarrier,
+      Request[Any]
   ): Future[Unit] =
 
     auditEvent(
@@ -64,7 +64,7 @@ class AuditService @Inject() (val auditConnector: AuditConnector)(implicit ec: E
 
   def sendAgentKnownFactsCreated(
       registrationDetails: RegistrationDetails
-  )(implicit hc: HeaderCarrier, request: Request[Any]): Future[Unit] =
+  )(using HeaderCarrier, Request[Any]): Future[Unit] =
 
     auditEvent(
       AgentEpayeRegistrationEvent.AgentKnownFactsRecordCreated,
@@ -90,7 +90,7 @@ class AuditService @Inject() (val auditConnector: AuditConnector)(implicit ec: E
       dataFrom: String,
       dateTo: String,
       count: Int
-  )(implicit hc: HeaderCarrier, request: Request[Any]): Future[Unit] =
+  )(using HeaderCarrier, Request[Any]): Future[Unit] =
 
     auditEvent(
       AgentEpayeRegistrationEvent.AgentEpayeRegistrationExtract,
@@ -108,11 +108,11 @@ class AuditService @Inject() (val auditConnector: AuditConnector)(implicit ec: E
       event: AgentEpayeRegistrationEvent,
       transactionName: String,
       details: Seq[(String, Any)] = Seq.empty
-  )(implicit hc: HeaderCarrier, request: Request[Any]): Future[Unit] =
+  )(using HeaderCarrier, Request[Any]): Future[Unit] =
     send(createEvent(event, transactionName, details: _*))
 
   private def createEvent(event: AgentEpayeRegistrationEvent, transactionName: String, details: (String, Any)*)(
-      implicit hc: HeaderCarrier,
+      using hc: HeaderCarrier,
       request: Request[Any]
   ): DataEvent = {
 
@@ -121,7 +121,7 @@ class AuditService @Inject() (val auditConnector: AuditConnector)(implicit ec: E
     DataEvent(auditSource = "agent-epaye-registration", auditType = event.toString, tags = tags, detail = detail)
   }
 
-  private def send(events: DataEvent*)(implicit hc: HeaderCarrier): Future[Unit] =
+  private def send(events: DataEvent*)(using HeaderCarrier): Future[Unit] =
     Future {
       events.foreach(event => Try(auditConnector.sendEvent(event)))
     }

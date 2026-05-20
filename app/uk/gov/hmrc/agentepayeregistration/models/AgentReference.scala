@@ -71,7 +71,7 @@ case class AgentReference(value: String) {
 
 object AgentReference {
 
-  implicit val agentReferenceWrites: Writes[AgentReference] =
+  given Writes[AgentReference] =
     (__ \ "payeAgentReference").write[String].contramap(_.value)
 
   private val mongoWrites: Writes[AgentReference] =

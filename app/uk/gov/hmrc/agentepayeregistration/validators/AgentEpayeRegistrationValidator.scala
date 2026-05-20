@@ -27,7 +27,7 @@ import java.time.temporal.ChronoUnit
 
 object ValidatedSemigroup {
 
-  implicit def validatedSemigroup[A]: Semigroup[Validated[Failure, Unit]] = new Semigroup[Validated[Failure, Unit]] {
+  given Semigroup[Validated[Failure, Unit]] = new Semigroup[Validated[Failure, Unit]] {
     def combine(x: Validated[Failure, Unit], y: Validated[Failure, Unit]): Validated[Failure, Unit] = (x, y) match {
       case (Valid(_), Valid(_))       => Valid(())
       case (Invalid(f1), Invalid(f2)) => Invalid(Failure(f1.errors ++ f2.errors))
@@ -39,7 +39,7 @@ object ValidatedSemigroup {
 }
 
 object AgentEpayeRegistrationValidator {
-  import ValidatedSemigroup._
+  import ValidatedSemigroup.given
 
   def validateRegistrationRequest(request: RegistrationRequest): Validated[Failure, Unit] = {
 

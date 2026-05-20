@@ -24,8 +24,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 class DesConnectorISpec extends BaseConnectorISpec {
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
-  val connector: DesConnector    = app.injector.instanceOf[DesConnector]
+  private given hc: HeaderCarrier     = HeaderCarrier()
+  private val connector: DesConnector = app.injector.instanceOf[DesConnector]
 
   val regRequest = RegistrationRequest(
     "Alex P",
