@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.agentepayeregistration.audit
 
-import javax.inject.Inject
 import com.google.inject.Singleton
 import play.api.mvc.Request
 import uk.gov.hmrc.agentepayeregistration.audit.AgentEpayeRegistrationEvent.AgentEpayeRegistrationEvent
@@ -26,6 +25,7 @@ import uk.gov.hmrc.play.audit.AuditExtensions.*
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
@@ -83,27 +83,7 @@ class AuditService @Inject() (val auditConnector: AuditConnector)(using Executio
         "postcode"        -> s"${registrationDetails.registration.address.postCode}"
       ).filter(_._2 != "")
     )
-
-  def sendAgentEpayeRegistrationExtract(
-      userId: String,
-      extractDate: String,
-      dataFrom: String,
-      dateTo: String,
-      count: Int
-  )(using HeaderCarrier, Request[Any]): Future[Unit] =
-
-    auditEvent(
-      AgentEpayeRegistrationEvent.AgentEpayeRegistrationExtract,
-      "agent-epaye-registration-extract",
-      Seq(
-        "strideUserId" -> userId,
-        "extractDate"  -> extractDate,
-        "dateFrom"     -> dataFrom,
-        "dateTo"       -> dateTo,
-        "recordCount"  -> count
-      )
-    )
-
+    
   private[audit] def auditEvent(
       event: AgentEpayeRegistrationEvent,
       transactionName: String,
