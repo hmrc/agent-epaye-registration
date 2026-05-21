@@ -18,7 +18,6 @@ package uk.gov.hmrc.agentepayeregistration.audit
 
 import com.google.inject.Singleton
 import play.api.mvc.Request
-import uk.gov.hmrc.agentepayeregistration.audit.AgentEpayeRegistrationEvent.AgentEpayeRegistrationEvent
 import uk.gov.hmrc.agentepayeregistration.models.{AgentReference, RegistrationDetails, RegistrationRequest}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.AuditExtensions.*
@@ -29,11 +28,10 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-object AgentEpayeRegistrationEvent extends Enumeration {
-  val AgentEpayeRegistrationRecordCreated = Value
-  val AgentKnownFactsRecordCreated        = Value
-  val AgentEpayeRegistrationExtract       = Value
-  type AgentEpayeRegistrationEvent = Value
+enum AgentEpayeRegistrationEvent {
+  case AgentEpayeRegistrationRecordCreated
+  case AgentKnownFactsRecordCreated
+  case AgentEpayeRegistrationExtract
 }
 
 @Singleton

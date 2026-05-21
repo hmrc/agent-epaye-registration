@@ -19,7 +19,7 @@ package uk.gov.hmrc.agentepayeregistration.stubs
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import org.scalatest.concurrent.Eventually
 import play.api.libs.json.Json
-import uk.gov.hmrc.agentepayeregistration.audit.AgentEpayeRegistrationEvent.AgentEpayeRegistrationEvent
+import uk.gov.hmrc.agentepayeregistration.audit.AgentEpayeRegistrationEvent
 
 trait DataStreamStub extends Eventually {
 
