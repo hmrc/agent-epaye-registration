@@ -22,7 +22,7 @@ lazy val root = (project in file("."))
     isPublicArtefact         := true,
     PlayKeys.playDefaultPort := 9445,
     libraryDependencies ++= AppDependencies(),
-    routesImport += "uk.gov.hmrc.agentepayeregistration.controllers.UrlBinders._",
+    routesImport += "uk.gov.hmrc.agentepayeregistration.controllers.UrlBinders.*",
     scoverageSettings,
     scalacOptions ++= Seq(
       "-feature",

@@ -19,7 +19,7 @@ package uk.gov.hmrc.agentepayeregistration.stubs
 import uk.gov.hmrc.agentepayeregistration.models.AgentReference
 import uk.gov.hmrc.agentepayeregistration.support.WireMockSupport
 import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor, urlEqualTo}
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import config.AppConfig
 
 trait DesStub {

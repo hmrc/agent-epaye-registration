@@ -36,9 +36,9 @@ case class RegistrationExtraction(
 object RegistrationExtraction {
 
   def apply(details: RegistrationDetails): RegistrationExtraction = {
-    import details._
-    import details.registration._
-    import details.registration.address._
+    import details.*
+    import details.registration.*
+    import details.registration.address.*
 
     RegistrationExtraction(
       agentReference.value,

@@ -17,7 +17,7 @@
 package uk.gov.hmrc.agentepayeregistration.connectors
 
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
-import uk.gov.hmrc.agentepayeregistration.models._
+import uk.gov.hmrc.agentepayeregistration.models.*
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
