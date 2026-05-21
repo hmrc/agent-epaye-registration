@@ -50,6 +50,6 @@ abstract class BaseControllerISpec
         "microservice.services.des.environment"         -> "",
         "microservice.services.des.authorization-token" -> ""
       )
-      .configure(additionalTestConfiguration: _*)
+      .configure(additionalTestConfiguration*)
 
 }

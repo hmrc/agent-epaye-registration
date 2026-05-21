@@ -40,6 +40,6 @@ class BaseConnectorISpec extends PlaySpec with GuiceOneServerPerSuite with WireM
         "microservice.services.des.environment"         -> "",
         "microservice.services.des.authorization-token" -> ""
       )
-      .configure(additionalTestConfiguration: _*)
+      .configure(additionalTestConfiguration*)
 
 }

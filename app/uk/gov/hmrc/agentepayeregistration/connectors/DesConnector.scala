@@ -56,7 +56,7 @@ class DesConnector @Inject() (config: AppConfig, http: HttpClientV2) extends Log
       "Environment"   -> config.desEnv
     )
 
-    http.post(url"$url").withBody(Json.toJson(body)).setHeader(desHeaders: _*).execute[B]
+    http.post(url"$url").withBody(Json.toJson(body)).setHeader(desHeaders*).execute[B]
   }
 
 }
