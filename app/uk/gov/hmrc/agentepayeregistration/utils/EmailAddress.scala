@@ -17,7 +17,7 @@
 package utils
 
 import utils.EmailAddressValidation.validEmail
-import javax.naming.Context.{INITIAL_CONTEXT_FACTORY => ICF}
+import javax.naming.Context.INITIAL_CONTEXT_FACTORY as ICF
 import javax.naming.directory.{Attribute, InitialDirContext}
 import scala.jdk.CollectionConverters.*
 import scala.util.matching.Regex
