@@ -27,7 +27,8 @@ lazy val root = (project in file("."))
     scalacOptions ++= Seq(
       "-feature",
       "-Wconf:cat=unused&src=routes/.*:s",
-      "-Wconf:cat=unused&src=views/.*:s"
+      "-Wconf:cat=unused&src=views/.*:s",
+      "-explain"
     )
   )
   .enablePlugins(Seq(play.sbt.PlayScala, SbtDistributablesPlugin): _*)

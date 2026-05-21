@@ -63,14 +63,14 @@ class DesConnectorISpec extends BaseConnectorISpec {
     "return Left when regime is not PAYE" in {
       createAgentKnownFactsInvalidRegime(AgentReference("HX2001"))
       await(
-        connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("HX2001"), "AAA")
+        connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("HX2001"))
       ).isLeft mustBe true
     }
 
     "return Left when AgentId is invalid and the regime is not PAYE" in {
       createAgentKnownFactsInvalidBoth
       await(
-        connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("ZZ0000"), "AAA")
+        connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("ZZ0000"))
       ).isLeft mustBe true
     }
 

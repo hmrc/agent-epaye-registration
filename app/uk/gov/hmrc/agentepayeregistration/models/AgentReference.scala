@@ -21,7 +21,7 @@ import play.api.libs.json.*
 import scala.util.Try
 
 case class AgentReference(value: String) {
-  validate(value)
+  validate()
 
   def newReference: AgentReference = {
     val (prefix, code) = value.splitAt(2)
@@ -33,7 +33,7 @@ case class AgentReference(value: String) {
     }
   }
 
-  private def validate(agentRef: String): Unit = {
+  private def validate(): Unit = {
     val (prefix, code) = value.splitAt(2)
 
     validateAlphaCode(prefix)

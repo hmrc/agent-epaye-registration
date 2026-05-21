@@ -18,8 +18,6 @@ package uk.gov.hmrc.agentepayeregistration.models
 
 import play.api.libs.json.{Json, OFormat}
 
-import java.time.LocalDate
-
 case class Address(
     addressLine1: String,
     addressLine2: String,

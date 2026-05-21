@@ -19,7 +19,7 @@ package uk.gov.hmrc.agentepayeregistration.repository
 import org.mongodb.scala.MongoException
 import org.mongodb.scala.model.*
 import org.mongodb.scala.model.Filters.equal
-import play.api.{Configuration, Logging}
+import play.api.Logging
 import uk.gov.hmrc.agentepayeregistration.models.{AgentReference, RegistrationDetails, RegistrationRequest}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
@@ -29,7 +29,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton()
-class AgentEpayeRegistrationRepository @Inject() (mongo: MongoComponent, config: Configuration)(using ExecutionContext)
+class AgentEpayeRegistrationRepository @Inject() (mongo: MongoComponent)(using ExecutionContext)
     extends PlayMongoRepository[AgentReference](
       mongoComponent = mongo,
       collectionName = "agent-epaye-registration-record",

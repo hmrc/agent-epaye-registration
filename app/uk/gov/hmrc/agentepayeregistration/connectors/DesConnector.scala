@@ -25,7 +25,7 @@ import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpReads, HttpResponse, StringContextOps}
 import uk.gov.hmrc.http.client.HttpClientV2
 
-import java.net.URL
+import java.net.{URI, URL}
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -33,12 +33,10 @@ class DesConnector @Inject() (config: AppConfig, http: HttpClientV2) extends Log
 
   def createAgentKnownFacts(
       knownFactDetails: CreateKnownFactsRequest,
-      agentRef: AgentReference,
-      regime: String = "PAYE"
+      agentRef: AgentReference
   )(using HeaderCarrier, ExecutionContext): Future[Either[String, Unit]] =
     postWithDesHeaders[CreateKnownFactsRequest, HttpResponse](
-      "createAgentKnownFactsAPI1337",
-      new URL(config.desBaseURL + config.desEndpoint(agentRef.value)),
+      URI.create(config.desBaseURL + config.desEndpoint(agentRef.value)).toURL,
       knownFactDetails
     ).map { response =>
       response.status match {
@@ -47,7 +45,7 @@ class DesConnector @Inject() (config: AppConfig, http: HttpClientV2) extends Log
       }
     }
 
-  private def postWithDesHeaders[A: Writes, B: HttpReads](apiName: String, url: URL, body: A)(
+  private def postWithDesHeaders[A: Writes, B: HttpReads](url: URL, body: A)(
       using HeaderCarrier,
       ExecutionContext
   ): Future[B] = {

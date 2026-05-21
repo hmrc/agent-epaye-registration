@@ -83,7 +83,7 @@ class AuditService @Inject() (val auditConnector: AuditConnector)(using Executio
         "postcode"        -> s"${registrationDetails.registration.address.postCode}"
       ).filter(_._2 != "")
     )
-    
+
   private[audit] def auditEvent(
       event: AgentEpayeRegistrationEvent,
       transactionName: String,
