@@ -1,4 +1,4 @@
-import uk.gov.hmrc.DefaultBuildSettings.{itSettings, targetJvm}
+import uk.gov.hmrc.DefaultBuildSettings.itSettings
 
 ThisBuild / majorVersion := 0
 ThisBuild / scalaVersion := "3.3.7"
@@ -31,9 +31,9 @@ lazy val root = (project in file("."))
       "-explain"
     )
   )
-  .enablePlugins(Seq(play.sbt.PlayScala, SbtDistributablesPlugin): _*)
+  .enablePlugins(Seq(play.sbt.PlayScala, SbtDistributablesPlugin) *)
 
 lazy val it = project
   .enablePlugins(PlayScala)
   .dependsOn(root % "test->test")
-  .settings(itSettings(): _*)
+  .settings(itSettings() *)
