@@ -26,7 +26,7 @@ object UrlBinders {
 
   implicit def localDateQueryBinder: QueryStringBindable[LocalDate] = new QueryStringBindable[LocalDate] {
     override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, LocalDate]] =
-      params.get(key).flatMap(_.headOption).map { dateTxt: String =>
+      params.get(key).flatMap(_.headOption).map { (dateTxt: String) =>
         Try {
           Right(LocalDate.parse(dateTxt, ISO_DATE))
         }.recover { case _: Exception =>

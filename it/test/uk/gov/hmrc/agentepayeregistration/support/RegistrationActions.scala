@@ -20,7 +20,7 @@ import org.scalatest.Suite
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.ServerProvider
 import play.api.libs.json.JsValue
-import play.api.libs.ws.{WSClient, WSResponse}
+import play.api.libs.ws.{WSClient, WSResponse, writeableOf_JsValue}
 import uk.gov.hmrc.http.HeaderNames
 
 trait RegistrationActions extends ScalaFutures {

@@ -19,6 +19,7 @@ package uk.gov.hmrc.agentepayeregistration.connectors
 import config.AppConfig
 import play.api.Logging
 import play.api.libs.json._
+import play.api.libs.ws.writeableOf_JsValue
 import uk.gov.hmrc.agentepayeregistration.models.{AgentReference, CreateKnownFactsRequest}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpReads, HttpResponse, StringContextOps}
@@ -55,7 +56,6 @@ class DesConnector @Inject() (config: AppConfig, http: HttpClientV2) extends Log
       "Environment"   -> config.desEnv
     )
 
-    // http.POST[A, B](url.toString, body, desHeaders)
     http.post(url"$url").withBody(Json.toJson(body)).setHeader(desHeaders: _*).execute[B]
   }
 
