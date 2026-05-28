@@ -17,15 +17,15 @@
 package uk.gov.hmrc.agentepayeregistration.connectors
 
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
-import uk.gov.hmrc.agentepayeregistration.models._
+import uk.gov.hmrc.agentepayeregistration.models.*
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class DesConnectorISpec extends BaseConnectorISpec {
 
-  implicit val hc: HeaderCarrier = HeaderCarrier()
-  val connector: DesConnector    = app.injector.instanceOf[DesConnector]
+  private given hc: HeaderCarrier     = HeaderCarrier()
+  private val connector: DesConnector = app.injector.instanceOf[DesConnector]
 
   val regRequest = RegistrationRequest(
     "Alex P",
@@ -63,14 +63,14 @@ class DesConnectorISpec extends BaseConnectorISpec {
     "return Left when regime is not PAYE" in {
       createAgentKnownFactsInvalidRegime(AgentReference("HX2001"))
       await(
-        connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("HX2001"), "AAA")
+        connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("HX2001"))
       ).isLeft mustBe true
     }
 
     "return Left when AgentId is invalid and the regime is not PAYE" in {
       createAgentKnownFactsInvalidBoth
       await(
-        connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("ZZ0000"), "AAA")
+        connector.createAgentKnownFacts(createKnownFactsRequest, AgentReference("ZZ0000"))
       ).isLeft mustBe true
     }
 

@@ -22,7 +22,7 @@ import java.time.format.DateTimeFormatter.ISO_DATE
 import java.time.{LocalDate, ZoneOffset}
 import uk.gov.hmrc.agentepayeregistration.models.{Address, Failure, RegistrationRequest, ValidationError}
 import org.scalatestplus.play.PlaySpec
-import uk.gov.hmrc.agentepayeregistration.validators.AgentEpayeRegistrationValidator._
+import uk.gov.hmrc.agentepayeregistration.validators.AgentEpayeRegistrationValidator.*
 
 import java.time.temporal.ChronoUnit
 

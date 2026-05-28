@@ -21,13 +21,13 @@ import play.api.libs.json.{Json, OFormat}
 case class ValidationError(code: String, message: String)
 
 object ValidationError {
-  implicit val validationErrorFormat: OFormat[ValidationError] = Json.format[ValidationError]
+  given validationErrorFormat: OFormat[ValidationError] = Json.format[ValidationError]
 }
 
 case class Failure(errors: Set[ValidationError])
 
 object Failure {
-  implicit val failureFormat: OFormat[Failure] = Json.format[Failure]
+  given failureFormat: OFormat[Failure] = Json.format[Failure]
 
   def apply(code: String, message: String): Failure = Failure(Set(ValidationError(code, message)))
 }

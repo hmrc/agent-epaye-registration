@@ -19,14 +19,14 @@ package uk.gov.hmrc.agentepayeregistration.controllers
 import cats.data.Validated.{Invalid, Valid}
 import play.api.Logging
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.{Action, ControllerComponents}
+import play.api.mvc.{Action, ControllerComponents, Request}
 import uk.gov.hmrc.agentepayeregistration.audit.AuditService
 import uk.gov.hmrc.agentepayeregistration.models.RegistrationRequest
 import uk.gov.hmrc.agentepayeregistration.services.AgentEpayeRegistrationService
 import uk.gov.hmrc.agentepayeregistration.validators.AgentEpayeRegistrationValidator.validateRegistrationRequest
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import javax.inject._
+import javax.inject.*
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -37,9 +37,11 @@ class AgentEpayeRegistrationController @Inject() (
 ) extends BackendController(cc)
     with Logging {
 
-  implicit val ec: ExecutionContext = cc.executionContext
+  private given ExecutionContext = cc.executionContext
 
-  val register: Action[JsValue] = Action.async(parse.json) { implicit request =>
+  val register: Action[JsValue] = Action.async(parse.json) { (request: Request[JsValue]) =>
+    given Request[JsValue] = request
+
     request.body
       .validate[RegistrationRequest]
       .map { registrationRequest =>
@@ -49,6 +51,7 @@ class AgentEpayeRegistrationController @Inject() (
             Future.successful(BadRequest(Json.toJson(failure)))
 
           case Valid(_) =>
+
             registrationService.register(registrationRequest).map {
               case Right(agentReference) =>
                 auditService.sendAgentEpayeRegistrationRecordCreated(registrationRequest, agentReference)

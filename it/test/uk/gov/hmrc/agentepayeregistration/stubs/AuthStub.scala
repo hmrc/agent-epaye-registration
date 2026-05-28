@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.agentepayeregistration.stubs
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import uk.gov.hmrc.agentepayeregistration.support.WireMockSupport
 
 trait AuthStub {

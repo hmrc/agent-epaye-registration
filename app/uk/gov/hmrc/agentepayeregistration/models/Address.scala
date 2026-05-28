@@ -26,7 +26,7 @@ case class Address(
     postCode: String
 ) {
 
-  override def toString(): String = Seq(
+  override def toString: String = Seq(
     Option(addressLine1),
     Option(addressLine2),
     addressLine3,
@@ -37,5 +37,5 @@ case class Address(
 }
 
 object Address {
-  implicit val addressFormat: OFormat[Address] = Json.format[Address]
+  given OFormat[Address] = Json.format[Address]
 }

@@ -16,16 +16,12 @@
 
 package uk.gov.hmrc.agentepayeregistration.stubs
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import org.scalatest.concurrent.Eventually
-import org.scalatest.time.{Millis, Seconds, Span}
 import play.api.libs.json.Json
-import uk.gov.hmrc.agentepayeregistration.audit.AgentEpayeRegistrationEvent.AgentEpayeRegistrationEvent
+import uk.gov.hmrc.agentepayeregistration.audit.AgentEpayeRegistrationEvent
 
 trait DataStreamStub extends Eventually {
-
-  override implicit val patienceConfig: PatienceConfig =
-    PatienceConfig(scaled(Span(5, Seconds)), scaled(Span(500, Millis)))
 
   def verifyAuditRequestSent(
       count: Int,

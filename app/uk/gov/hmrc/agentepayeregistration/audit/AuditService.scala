@@ -16,32 +16,30 @@
 
 package uk.gov.hmrc.agentepayeregistration.audit
 
-import javax.inject.Inject
 import com.google.inject.Singleton
 import play.api.mvc.Request
-import uk.gov.hmrc.agentepayeregistration.audit.AgentEpayeRegistrationEvent.AgentEpayeRegistrationEvent
 import uk.gov.hmrc.agentepayeregistration.models.{AgentReference, RegistrationDetails, RegistrationRequest}
 import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.audit.AuditExtensions._
+import uk.gov.hmrc.play.audit.AuditExtensions.*
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
 
+import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
-object AgentEpayeRegistrationEvent extends Enumeration {
-  val AgentEpayeRegistrationRecordCreated = Value
-  val AgentKnownFactsRecordCreated        = Value
-  val AgentEpayeRegistrationExtract       = Value
-  type AgentEpayeRegistrationEvent = Value
+enum AgentEpayeRegistrationEvent {
+  case AgentEpayeRegistrationRecordCreated
+  case AgentKnownFactsRecordCreated
+  case AgentEpayeRegistrationExtract
 }
 
 @Singleton
-class AuditService @Inject() (val auditConnector: AuditConnector)(implicit ec: ExecutionContext) {
+class AuditService @Inject() (val auditConnector: AuditConnector)(using ExecutionContext) {
 
   def sendAgentEpayeRegistrationRecordCreated(registrationRequest: RegistrationRequest, agentReference: AgentReference)(
-      implicit hc: HeaderCarrier,
-      request: Request[Any]
+      using HeaderCarrier,
+      Request[Any]
   ): Future[Unit] =
 
     auditEvent(
@@ -64,7 +62,7 @@ class AuditService @Inject() (val auditConnector: AuditConnector)(implicit ec: E
 
   def sendAgentKnownFactsCreated(
       registrationDetails: RegistrationDetails
-  )(implicit hc: HeaderCarrier, request: Request[Any]): Future[Unit] =
+  )(using HeaderCarrier, Request[Any]): Future[Unit] =
 
     auditEvent(
       AgentEpayeRegistrationEvent.AgentKnownFactsRecordCreated,
@@ -84,44 +82,24 @@ class AuditService @Inject() (val auditConnector: AuditConnector)(implicit ec: E
       ).filter(_._2 != "")
     )
 
-  def sendAgentEpayeRegistrationExtract(
-      userId: String,
-      extractDate: String,
-      dataFrom: String,
-      dateTo: String,
-      count: Int
-  )(implicit hc: HeaderCarrier, request: Request[Any]): Future[Unit] =
-
-    auditEvent(
-      AgentEpayeRegistrationEvent.AgentEpayeRegistrationExtract,
-      "agent-epaye-registration-extract",
-      Seq(
-        "strideUserId" -> userId,
-        "extractDate"  -> extractDate,
-        "dateFrom"     -> dataFrom,
-        "dateTo"       -> dateTo,
-        "recordCount"  -> count
-      )
-    )
-
   private[audit] def auditEvent(
       event: AgentEpayeRegistrationEvent,
       transactionName: String,
       details: Seq[(String, Any)] = Seq.empty
-  )(implicit hc: HeaderCarrier, request: Request[Any]): Future[Unit] =
-    send(createEvent(event, transactionName, details: _*))
+  )(using HeaderCarrier, Request[Any]): Future[Unit] =
+    send(createEvent(event, transactionName, details*))
 
   private def createEvent(event: AgentEpayeRegistrationEvent, transactionName: String, details: (String, Any)*)(
-      implicit hc: HeaderCarrier,
+      using hc: HeaderCarrier,
       request: Request[Any]
   ): DataEvent = {
 
-    val detail = hc.toAuditDetails(details.map(pair => pair._1 -> pair._2.toString): _*)
+    val detail = hc.toAuditDetails(details.map(pair => pair._1 -> pair._2.toString)*)
     val tags   = hc.toAuditTags(transactionName, request.path)
     DataEvent(auditSource = "agent-epaye-registration", auditType = event.toString, tags = tags, detail = detail)
   }
 
-  private def send(events: DataEvent*)(implicit hc: HeaderCarrier): Future[Unit] =
+  private def send(events: DataEvent*)(using HeaderCarrier): Future[Unit] =
     Future {
       events.foreach(event => Try(auditConnector.sendEvent(event)))
     }

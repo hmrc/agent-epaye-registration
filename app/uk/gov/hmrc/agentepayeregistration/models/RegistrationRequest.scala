@@ -28,5 +28,5 @@ case class RegistrationRequest(
 )
 
 object RegistrationRequest {
-  implicit val registrationRequestFormat: OFormat[RegistrationRequest] = Json.format[RegistrationRequest]
+  given registrationRequestFormat: OFormat[RegistrationRequest] = Json.format[RegistrationRequest]
 }

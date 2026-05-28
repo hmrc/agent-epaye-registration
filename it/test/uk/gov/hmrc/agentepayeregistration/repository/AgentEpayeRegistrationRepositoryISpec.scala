@@ -19,19 +19,16 @@ package uk.gov.hmrc.agentepayeregistration.repository
 import org.mongodb.scala.ObservableFuture
 import org.mongodb.scala.model.Filters
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
-import play.api.Configuration
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.agentepayeregistration.models.{Address, AgentReference, RegistrationRequest}
 
 import scala.collection.immutable.List
 import scala.concurrent.ExecutionContext
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class AgentEpayeRegistrationRepositoryISpec extends BaseRepositoryISpec with BeforeAndAfterEach with BeforeAndAfterAll {
-  private lazy val config           = app.injector.instanceOf[Configuration]
-  implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
-  override val repository: AgentEpayeRegistrationRepository =
-    new AgentEpayeRegistrationRepository(mongoComponent, config)
+  override val repository: AgentEpayeRegistrationRepository = new AgentEpayeRegistrationRepository(mongoComponent)
 
   val postcode     = "AB11 AA11"
   val addressLine1 = "Address Line 1"

@@ -17,28 +17,26 @@
 package uk.gov.hmrc.agentepayeregistration.audit
 
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers._
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.*
+import org.mockito.Mockito.*
 import org.scalatest.concurrent.Eventually
-import org.scalatestplus.mockito.MockitoSugar
 import org.scalatest.time.{Millis, Span}
+import org.scalatestplus.mockito.MockitoSugar
+import org.scalatestplus.play.PlaySpec
 import play.api.test.FakeRequest
+import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.agentepayeregistration.models.{Address, AgentReference, RegistrationRequest}
+import uk.gov.hmrc.http.{Authorization, HeaderCarrier, RequestId, SessionId}
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.audit.model.DataEvent
-import org.scalatestplus.play.PlaySpec
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.test.Helpers.{await, defaultAwaitTimeout}
 
 import scala.concurrent.ExecutionContext
-import uk.gov.hmrc.http.{Authorization, HeaderCarrier, RequestId, SessionId}
+import scala.concurrent.ExecutionContext.Implicits.global
 
-class AuditServiceSpec extends PlaySpec with GuiceOneAppPerSuite with MockitoSugar with Eventually {
+class AuditServiceSpec extends PlaySpec with MockitoSugar with Eventually {
 
-  override implicit val patienceConfig: PatienceConfig =
+  override given patienceConfig: PatienceConfig =
     PatienceConfig(timeout = scaled(Span(500, Millis)), interval = scaled(Span(200, Millis)))
-
-  implicit val ec: ExecutionContext = app.injector.instanceOf[ExecutionContext]
 
   "auditEvent" should {
     "send an AgentEpayeRegistrationRecordCreated event with the correct fields" in {
@@ -63,14 +61,14 @@ class AuditServiceSpec extends PlaySpec with GuiceOneAppPerSuite with MockitoSug
 
       await(
         service.sendAgentEpayeRegistrationRecordCreated(registrationRequest, agentReference)(
-          hc,
+          using hc,
           FakeRequest("GET", "/path")
         )
       )
 
       eventually {
         val captor = ArgumentCaptor.forClass(classOf[DataEvent])
-        verify(mockConnector).sendEvent(captor.capture())(any[HeaderCarrier], any[ExecutionContext])
+        verify(mockConnector).sendEvent(captor.capture())(using any[HeaderCarrier], any[ExecutionContext])
         val sentEvent = captor.getValue.asInstanceOf[DataEvent]
 
         sentEvent.auditType mustBe "AgentEpayeRegistrationRecordCreated"
@@ -118,14 +116,14 @@ class AuditServiceSpec extends PlaySpec with GuiceOneAppPerSuite with MockitoSug
 
       await(
         service.sendAgentEpayeRegistrationRecordCreated(registrationRequest, agentReference)(
-          hc,
+          using hc,
           FakeRequest("GET", "/path")
         )
       )
 
       eventually {
         val captor = ArgumentCaptor.forClass(classOf[DataEvent])
-        verify(mockConnector).sendEvent(captor.capture())(any[HeaderCarrier], any[ExecutionContext])
+        verify(mockConnector).sendEvent(captor.capture())(using any[HeaderCarrier], any[ExecutionContext])
         val sentEvent = captor.getValue.asInstanceOf[DataEvent]
 
         sentEvent.auditType mustBe "AgentEpayeRegistrationRecordCreated"
@@ -140,45 +138,6 @@ class AuditServiceSpec extends PlaySpec with GuiceOneAppPerSuite with MockitoSug
         sentEvent.tags.contains("Authorization") mustBe false
 
         sentEvent.tags("transactionName") mustBe "Agent ePAYE registration created"
-        sentEvent.tags("path") mustBe "/path"
-        sentEvent.tags("X-Session-ID") mustBe "dummy session id"
-        sentEvent.tags("X-Request-ID") mustBe "dummy request id"
-      }
-    }
-
-    "send an AgentEpayeRegistrationRecordExtract event with the correct fields" in {
-      val mockConnector = mock[AuditConnector]
-      val service       = new AuditService(mockConnector)
-
-      val hc = HeaderCarrier(
-        authorization = Some(Authorization("dummy bearer token")),
-        sessionId = Some(SessionId("dummy session id")),
-        requestId = Some(RequestId("dummy request id"))
-      )
-
-      await(
-        service.sendAgentEpayeRegistrationExtract("userId", "extractDate", "dateFrom", "dateTo", 2)(
-          hc,
-          FakeRequest("GET", "/path")
-        )
-      )
-
-      eventually {
-        val captor = ArgumentCaptor.forClass(classOf[DataEvent])
-        verify(mockConnector).sendEvent(captor.capture())(any[HeaderCarrier], any[ExecutionContext])
-        val sentEvent = captor.getValue.asInstanceOf[DataEvent]
-
-        sentEvent.auditType mustBe "AgentEpayeRegistrationExtract"
-        sentEvent.auditSource mustBe "agent-epaye-registration"
-        sentEvent.detail("strideUserId") mustBe "userId"
-        sentEvent.detail("extractDate") mustBe "extractDate"
-        sentEvent.detail("dateFrom") mustBe "dateFrom"
-        sentEvent.detail("dateTo") mustBe "dateTo"
-        sentEvent.detail("recordCount") mustBe "2"
-
-        sentEvent.tags.contains("Authorization") mustBe false
-
-        sentEvent.tags("transactionName") mustBe "agent-epaye-registration-extract"
         sentEvent.tags("path") mustBe "/path"
         sentEvent.tags("X-Session-ID") mustBe "dummy session id"
         sentEvent.tags("X-Request-ID") mustBe "dummy request id"

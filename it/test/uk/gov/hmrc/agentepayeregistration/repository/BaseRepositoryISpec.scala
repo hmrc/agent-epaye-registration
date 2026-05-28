@@ -31,7 +31,7 @@ abstract class BaseRepositoryISpec
     with WireMockSupport
     with DefaultPlayMongoRepositorySupport[AgentReference] {
 
-  override implicit lazy val app: Application = appBuilder.build()
+  override given app: Application = appBuilder.build()
 
   protected def appBuilder: GuiceApplicationBuilder =
     new GuiceApplicationBuilder()

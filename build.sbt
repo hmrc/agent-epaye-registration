@@ -1,4 +1,4 @@
-import uk.gov.hmrc.DefaultBuildSettings.{itSettings, targetJvm}
+import uk.gov.hmrc.DefaultBuildSettings.itSettings
 
 ThisBuild / majorVersion := 0
 ThisBuild / scalaVersion := "3.3.7"
@@ -22,17 +22,18 @@ lazy val root = (project in file("."))
     isPublicArtefact         := true,
     PlayKeys.playDefaultPort := 9445,
     libraryDependencies ++= AppDependencies(),
-    routesImport += "uk.gov.hmrc.agentepayeregistration.controllers.UrlBinders._",
+    routesImport += "uk.gov.hmrc.agentepayeregistration.controllers.UrlBinders.*",
     scoverageSettings,
     scalacOptions ++= Seq(
       "-feature",
       "-Wconf:cat=unused&src=routes/.*:s",
-      "-Wconf:cat=unused&src=views/.*:s"
+      "-Wconf:cat=unused&src=views/.*:s",
+      "-explain"
     )
   )
-  .enablePlugins(Seq(play.sbt.PlayScala, SbtDistributablesPlugin): _*)
+  .enablePlugins(Seq(play.sbt.PlayScala, SbtDistributablesPlugin) *)
 
 lazy val it = project
   .enablePlugins(PlayScala)
   .dependsOn(root % "test->test")
-  .settings(itSettings(): _*)
+  .settings(itSettings() *)
