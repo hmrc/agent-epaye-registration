@@ -18,12 +18,14 @@ package utils
 
 import utils.EmailAddressValidation.validEmail
 import javax.naming.Context.INITIAL_CONTEXT_FACTORY as ICF
-import javax.naming.directory.{Attribute, InitialDirContext}
+import javax.naming.directory.{Attribute, DirContext, InitialDirContext}
 import scala.jdk.CollectionConverters.*
 import scala.util.matching.Regex
 import scala.util.{Success, Try}
 
 class EmailAddressValidation {
+
+  protected def dnsContext: DirContext = EmailAddressValidation.ictx
 
   def isValid(email: String): Boolean =
     email match {
@@ -44,7 +46,7 @@ class EmailAddressValidation {
 
   private def getAttributeValue(domain: String, attribute: String): Try[List[Attribute]] =
     Try {
-      EmailAddressValidation.ictx.getAttributes(domain, Array(attribute)).getAll.asScala.toList
+      dnsContext.getAttributes(domain, Array(attribute)).getAll.asScala.toList
     }
 
 }
